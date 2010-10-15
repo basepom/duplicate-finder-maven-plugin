@@ -18,7 +18,7 @@ This will install the plugin into your local repository and make it available fo
     <settings>
       ...
       <pluginGroups>
-        <pluginGroup>ning.maven.plugins</pluginGroup>
+        <pluginGroup>com.ning.maven.plugins</pluginGroup>
       </pluginGroups>
       ...
     </settings>
