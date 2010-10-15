@@ -7,8 +7,9 @@
   <name>maven-duplicate-finder-plugin Maven Mojo</name>
   <url>http://www.ning.com</url>
   <scm>
-    <connection>scm:git:git://github/maven-plugins-duplicate-class-finder.git</connection>
-    <url>http://git.source.ninginc.com/maven-plugins-duplicate-class-finder.git</url>
+    <connection>scm:git:git://github.com/ning/maven-duplicate-finder-plugin.git</connection>
+    <developerConnection>scm:git:git://github.com/ning/maven-duplicate-finder-plugin.git</developerConnection>
+    <url>http://github.com/ning/maven-duplicate-finder-plugin</url>
   </scm>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
