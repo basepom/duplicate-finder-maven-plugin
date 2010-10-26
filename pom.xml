@@ -5,7 +5,21 @@
   <packaging>maven-plugin</packaging>
   <version>1.0.0-SNAPSHOT</version>
   <name>maven-duplicate-finder-plugin Maven Mojo</name>
+  <description>
+    The maven-duplicate-class-finder-plugin is a plugin that will search for classes with the same name, as well as resources with the same path,
+    in the classpaths of a maven project. More specifically, it will check the compile, runtime, and test classpaths for
+      * Classes with the same qualified name in the current project and all dependencies relevant for that classpath
+      * Files that are not class files, with the same resource path (i.e. as if it would be accessed via the classloader) in the current project and all dependencies relevant for that 
+    (Note that at the moment, the plugin does not check if the files are actually the same or not, it only looks for the same file/class name.)
+  </description>
   <url>http://www.ning.com</url>
+  <licenses>
+      <license>
+          <name>Apache License 2.0</name>
+          <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
+          <distribution>repo</distribution>
+      </license>
+  </licenses>
   <scm>
     <connection>scm:git:git://github.com/ning/maven-duplicate-finder-plugin.git</connection>
     <developerConnection>scm:git:git://github.com/ning/maven-duplicate-finder-plugin.git</developerConnection>
@@ -14,6 +28,18 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
+  <distributionManagement>
+      <snapshotRepository>
+          <id>sonatype-nexus-snapshots</id>
+          <name>Sonatype Nexus Snapshots</name>
+          <url>http://oss.sonatype.org/content/repositories/snapshots</url>
+      </snapshotRepository>
+      <repository>
+          <id>sonatype-nexus-staging</id>
+          <name>Nexus Release Repository</name>
+          <url>http://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+      </repository>
+  </distributionManagement>
   <dependencies>
     <dependency>
       <groupId>org.apache.maven</groupId>
