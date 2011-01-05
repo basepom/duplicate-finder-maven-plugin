@@ -69,6 +69,6 @@ public class DependencyWrapper
                StringUtils.equals(dependency.getArtifactId(), artifact.getArtifactId()) &&
                StringUtils.equals(StringUtils.defaultIfEmpty(dependency.getType(), "jar"), StringUtils.defaultIfEmpty(artifact.getType(), "jar")) &&
                StringUtils.equals(dependency.getClassifier(), artifact.getClassifier()) &&
-               (versionRange.containsVersion(version) || artifact.getVersion().equals(dependency.getVersion()));
+               (versionRange == null || versionRange.containsVersion(version) || StringUtils.equals(artifact.getVersion(), dependency.getVersion()));
     }
 }
