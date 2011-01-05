@@ -322,6 +322,18 @@ You can turn these default resource exceptions off via the <tt>useDefaultResourc
       </configuration>
     </plugin>
 
+== Globally ignoring additional resources
+
+It is possible to specify additional resources on the classpath that are excluded from the duplication check:
+
+    <ignoredResources>
+      <ignoredResource>overview\.html</ignoredResource>
+    </ignoredResource>
+
+will ignore all occurences of 'overview.html' on the classpath. This is useful for resources that are present in many dependencies. 
+
+The resource definition is a pattern as consumed by java.util.regex.Pattern. 
+
 == Failing the build
 
 By default, the plugin will only print warning. However, you can configure it to fail the build using the <tt>failBuildInCaseOfConflict</tt> configuration option:

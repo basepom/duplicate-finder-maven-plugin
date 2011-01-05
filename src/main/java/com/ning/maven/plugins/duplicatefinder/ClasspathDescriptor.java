@@ -26,10 +26,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import org.apache.commons.io.FilenameUtils;
+import org.apache.maven.plugin.MojoExecutionException;
 
 public class ClasspathDescriptor
 {
@@ -54,10 +56,12 @@ public class ClasspathDescriptor
         IGNORED_LOCAL_DIRECTORIES.add(".HG");
         IGNORED_LOCAL_DIRECTORIES.add(".BZR");
     }
-    
+
     private Map classesWithElements   = new TreeMap();
     private Map resourcesWithElements = new TreeMap();
     private boolean useDefaultResourceIgnoreList = true;
+
+    private Pattern [] ignoredResourcesPatterns = null;
 
     public boolean isUseDefaultResourceIgnoreList()
     {
@@ -67,6 +71,21 @@ public class ClasspathDescriptor
     public void setUseDefaultResourceIgnoreList(boolean useDefaultResourceIgnoreList)
     {
         this.useDefaultResourceIgnoreList = useDefaultResourceIgnoreList;
+    }
+
+    public void setIgnoredResources(final String [] ignoredResources) throws MojoExecutionException
+    {
+        if (ignoredResources != null) {
+            ignoredResourcesPatterns = new Pattern [ignoredResources.length];
+
+            try {
+                for (int i = 0 ; i < ignoredResources.length; i++) {
+                    ignoredResourcesPatterns[i] = Pattern.compile(ignoredResources[i].toUpperCase());
+                }
+            } catch (PatternSyntaxException pse) {
+                throw new MojoExecutionException("Error compiling resourceIgnore pattern: " + pse.getMessage());
+            }
+        }
     }
 
     public void add(File element) throws IOException
@@ -98,7 +117,7 @@ public class ClasspathDescriptor
 
         return elements == null ? null : Collections.unmodifiableSet(elements);
     }
-    
+
     public Set getElementsHavingResource(String resource)
     {
         Set elements = (Set)resourcesWithElements.get(resource);
@@ -114,7 +133,7 @@ public class ClasspathDescriptor
     private void addDirectory(File element, String parentPackageName, File directory)
     {
         File[] files    = directory.listFiles();
-        String pckgName = (element.equals(directory) ? null : (parentPackageName == null ? "" : parentPackageName + ".") + directory.getName()); 
+        String pckgName = (element.equals(directory) ? null : (parentPackageName == null ? "" : parentPackageName + ".") + directory.getName());
 
         if ((files != null) && (files.length > 0)) {
             for (int idx = 0; idx < files.length; idx++) {
@@ -123,13 +142,13 @@ public class ClasspathDescriptor
                 }
                 else if (files[idx].isFile()) {
                     if ("class".equals(FilenameUtils.getExtension(files[idx].getName()))) {
-                        String className = (parentPackageName == null ? "" : parentPackageName + ".") + FilenameUtils.getBaseName(files[idx].getName()); 
+                        String className = (parentPackageName == null ? "" : parentPackageName + ".") + FilenameUtils.getBaseName(files[idx].getName());
 
                         addClass(className, element);
                     }
                     else {
                         String resourcePath = (pckgName == null ? "" : pckgName.replace('.', '/') + "/")  + files[idx].getName();
-                        
+
                         addResource(resourcePath, element);
                     }
                 }
@@ -139,11 +158,11 @@ public class ClasspathDescriptor
 
     private void addArchive(File element) throws IOException
     {
-        InputStream    input    = null; 
+        InputStream    input    = null;
         ZipInputStream zipInput = null;
 
         try {
-            input    = element.toURI().toURL().openStream(); 
+            input    = element.toURI().toURL().openStream();
             zipInput = new ZipInputStream(input);
 
             ZipEntry entry;
@@ -151,15 +170,15 @@ public class ClasspathDescriptor
             while ((entry = zipInput.getNextEntry()) != null) {
                 if (!entry.isDirectory()) {
                     String name = entry.getName();
-    
+
                     if ("class".equals(FilenameUtils.getExtension(name))) {
                         String className = FilenameUtils.removeExtension(name).replace('/', '.').replace('\\', '.');
-    
+
                         addClass(className, element);
                     }
                     else {
                         String resourcePath = name.replace('\\', File.separatorChar);
-    
+
                         addResource(resourcePath, element);
                     }
                 }
@@ -191,7 +210,7 @@ public class ClasspathDescriptor
     {
         if (className.indexOf('$') < 0) {
             Set elements = (Set)classesWithElements.get(className);
-    
+
             if (elements == null) {
                 elements = new HashSet();
                 classesWithElements.put(className, elements);
@@ -202,9 +221,9 @@ public class ClasspathDescriptor
 
     private void addResource(String path, File element)
     {
-        if (!useDefaultResourceIgnoreList || !isInDefaultResourceIgnoreList(path)) {
+        if (!ignore(path)) {
             Set elements = (Set)resourcesWithElements.get(path);
-    
+
             if (elements == null) {
                 elements = new HashSet();
                 resourcesWithElements.put(path, elements);
@@ -213,15 +232,29 @@ public class ClasspathDescriptor
         }
     }
 
-    private boolean isInDefaultResourceIgnoreList(String path)
+    private boolean ignore(String path)
     {
-        String uppercasedPath = path.toUpperCase().replace(File.separatorChar, '/');
+        final String uppercasedPath = path.toUpperCase().replace(File.separatorChar, '/');
 
-        for (int idx = 0; idx < DEFAULT_IGNORED_RESOURCES.length; idx++) {
-            if (DEFAULT_IGNORED_RESOURCES[idx].matcher(uppercasedPath).matches()) {
-                return true;
+        // Unless it has been turned off...
+        if (useDefaultResourceIgnoreList) {
+            //  check whether the path is in the list of default ignores
+            for (int idx = 0; idx < DEFAULT_IGNORED_RESOURCES.length; idx++) {
+                if (DEFAULT_IGNORED_RESOURCES[idx].matcher(uppercasedPath).matches()) {
+                    return true;
+                }
             }
         }
+
+        // check whether there is an user supplied ignore pattern.
+        if (ignoredResourcesPatterns != null) {
+            for (int idx = 0; idx < ignoredResourcesPatterns.length; idx++) {
+                if (ignoredResourcesPatterns[idx].matcher(uppercasedPath).matches()) {
+                    return true;
+                }
+            }
+        }
+
         return false;
     }
 }

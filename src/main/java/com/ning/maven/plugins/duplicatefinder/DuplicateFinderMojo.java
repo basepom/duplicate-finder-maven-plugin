@@ -70,6 +70,12 @@ public class DuplicateFinderMojo extends AbstractMojo
     private boolean useDefaultResourceIgnoreList = true;
 
     /**
+     * Additional resources that should be ignored.
+     * @parameter alias="ignoredResources"
+     */
+    private String [] ignoredResources;
+
+    /**
      * A set of artifacts with expected and resolved versions that are to be except from the check.
      * @parameter alias="exceptions"
      */
@@ -337,6 +343,8 @@ public class DuplicateFinderMojo extends AbstractMojo
         ClasspathDescriptor classpathDesc = new ClasspathDescriptor();
 
         classpathDesc.setUseDefaultResourceIgnoreList(useDefaultResourceIgnoreList);
+        classpathDesc.setIgnoredResources(ignoredResources);
+
         for (Iterator elementIt = classpathElements.iterator(); elementIt.hasNext();) {
             String element = (String)elementIt.next();
 
