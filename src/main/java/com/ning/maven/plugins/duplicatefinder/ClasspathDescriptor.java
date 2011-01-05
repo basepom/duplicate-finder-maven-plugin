@@ -51,6 +51,8 @@ public class ClasspathDescriptor
     static {
         IGNORED_LOCAL_DIRECTORIES.add(".GIT");
         IGNORED_LOCAL_DIRECTORIES.add(".SVN");
+        IGNORED_LOCAL_DIRECTORIES.add(".HG");
+        IGNORED_LOCAL_DIRECTORIES.add(".BZR");
     }
     
     private Map classesWithElements   = new TreeMap();
