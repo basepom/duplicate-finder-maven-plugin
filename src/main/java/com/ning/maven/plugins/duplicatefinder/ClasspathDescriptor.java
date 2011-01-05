@@ -45,9 +45,11 @@ public class ClasspathDescriptor
                                                                  Pattern.compile("META-INF/SERVICES/.*"),
                                                                  Pattern.compile("(META-INF/)?NOTICE(\\.TXT)?"),
                                                                  Pattern.compile("README(\\.TXT)?"),
-                                                                 Pattern.compile(".*PACKAGE.HTML"),
-                                                                 Pattern.compile("META-INF/SPRING.HANDLERS"),
-                                                                 Pattern.compile("META-INF/SPRING.SCHEMAS")};
+                                                                 Pattern.compile(".*PACKAGE\\.HTML"),
+                                                                 Pattern.compile(".*OVERVIEW\\.HTML"),
+                                                                 Pattern.compile("META-INF/SPRING\\.HANDLERS"),
+                                                                 Pattern.compile("META-INF/SPRING\\.SCHEMAS"),
+                                                                 Pattern.compile("META-INF/SPRING\\.TOOLING")};
     private static final Set IGNORED_LOCAL_DIRECTORIES = new HashSet();
 
     static {

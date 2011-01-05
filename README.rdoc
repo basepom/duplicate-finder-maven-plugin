@@ -304,11 +304,15 @@ The plugin by default ignores several resources that are frequently found in dep
     META-INF/SERVICES/.*,
     (META-INF/)?NOTICE(\.TXT)?
     README(\.TXT)?
-    .*PACKAGE.HTML
-    META-INF/SPRING.HANDLERS
-    META-INF/SPRING.SCHEMAS
+    .*PACKAGE\.HTML
+    .*OVERVIEW\.HTML
+    META-INF/SPRING\.HANDLERS
+    META-INF/SPRING\.SCHEMAS
+    META-INF/SPRING\.TOOLING
     .GIT
     .SVN
+    .HG
+    .BZR
 
 You can turn these default resource exceptions off via the <tt>useDefaultResourceIgnoreList</tt> configuration option:
 
