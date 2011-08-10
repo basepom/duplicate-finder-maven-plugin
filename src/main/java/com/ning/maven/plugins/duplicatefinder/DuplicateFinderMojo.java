@@ -93,6 +93,19 @@ public class DuplicateFinderMojo extends AbstractMojo
      */
     private DependencyWrapper[] ignoredDependencies;
 
+    /**
+     * Skip the plugin execution.
+     *
+     * <pre>
+     *   <configuration>
+     *     <skip>true</skip>
+     *   </configuration>
+     * </pre>
+     *
+     * @parameter default-value="false"
+     */
+    protected boolean skip = false;
+
     public void setIgnoredDependencies(Dependency[] ignoredDependencies) throws InvalidVersionSpecificationException
     {
         this.ignoredDependencies = new DependencyWrapper[ignoredDependencies.length];
@@ -106,9 +119,14 @@ public class DuplicateFinderMojo extends AbstractMojo
         MavenLogAppender.startPluginLog(this);
 
         try {
-            checkCompileClasspath();
-            checkRuntimeClasspath();
-            checkTestClasspath();
+            if (skip) {
+                LOG.debug("Skipping execution!");
+            }
+            else {
+                checkCompileClasspath();
+                checkRuntimeClasspath();
+                checkTestClasspath();
+            }
         }
         finally {
             MavenLogAppender.endPluginLog(this);
