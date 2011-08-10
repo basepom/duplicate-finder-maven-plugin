@@ -29,6 +29,9 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
@@ -36,6 +39,7 @@ import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
+import com.pyx4j.log4j.MavenLogAppender;
 
 /**
  * Finds duplicate classes.
@@ -49,6 +53,8 @@ import org.apache.maven.project.MavenProject;
  */
 public class DuplicateFinderMojo extends AbstractMojo
 {
+    protected final Logger LOG = LoggerFactory.getLogger(this.getClass());
+
     /**
      * The maven project (effective pom).
      * @parameter expression="${project}"
@@ -97,15 +103,22 @@ public class DuplicateFinderMojo extends AbstractMojo
 
     public void execute() throws MojoExecutionException
     {
-        checkCompileClasspath();
-        checkRuntimeClasspath();
-        checkTestClasspath();
+        MavenLogAppender.startPluginLog(this);
+
+        try {
+            checkCompileClasspath();
+            checkRuntimeClasspath();
+            checkTestClasspath();
+        }
+        finally {
+            MavenLogAppender.endPluginLog(this);
+        }
     }
 
     private void checkCompileClasspath() throws MojoExecutionException
     {
         try {
-            getLog().info("Checking compile classpath");
+            LOG.info("Checking compile classpath");
 
             Map artifactsByFile = createArtifactsByFileMap(project.getCompileArtifacts());
 
@@ -120,7 +133,7 @@ public class DuplicateFinderMojo extends AbstractMojo
     private void checkRuntimeClasspath() throws MojoExecutionException
     {
         try {
-            getLog().info("Checking runtime classpath");
+            LOG.info("Checking runtime classpath");
 
             Map artifactsByFile = createArtifactsByFileMap(project.getRuntimeArtifacts());
 
@@ -135,7 +148,7 @@ public class DuplicateFinderMojo extends AbstractMojo
     private void checkTestClasspath() throws MojoExecutionException
     {
         try {
-            getLog().info("Checking test classpath");
+            LOG.info("Checking test classpath");
 
             Map artifactsByFile = createArtifactsByFileMap(project.getTestArtifacts());
 
@@ -193,9 +206,9 @@ public class DuplicateFinderMojo extends AbstractMojo
                 String    artifactNames = (String)entry.getKey();
                 List      classNames    = (List)entry.getValue();
 
-                getLog().warn("Found duplicate classes in " + artifactNames + " :");
+                LOG.warn("Found duplicate classes in " + artifactNames + " :");
                 for (Iterator classNameIt = classNames.iterator(); classNameIt.hasNext();) {
-                    getLog().warn("  " + classNameIt.next());
+                    LOG.warn("  " + classNameIt.next());
                 }
             }
             return true;
@@ -238,9 +251,9 @@ public class DuplicateFinderMojo extends AbstractMojo
                 String    artifactNames = (String)entry.getKey();
                 List      resources     = (List)entry.getValue();
 
-                getLog().warn("Found duplicate resources in " + artifactNames + " :");
+                LOG.warn("Found duplicate resources in " + artifactNames + " :");
                 for (Iterator resourceIt = resources.iterator(); resourceIt.hasNext();) {
-                    getLog().warn("  " + resourceIt.next());
+                    LOG.warn("  " + resourceIt.next());
                 }
             }
             return true;
@@ -352,7 +365,7 @@ public class DuplicateFinderMojo extends AbstractMojo
                 classpathDesc.add(new File(element));
             }
             catch (FileNotFoundException ex) {
-                getLog().debug("Could not access classpath element " + element);
+                LOG.debug("Could not access classpath element " + element);
             }
             catch (IOException ex) {
                 throw new MojoExecutionException("Error trying to access element " + element, ex);
