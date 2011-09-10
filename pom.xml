@@ -8,7 +8,7 @@
   <groupId>com.ning.maven.plugins</groupId>
   <artifactId>maven-duplicate-finder-plugin</artifactId>
   <packaging>maven-plugin</packaging>
-  <version>1.0.2</version>
+  <version>1.0.3-SNAPSHOT</version>
   <name>maven-duplicate-finder-plugin Maven Mojo</name>
   <description>
     The maven-duplicate-class-finder-plugin is a plugin that will search for classes with the same name, as well as resources with the same path,
