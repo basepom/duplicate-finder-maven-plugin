@@ -1,18 +1,16 @@
 = What is it
 
-The <tt>maven-duplicate-class-finder-plugin</tt> is a plugin that will search for classes with the same name, as well as resources with the same path,
+The <tt>maven-duplicate-finder-plugin</tt> is a plugin that will search for classes with the same name, as well as resources with the same path,
 in the classpaths of a maven project. More specifically, it will check the compile, runtime, and test classpaths for
 * Classes with the same qualified name in the current project and all dependencies relevant for that classpath
 * Files that are not <tt>class</tt> files, with the same resource path (i.e. as if it would be accessed via the classloader) in the current project and all dependencies relevant for that classpath
 (Note that at the moment, the plugin does not check if the files are actually the same or not, it only looks for the same file/class name.)
 
-= How to get it
+= How to use it
 
-Currently, the plugin is not in a public repository yet, so you'll have to build it yourself. First clone the git repository and then simply do
+== Configuration
 
-    mvn install
-
-This will install the plugin into your local repository and make it available for use. To make commandline usage a bit easier, you should add the
+To make commandline usage a bit easier, you should add the
 <tt>com.ning.maven.plugins</tt> group to the <tt>pluginGroups</tt> section in your settings file:
 
     <settings>
@@ -22,8 +20,6 @@ This will install the plugin into your local repository and make it available fo
       </pluginGroups>
       ...
     </settings>
-
-= How to use it
 
 == Running it
 
@@ -35,7 +31,7 @@ Usually, the plugin does not need to be configured in the POM. You can simply ex
 This will check for the latest version of the plugin, download it if necessary, and then execute it. Note that you might get snapshot versions this way.
 You can also run a specific version using the fully qualified plugin identifier:
 
-    mvn com.ning.maven.plugins:maven-class-finder-plugin:1.0.0:check
+    mvn com.ning.maven.plugins:maven-duplicate-finder-plugin:1.0.2:check
 
 If you want to include it in the normal build, configure it like this:
 
