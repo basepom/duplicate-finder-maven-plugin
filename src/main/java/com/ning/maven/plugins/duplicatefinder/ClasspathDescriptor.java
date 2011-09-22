@@ -31,6 +31,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.maven.plugin.MojoExecutionException;
 
 public class ClasspathDescriptor
@@ -46,12 +47,15 @@ public class ClasspathDescriptor
                                                                  Pattern.compile("META-INF/PLEXUS/.*"),
                                                                  Pattern.compile("META-INF/SERVICES/.*"),
                                                                  Pattern.compile("(META-INF/)?NOTICE(\\.TXT)?"),
+                                                                 Pattern.compile("META-INF/README"),
+                                                                 Pattern.compile("OSGI-INF/.*"),
                                                                  Pattern.compile("README(\\.TXT)?"),
                                                                  Pattern.compile(".*PACKAGE\\.HTML"),
                                                                  Pattern.compile(".*OVERVIEW\\.HTML"),
                                                                  Pattern.compile("META-INF/SPRING\\.HANDLERS"),
                                                                  Pattern.compile("META-INF/SPRING\\.SCHEMAS"),
                                                                  Pattern.compile("META-INF/SPRING\\.TOOLING")};
+    
     private static final Set IGNORED_LOCAL_DIRECTORIES = new HashSet();
 
     static {
@@ -61,8 +65,12 @@ public class ClasspathDescriptor
         IGNORED_LOCAL_DIRECTORIES.add(".BZR");
     }
 
+    // TreeMap<String, File>
     private Map classesWithElements   = new TreeMap();
+    
+    // TreeMap<String, File>
     private Map resourcesWithElements = new TreeMap();
+    
     private boolean useDefaultResourceIgnoreList = true;
 
     private Pattern [] ignoredResourcesPatterns = null;
@@ -191,21 +199,11 @@ public class ClasspathDescriptor
         }
         finally {
             if (zipInput != null) {
-                try {
-                    // this will also close the wrapped stream
-                    zipInput.close();
-                }
-                catch (IOException ex) {
-                    // we ignore this one
-                }
+                // this will also close the wrapped stream
+                IOUtils.closeQuietly(zipInput);
             }
             else if (input != null) {
-                try {
-                    input.close();
-                }
-                catch (IOException ex) {
-                    // and this one
-                }
+                IOUtils.closeQuietly(input);
             }
         }
     }
