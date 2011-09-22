@@ -53,7 +53,7 @@
 							<goal>check</goal>
 						</goals>
 						<configuration>
-							<failBuildInCaseOfDifferentConflict>true</failBuildInCaseOfDifferentConflict>
+							<failBuildInCaseOfDifferentContentConflict>true</failBuildInCaseOfDifferentContentConflict>
 						</configuration>
 					</execution>
 				</executions>
