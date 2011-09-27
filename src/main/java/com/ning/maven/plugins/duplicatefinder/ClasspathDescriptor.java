@@ -36,7 +36,6 @@ import org.apache.maven.plugin.MojoExecutionException;
 
 public class ClasspathDescriptor
 {
-	// add all paths in uppercase!
     private static final Pattern[] DEFAULT_IGNORED_RESOURCES = { Pattern.compile("(META-INF/)?ASL2\\.0(\\.TXT)?"),
                                                                  Pattern.compile("META-INF/DEPENDENCIES(\\.TXT)?"),
                                                                  Pattern.compile("META-INF/DISCLAIMER(\\.TXT)?"),
