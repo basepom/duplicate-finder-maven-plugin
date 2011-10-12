@@ -145,7 +145,7 @@ public class ClasspathDescriptor
                 }
                 else if (files[idx].isFile()) {
                     if ("class".equals(FilenameUtils.getExtension(files[idx].getName()))) {
-                        String className = (parentPackageName == null ? "" : parentPackageName + ".") + FilenameUtils.getBaseName(files[idx].getName());
+                        String className = (pckgName == null ? "" : pckgName + ".") + FilenameUtils.getBaseName(files[idx].getName());
 
                         addClass(className, element);
                     }
