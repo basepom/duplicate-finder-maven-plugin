@@ -94,6 +94,24 @@ public class DuplicateFinderMojo extends AbstractMojo
     private DependencyWrapper[] ignoredDependencies;
 
     /**
+     * Check the compile classpath. On by default.
+     * @parameter default-value="true"
+     */
+    private boolean checkCompileClasspath = true;
+
+    /**
+     * Check the runtime classpath. On by default.
+     * @parameter default-value="true"
+     */
+    private boolean checkRuntimeClasspath = true;
+
+    /**
+     * Check the test classpath. On by default.
+     * @parameter default-value="true"
+     */
+    private boolean checkTestClasspath = true;
+
+    /**
      * Skip the plugin execution.
      *
      * <pre>
@@ -123,9 +141,15 @@ public class DuplicateFinderMojo extends AbstractMojo
                 LOG.debug("Skipping execution!");
             }
             else {
-                checkCompileClasspath();
-                checkRuntimeClasspath();
-                checkTestClasspath();
+                if (checkCompileClasspath) {
+                    checkCompileClasspath();
+                }
+                if (checkRuntimeClasspath) {
+                    checkRuntimeClasspath();
+                }
+                if (checkTestClasspath) {
+                    checkTestClasspath();
+                }
             }
         }
         finally {
