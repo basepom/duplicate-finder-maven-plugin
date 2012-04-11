@@ -116,12 +116,14 @@ public class Exception
         for (Iterator artifactIt = artifacts.iterator(); artifactIt.hasNext();) {
             Artifact artifact = (Artifact)artifactIt.next();
 
-            for (int idx = 0; idx < conflictingDependencies.length; idx++) {
-                if (conflictingDependencies[idx].matches(artifact)) {
-                    numMatches++;
-                }
-                else if (currentProject && currentProjectDependencyMatches(artifact, projectArtifact)) {
-                    numMatches++;
+            if (conflictingDependencies != null) {
+                for (int idx = 0; idx < conflictingDependencies.length; idx++) {
+                    if (conflictingDependencies[idx].matches(artifact)) {
+                        numMatches++;
+                    }
+                    else if (currentProject && currentProjectDependencyMatches(artifact, projectArtifact)) {
+                        numMatches++;
+                    }
                 }
             }
         }
