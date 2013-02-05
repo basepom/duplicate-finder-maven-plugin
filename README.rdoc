@@ -284,9 +284,13 @@ Adding exceptions for resources works the same way:
       <resources>
         <resource>log4j.xml</resource>
       </resources>
+      <resourcePatterns>
+        <resourcePattern>files.*</resourcePattern>
     </exception>
 
 Note that there is no corresponding concept to packages for resources, you'll have to specify each resource individually.
+
+The Resource pattern allows excluding multiple files or pathes by applying regular expressions to the resources in question.
 
 The plugin by default ignores several resources that are frequently found in dependencies. They follow these regular expressions (case-insensitive):
 

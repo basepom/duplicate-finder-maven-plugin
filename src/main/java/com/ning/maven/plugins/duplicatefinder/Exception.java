@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
@@ -44,12 +45,21 @@ public class Exception
     private Set classes = new HashSet();
     private Set packages = new HashSet();
     private Set resources = new HashSet();
+    private Pattern [] matchingResources;
 
     public void setConflictingDependencies(Dependency[] conflictingDependencies) throws InvalidVersionSpecificationException
     {
         this.conflictingDependencies = new DependencyWrapper[conflictingDependencies.length];
         for (int idx = 0; idx < conflictingDependencies.length; idx++) {
             this.conflictingDependencies[idx] = new DependencyWrapper(conflictingDependencies[idx]);
+        }
+    }
+
+    public void setResourcePatterns(String[] resourcePatterns)
+    {
+        this.matchingResources = new Pattern[resourcePatterns.length];
+        for (int i = 0; i < resourcePatterns.length; i++) {
+            this.matchingResources[i] = Pattern.compile(resourcePatterns[i], Pattern.CASE_INSENSITIVE);
         }
     }
 
@@ -168,13 +178,23 @@ public class Exception
             return false;
         }
     }
-    
+
     public boolean containsResource(String resource)
     {
         String resourceAsRelative = (resource.startsWith("/") || resource.startsWith("\\") ? resource.substring(1) : resource);
 
-        return resources.contains(resourceAsRelative) ||
-               resources.contains("/" + resourceAsRelative) ||
-               resources.contains("\\" + resourceAsRelative);
+        if(resources.contains(resourceAsRelative) ||
+           resources.contains("/" + resourceAsRelative) ||
+           resources.contains("\\" + resourceAsRelative)) {
+            return true;
+        }
+
+        for (int i = 0; i < matchingResources.length; i++) {
+            if (matchingResources[i].matcher(resourceAsRelative).matches()) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
