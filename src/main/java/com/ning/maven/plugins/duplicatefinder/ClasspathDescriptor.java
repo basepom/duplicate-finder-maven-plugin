@@ -20,8 +20,13 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -56,6 +61,8 @@ public class ClasspathDescriptor
                                                                  Pattern.compile("META-INF/SPRING\\.TOOLING")};
     
     private static final Set IGNORED_LOCAL_DIRECTORIES = new HashSet();
+
+    private static final Map CACHED_BY_ELEMENT = new HashMap();
 
     static {
         IGNORED_LOCAL_DIRECTORIES.add(".GIT");
@@ -143,6 +150,12 @@ public class ClasspathDescriptor
 
     private void addDirectory(File element, String parentPackageName, File directory)
     {
+        if (addCached(element)) {
+            return;
+        }
+
+        List classes = new ArrayList();
+        List resources = new ArrayList();
         File[] files    = directory.listFiles();
         String pckgName = (element.equals(directory) ? null : (parentPackageName == null ? "" : parentPackageName + ".") + directory.getName());
 
@@ -155,20 +168,30 @@ public class ClasspathDescriptor
                     if ("class".equals(FilenameUtils.getExtension(files[idx].getName()))) {
                         String className = (pckgName == null ? "" : pckgName + ".") + FilenameUtils.getBaseName(files[idx].getName());
 
+                        classes.add(className);
                         addClass(className, element);
                     }
                     else {
                         String resourcePath = (pckgName == null ? "" : pckgName.replace('.', '/') + "/")  + files[idx].getName();
 
+                        resources.add(resourcePath);
                         addResource(resourcePath, element);
                     }
                 }
             }
         }
+
+        CACHED_BY_ELEMENT.put(element, new Cached(classes, resources));
     }
 
     private void addArchive(File element) throws IOException
     {
+        if (addCached(element)) {
+            return;
+        }
+
+        List classes = new ArrayList();
+        List resources = new ArrayList();
         InputStream    input    = null;
         ZipInputStream zipInput = null;
 
@@ -185,16 +208,19 @@ public class ClasspathDescriptor
                     if ("class".equals(FilenameUtils.getExtension(name))) {
                         String className = FilenameUtils.removeExtension(name).replace('/', '.').replace('\\', '.');
 
+                        classes.add(className);
                         addClass(className, element);
                     }
                     else {
                         String resourcePath = name.replace('\\', File.separatorChar);
 
+                        resources.add(resourcePath);
                         addResource(resourcePath, element);
                     }
                 }
             }
 
+            CACHED_BY_ELEMENT.put(element, new Cached(classes, resources));
         }
         finally {
             if (zipInput != null) {
@@ -257,5 +283,47 @@ public class ClasspathDescriptor
         }
 
         return false;
+    }
+
+    private boolean addCached(File element)
+    {
+        Cached cached = (Cached) CACHED_BY_ELEMENT.get(element);
+
+        if (cached == null) {
+            return false;
+        }
+
+        Iterator cachedClasses = cached.getClasses().iterator();
+        Iterator cachedResources = cached.getResources().iterator();
+
+        while (cachedClasses.hasNext()) {
+            addClass((String) cachedClasses.next(), element);
+        }
+
+        while (cachedResources.hasNext()) {
+            addResource((String) cachedResources.next(), element);
+        }
+
+        return true;
+    }
+
+    private static class Cached
+    {
+        private final List classes;
+        private final List resources;
+
+        private Cached(List classes, List resources)
+        {
+            this.classes = classes;
+            this.resources = resources;
+        }
+
+        public List getClasses() {
+            return classes;
+        }
+
+        public List getResources() {
+            return resources;
+        }
     }
 }
