@@ -16,7 +16,9 @@
 
 package com.ning.maven.plugins.duplicatefinder;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -72,6 +74,13 @@ public class DuplicateFinderMojo extends AbstractMojo
      * @readonly
     */
     private MavenProject project;
+
+    /**
+     * Whether the mojo should print files that are the same as per sha256 from the output.
+     * @parameter default-value="false"
+     * @since 1.0.6
+     */
+    private boolean printEqualFiles = false;
 
     /**
      * Whether the mojo should fail the build if a conflict with content different elements was found.
@@ -283,7 +292,9 @@ public class DuplicateFinderMojo extends AbstractMojo
         int conflict = NO_CONFLICT;
 
         if (!classEqualConflictsByArtifactNames.isEmpty()) {
-            printWarningMessage(classEqualConflictsByArtifactNames, "(but equal)", "classes");
+            if (printEqualFiles) {
+                printWarningMessage(classEqualConflictsByArtifactNames, "(but equal)", "classes");
+            }
 
             conflict = CONFLICT_CONTENT_EQUAL;
         }
@@ -337,7 +348,9 @@ public class DuplicateFinderMojo extends AbstractMojo
         int conflict = NO_CONFLICT;
 
         if (!resourceEqualConflictsByArtifactNames.isEmpty()) {
-            printWarningMessage(resourceEqualConflictsByArtifactNames, "(but equal)", "resources");
+            if (printEqualFiles) {
+                printWarningMessage(resourceEqualConflictsByArtifactNames, "(but equal)", "resources");
+            }
 
             return CONFLICT_CONTENT_EQUAL;
         }
@@ -386,7 +399,7 @@ public class DuplicateFinderMojo extends AbstractMojo
 
         for (Iterator it = elements.iterator(); it.hasNext();)
         {
-            File file = (File) it.next();
+            File file = (File)it.next();
             try {
                 String newSHA256 = getSHA256HexOfElement(file, resourcePath);
 
@@ -396,7 +409,7 @@ public class DuplicateFinderMojo extends AbstractMojo
                     firstFile = file;
                 }
                 else if (!newSHA256.equals(firstSHA256)) {
-                    LOG.debug("Found different SHA256-Hashs for element " + resourcePath + " in file " + firstFile + " and " + file);
+                    LOG.debug("Found different SHA256 hashs for elements " + resourcePath + " in file " + firstFile + " and " + file);
                     return false;
                 }
             }
@@ -418,24 +431,28 @@ public class DuplicateFinderMojo extends AbstractMojo
      */
     private String getSHA256HexOfElement(final File file, final String resourcePath) throws IOException
     {
-        ZipFile zip = new ZipFile(file);
-        ZipEntry zipEntry = zip.getEntry(resourcePath);
+        InputStream in;
 
-        if (zipEntry == null) {
-            throw new IOException("Could not found Zip-Entry for " + resourcePath + " in file " + file);
+        if (file.isDirectory()) {
+            File resourceFile = new File(file, resourcePath);
+            in = new BufferedInputStream(new FileInputStream(resourceFile));
+        }
+        else {
+            ZipFile zip = new ZipFile(file);
+            ZipEntry zipEntry = zip.getEntry(resourcePath);
+
+            if (zipEntry == null) {
+                throw new IOException("Could not find " + resourcePath + " in archive " + file);
+            }
+            in = zip.getInputStream(zipEntry);
         }
 
-        String sha256;
-        InputStream in = zip.getInputStream(zipEntry);
-
         try {
-            sha256 = DigestUtils.sha256Hex(in);
+            return DigestUtils.sha256Hex(in);
         }
         finally {
             IOUtils.closeQuietly(in);
         }
-
-        return sha256;
     }
 
     private void filterIgnoredDependencies(final Set artifacts)
