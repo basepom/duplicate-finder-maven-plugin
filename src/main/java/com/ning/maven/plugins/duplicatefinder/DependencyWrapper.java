@@ -51,7 +51,7 @@ public class DependencyWrapper
 
     public boolean matches(Artifact artifact)
     {
-        ArtifactVersion version = null;
+        ArtifactVersion version;
 
         try {
             if (artifact.getVersionRange() != null) {
