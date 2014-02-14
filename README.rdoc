@@ -57,7 +57,7 @@ A successful run will look like this:
 
 If you run the plugin on its own source code, you'll instead get something like
 
-    [WARNING] Found duplicate classes in [commons-logging:commons-logging:1.1.1,commons-logging:commons-logging-api:1.1] :
+    [WARNING] Found duplicate and different classes in [commons-logging:commons-logging:1.1.1,commons-logging:commons-logging-api:1.1] :
     [WARNING]   org.apache.commons.logging.Log
     [WARNING]   org.apache.commons.logging.LogConfigurationException
     [WARNING]   org.apache.commons.logging.LogFactory
@@ -67,9 +67,9 @@ If you run the plugin on its own source code, you'll instead get something like
     [WARNING]   org.apache.commons.logging.impl.NoOpLog
     [WARNING]   org.apache.commons.logging.impl.SimpleLog
     [WARNING]   org.apache.commons.logging.impl.WeakHashtable
-    [WARNING] Found duplicate resources in [org.springframework:spring-aop:3.0.3.RELEASE,org.springframework:spring-beans:3.0.3.RELEASE,org.springframework:spring-context:3.0.3.RELEASE,org.springframework:spring-core:3.0.3.RELEASE] :
+    [WARNING] Found duplicate and different resources in [org.springframework:spring-aop:3.0.3.RELEASE,org.springframework:spring-beans:3.0.3.RELEASE,org.springframework:spring-context:3.0.3.RELEASE,org.springframework:spring-core:3.0.3.RELEASE] :
     [WARNING]   overview.html
-    [WARNING] Found duplicate resources in [org.springframework:spring-aop:3.0.3.RELEASE,org.springframework:spring-beans:3.0.3.RELEASE,org.springframework:spring-context:3.0.3.RELEASE] :
+    [WARNING] Found duplicate and different resources in [org.springframework:spring-aop:3.0.3.RELEASE,org.springframework:spring-beans:3.0.3.RELEASE,org.springframework:spring-context:3.0.3.RELEASE] :
     [WARNING]   META-INF/spring.tooling
 
 The above example shows a duplicate resource and a duplicate class in the current POM. In either case, it will print the qualified names of all artifacts that
@@ -336,7 +336,7 @@ It is possible to specify additional resources on the classpath that are exclude
 
 will ignore all occurences of 'overview.html' on the classpath. This is useful for resources that are present in many dependencies. 
 
-The resource definition is a pattern as consumed by java.util.regex.Pattern. 
+The resource definition is a pattern as consumed by <tt>java.util.regex.Pattern</tt>.
 
 == Failing the build
 
@@ -350,6 +350,25 @@ By default, the plugin will only print warning. However, you can configure it to
         ...
       </configuration>
     </plugin>
+
+This will fail the build even in case of duplicate but identical classes/resources (as per their SHA256).
+If you don't want that, then use these two for more fine-grained control:
+
+    <failBuildInCaseOfDifferentContentConflict>true</failBuildInCaseOfDifferentContentConflict>
+    <failBuildInCaseOfEqualContentConflict>false</failBuildInCaseOfEqualContentConflict>
+
+
+== Verbose output
+
+By default the plugin will not print duplicate but identical classes/resources (as per SHA256).
+If you want to see those classes/resources, add this configuration option:
+
+    <printEqualFiles>true</printEqualFiles>
+
+Note that this flag is ignored if either <tt>failBuildInCaseOfConflict</tt> or
+<tt>failBuildInCaseOfEqualContentConflict</tt> are set to <tt>true</tt>.
+
+Note that
 
 = License
 

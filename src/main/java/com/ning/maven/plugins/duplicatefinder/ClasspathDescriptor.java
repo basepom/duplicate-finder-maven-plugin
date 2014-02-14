@@ -72,7 +72,7 @@ public class ClasspathDescriptor
     }
 
     // TreeMap<String, File>
-    private Map classesWithElements   = new TreeMap();
+    private Map classesWithElements = new TreeMap();
     
     // TreeMap<String, File>
     private Map resourcesWithElements = new TreeMap();
@@ -100,7 +100,8 @@ public class ClasspathDescriptor
                 for (int i = 0 ; i < ignoredResources.length; i++) {
                     ignoredResourcesPatterns[i] = Pattern.compile(ignoredResources[i].toUpperCase());
                 }
-            } catch (PatternSyntaxException pse) {
+            }
+            catch (PatternSyntaxException pse) {
                 throw new MojoExecutionException("Error compiling resourceIgnore pattern: " + pse.getMessage());
             }
         }

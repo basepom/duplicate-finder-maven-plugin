@@ -16,7 +16,9 @@
 
 package com.ning.maven.plugins.duplicatefinder;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -64,7 +66,7 @@ public class DuplicateFinderMojo extends AbstractMojo
     private final static int NO_CONFLICT = 0;
     private final static int CONFLICT_CONTENT_EQUAL = 1;
     private final static int CONFLICT_CONTENT_DIFFERENT = 2;
-    
+
     /**
      * The maven project (effective pom).
      * @parameter expression="${project}"
@@ -74,19 +76,26 @@ public class DuplicateFinderMojo extends AbstractMojo
     private MavenProject project;
 
     /**
+     * Whether the mojo should print files that are the same as per sha256 from the output.
+     * @parameter default-value="false"
+     * @since 1.0.6
+     */
+    private boolean printEqualFiles = false;
+
+    /**
      * Whether the mojo should fail the build if a conflict with content different elements was found.
      * @parameter default-value="false"
      * @since 1.0.3
      */
     private boolean failBuildInCaseOfDifferentContentConflict;
-    
+
     /**
      * Whether the mojo should fail the build if a conflict with content equal elements was found.
      * @parameter default-value="false"
      * @since 1.0.3
      */
     private boolean failBuildInCaseOfEqualContentConflict;
-    
+
     /**
      * Whether the mojo should fail the build if a conflict was found. 
      * @parameter default-value="false"
@@ -195,7 +204,7 @@ public class DuplicateFinderMojo extends AbstractMojo
             throw new MojoExecutionException("Could not resolve dependencies", ex);
         }
     }
-    
+
     private void checkRuntimeClasspath() throws MojoExecutionException
     {
         try {
@@ -234,10 +243,10 @@ public class DuplicateFinderMojo extends AbstractMojo
         int foundDuplicateClassesConflict   = checkForDuplicateClasses(classpathDesc, artifactsByFile);
         int foundDuplicateResourcesConflict = checkForDuplicateResources(classpathDesc, artifactsByFile);
         int maxConflict = Math.max(foundDuplicateClassesConflict, foundDuplicateResourcesConflict);
-        
+
         if ( (failBuildInCaseOfConflict && maxConflict > NO_CONFLICT) ||        		
-        	 (failBuildInCaseOfDifferentContentConflict && maxConflict == CONFLICT_CONTENT_DIFFERENT) ||
-        	 (failBuildInCaseOfEqualContentConflict && maxConflict >= CONFLICT_CONTENT_EQUAL)	) {
+             (failBuildInCaseOfDifferentContentConflict && maxConflict == CONFLICT_CONTENT_DIFFERENT) ||
+             (failBuildInCaseOfEqualContentConflict && maxConflict >= CONFLICT_CONTENT_EQUAL)	) {
             throw new MojoExecutionException("Found duplicate classes/resources");
         }
     }
@@ -258,17 +267,17 @@ public class DuplicateFinderMojo extends AbstractMojo
                 if ((artifacts.size() < 2) || isExceptedClass(className, artifacts)) {
                     continue;
                 }
-                
+
                 Map conflictsByArtifactNames;
-                
-                if(isAllElementsAreEqual(elements, className.replace('.', '/') + ".class"))
+
+                if (isAllElementsAreEqual(elements, className.replace('.', '/') + ".class"))
                 {
-                	conflictsByArtifactNames = classEqualConflictsByArtifactNames;
-                } else
-                {
-                	conflictsByArtifactNames = classDifferentConflictsByArtifactNames;	
+                    conflictsByArtifactNames = classEqualConflictsByArtifactNames;
                 }
-                
+                else {
+                    conflictsByArtifactNames = classDifferentConflictsByArtifactNames;
+                }
+
                 String artifactNames = getArtifactsToString(artifacts);
                 List classNames = (List)conflictsByArtifactNames.get(artifactNames); 
 
@@ -281,32 +290,35 @@ public class DuplicateFinderMojo extends AbstractMojo
         }
 
         int conflict = NO_CONFLICT;
-        
-        if(!classEqualConflictsByArtifactNames.isEmpty())
-        {
-        	printWarningMessage(classEqualConflictsByArtifactNames, "(but equal)", "classes");
-        	
-        	conflict = CONFLICT_CONTENT_EQUAL;
+
+        if (!classEqualConflictsByArtifactNames.isEmpty()) {
+            if (printEqualFiles &&
+                !failBuildInCaseOfConflict &&
+                !failBuildInCaseOfEqualContentConflict) {
+
+                printWarningMessage(classEqualConflictsByArtifactNames, "(but equal)", "classes");
+            }
+
+            conflict = CONFLICT_CONTENT_EQUAL;
         }
-        
-        if (!classDifferentConflictsByArtifactNames.isEmpty())
-        {
+
+        if (!classDifferentConflictsByArtifactNames.isEmpty()) {
             printWarningMessage(classDifferentConflictsByArtifactNames, "and different", "classes");
-            
+
             conflict = CONFLICT_CONTENT_DIFFERENT;
         }
-        
+
         return conflict;
     }
-    
+
     private int checkForDuplicateResources(ClasspathDescriptor classpathDesc, Map artifactsByFile) throws MojoExecutionException
     {
-    	Map resourceDifferentConflictsByArtifactNames = new TreeMap(new ToStringComparator());
+        Map resourceDifferentConflictsByArtifactNames = new TreeMap(new ToStringComparator());
         Map resourceEqualConflictsByArtifactNames = new TreeMap(new ToStringComparator());
 
         for (Iterator resourceIt = classpathDesc.getResources().iterator(); resourceIt.hasNext();) {
-            String    resource = (String)resourceIt.next();
-            Set       elements = classpathDesc.getElementsHavingResource(resource);
+            String resource = (String)resourceIt.next();
+            Set    elements = classpathDesc.getElementsHavingResource(resource);
 
             if (elements.size() > 1) {
                 Set artifacts = getArtifactsForElements(elements, artifactsByFile);
@@ -315,15 +327,14 @@ public class DuplicateFinderMojo extends AbstractMojo
                 if ((artifacts.size() < 2) || isExceptedResource(resource, artifacts)) {
                     continue;
                 }
-                
+
                 Map conflictsByArtifactNames;
-                
-                if(isAllElementsAreEqual(elements, resource))
-                {
-                	conflictsByArtifactNames = resourceEqualConflictsByArtifactNames;
-                } else
-                {
-                	conflictsByArtifactNames = resourceDifferentConflictsByArtifactNames;	
+
+                if (isAllElementsAreEqual(elements, resource)) {
+                    conflictsByArtifactNames = resourceEqualConflictsByArtifactNames;
+                }
+                else {
+                    conflictsByArtifactNames = resourceDifferentConflictsByArtifactNames;
                 }
 
                 String artifactNames = getArtifactsToString(artifacts);
@@ -338,23 +349,27 @@ public class DuplicateFinderMojo extends AbstractMojo
         }
 
         int conflict = NO_CONFLICT;
-                
-        if(!resourceEqualConflictsByArtifactNames.isEmpty()) {
-        	printWarningMessage(resourceEqualConflictsByArtifactNames, "(but equal)", "resources");
-        	
-        	return CONFLICT_CONTENT_EQUAL;
+
+        if (!resourceEqualConflictsByArtifactNames.isEmpty()) {
+            if (printEqualFiles &&
+                !failBuildInCaseOfConflict &&
+                !failBuildInCaseOfEqualContentConflict) {
+
+                printWarningMessage(resourceEqualConflictsByArtifactNames, "(but equal)", "resources");
+            }
+
+            return CONFLICT_CONTENT_EQUAL;
         }
-        
-        if (!resourceDifferentConflictsByArtifactNames.isEmpty())
-        {
+
+        if (!resourceDifferentConflictsByArtifactNames.isEmpty()) {
             printWarningMessage(resourceDifferentConflictsByArtifactNames, "and different", "resources");
-            
+
             conflict = CONFLICT_CONTENT_DIFFERENT;
         }
-        
+
         return conflict;
     }
-    
+
     /**
      * Prints the conflict messages. 
      * 
@@ -364,7 +379,7 @@ public class DuplicateFinderMojo extends AbstractMojo
      */
     private void printWarningMessage(Map conflictsByArtifactNames, String hint, String type)
     {
-    	for (Iterator conflictIt = conflictsByArtifactNames.entrySet().iterator(); conflictIt.hasNext();) {
+        for (Iterator conflictIt = conflictsByArtifactNames.entrySet().iterator(); conflictIt.hasNext();) {
             Map.Entry entry         = (Map.Entry)conflictIt.next();
             String    artifactNames = (String)entry.getKey();
             List      classNames    = (List)entry.getValue();
@@ -385,34 +400,33 @@ public class DuplicateFinderMojo extends AbstractMojo
      */
     private boolean isAllElementsAreEqual(final Set elements, final String resourcePath) 
     {
-    	File firstFile = null;
-		String firstSHA256 = null;
-		
-		for(Iterator it=elements.iterator(); it.hasNext();)
-		{
-			File file = (File) it.next();
-			try {
-				String newSHA256 = getSHA256HexOfElement(file, resourcePath);
-				
-				if(firstSHA256 == null)
-				{
-					// save sha256 hash from the first element
-					firstSHA256 = newSHA256;
-					firstFile = file;
-				}
-				else if(!newSHA256.equals(firstSHA256)) {
-					LOG.debug("Found different SHA256-Hashs for element " + resourcePath + " in file " + firstFile + " and " + file);
-					return false;
-				}
-			} catch (IOException ex)
-			{
-				LOG.warn("Could not read content from file " + file + "!", ex);
-			}
-		}
-		
-		return true;
-	}
-    
+        File firstFile = null;
+        String firstSHA256 = null;
+
+        for (Iterator it = elements.iterator(); it.hasNext();)
+        {
+            File file = (File)it.next();
+            try {
+                String newSHA256 = getSHA256HexOfElement(file, resourcePath);
+
+                if (firstSHA256 == null) {
+                    // save sha256 hash from the first element
+                    firstSHA256 = newSHA256;
+                    firstFile = file;
+                }
+                else if (!newSHA256.equals(firstSHA256)) {
+                    LOG.debug("Found different SHA256 hashs for elements " + resourcePath + " in file " + firstFile + " and " + file);
+                    return false;
+                }
+            }
+            catch (IOException ex) {
+                LOG.warn("Could not read content from file " + file + "!", ex);
+            }
+        }
+
+        return true;
+    }
+
     /**
      * Calculates the SHA256 Hash of a class in a file.
      * 
@@ -423,24 +437,28 @@ public class DuplicateFinderMojo extends AbstractMojo
      */
     private String getSHA256HexOfElement(final File file, final String resourcePath) throws IOException
     {
-    	ZipFile zip = new ZipFile(file);
-    	ZipEntry zipEntry = zip.getEntry(resourcePath);
-    	if(zipEntry == null)
-    	{
-    		throw new IOException("Could not found Zip-Entry for " + resourcePath + " in file " + file);
-    	}
-    	
-    	String sha256;
-    	
-		InputStream in = zip.getInputStream(zipEntry);
-		try
-		{
-			sha256 = DigestUtils.sha256Hex(in);
-		} finally {
-			IOUtils.closeQuietly(in);
-		}
-    		
-    	return sha256;
+        InputStream in;
+
+        if (file.isDirectory()) {
+            File resourceFile = new File(file, resourcePath);
+            in = new BufferedInputStream(new FileInputStream(resourceFile));
+        }
+        else {
+            ZipFile zip = new ZipFile(file);
+            ZipEntry zipEntry = zip.getEntry(resourcePath);
+
+            if (zipEntry == null) {
+                throw new IOException("Could not find " + resourcePath + " in archive " + file);
+            }
+            in = zip.getInputStream(zipEntry);
+        }
+
+        try {
+            return DigestUtils.sha256Hex(in);
+        }
+        finally {
+            IOUtils.closeQuietly(in);
+        }
     }
 
     private void filterIgnoredDependencies(final Set artifacts)
@@ -449,7 +467,7 @@ public class DuplicateFinderMojo extends AbstractMojo
             for (int idx = 0; idx < ignoredDependencies.length; idx++) {
                 for (Iterator artifactIt = artifacts.iterator(); artifactIt.hasNext();) {
                     Artifact artifact = (Artifact)artifactIt.next();
-    
+
                     if (ignoredDependencies[idx].matches(artifact)) {
                         artifactIt.remove();
                     }
@@ -457,7 +475,7 @@ public class DuplicateFinderMojo extends AbstractMojo
             }
         }
     }
-    
+
     private boolean isExceptedClass(final String className, final Collection artifacts)
     {
         List exceptions = getExceptionsFor(artifacts);
@@ -485,7 +503,7 @@ public class DuplicateFinderMojo extends AbstractMojo
         }
         return false;
     }
-    
+
     private List getExceptionsFor(Collection artifacts)
     {
         List result = new ArrayList();
@@ -530,7 +548,7 @@ public class DuplicateFinderMojo extends AbstractMojo
         result.append("]");
         return result.toString();
     }
-    
+
     private ClasspathDescriptor createClasspathDescriptor(List classpathElements) throws MojoExecutionException
     {
         ClasspathDescriptor classpathDesc = new ClasspathDescriptor();
@@ -563,8 +581,7 @@ public class DuplicateFinderMojo extends AbstractMojo
             File     localPath = getLocalProjectPath(artifact);
             File     repoPath  = artifact.getFile();
 
-            if ((localPath == null) && (repoPath == null))
-            {
+            if ((localPath == null) && (repoPath == null)) {
                 throw new DependencyResolutionRequiredException(artifact);
             }
             if (localPath != null) {
@@ -582,19 +599,15 @@ public class DuplicateFinderMojo extends AbstractMojo
         String       refId         = artifact.getGroupId() + ":" + artifact.getArtifactId() + ":" + artifact.getVersion();
         MavenProject owningProject = (MavenProject)project.getProjectReferences().get(refId);
 
-        if (owningProject != null)
-        {
-            if (artifact.getType().equals("test-jar"))
-            {
+        if (owningProject != null) {
+            if (artifact.getType().equals("test-jar")) {
                 File testOutputDir = new File(owningProject.getBuild().getTestOutputDirectory());
 
-                if (testOutputDir.exists())
-                {
+                if (testOutputDir.exists()) {
                     return testOutputDir;
                 }
             }
-            else
-            {
+            else {
                 return new File(project.getBuild().getOutputDirectory());
             }
         }
@@ -609,7 +622,7 @@ public class DuplicateFinderMojo extends AbstractMojo
             artifactsByFile.put(outputDir, null);
         }
     }
-    
+
     private void addTestOutputDirectory(Map artifactsByFile)
     {
         File outputDir = new File(project.getBuild().getOutputDirectory());
