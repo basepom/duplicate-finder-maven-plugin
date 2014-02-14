@@ -292,9 +292,9 @@ public class DuplicateFinderMojo extends AbstractMojo
         int conflict = NO_CONFLICT;
 
         if (!classEqualConflictsByArtifactNames.isEmpty()) {
-            if (printEqualFiles &&
-                !failBuildInCaseOfConflict &&
-                !failBuildInCaseOfEqualContentConflict) {
+            if (printEqualFiles ||
+                failBuildInCaseOfConflict ||
+                failBuildInCaseOfEqualContentConflict) {
 
                 printWarningMessage(classEqualConflictsByArtifactNames, "(but equal)", "classes");
             }
@@ -351,9 +351,9 @@ public class DuplicateFinderMojo extends AbstractMojo
         int conflict = NO_CONFLICT;
 
         if (!resourceEqualConflictsByArtifactNames.isEmpty()) {
-            if (printEqualFiles &&
-                !failBuildInCaseOfConflict &&
-                !failBuildInCaseOfEqualContentConflict) {
+            if (printEqualFiles ||
+                failBuildInCaseOfConflict ||
+                failBuildInCaseOfEqualContentConflict) {
 
                 printWarningMessage(resourceEqualConflictsByArtifactNames, "(but equal)", "resources");
             }

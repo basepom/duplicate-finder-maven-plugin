@@ -53,7 +53,6 @@
               <goal>check</goal>
             </goals>
             <configuration>
-              <printEqualFiles>true</printEqualFiles>
               <failBuildInCaseOfEqualContentConflict>true</failBuildInCaseOfEqualContentConflict>
             </configuration>
           </execution>
