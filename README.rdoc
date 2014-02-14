@@ -336,7 +336,7 @@ It is possible to specify additional resources on the classpath that are exclude
 
 will ignore all occurences of 'overview.html' on the classpath. This is useful for resources that are present in many dependencies. 
 
-The resource definition is a pattern as consumed by java.util.regex.Pattern. 
+The resource definition is a pattern as consumed by <tt>java.util.regex.Pattern</tt>.
 
 == Failing the build
 
@@ -351,12 +351,24 @@ By default, the plugin will only print warning. However, you can configure it to
       </configuration>
     </plugin>
 
+This will fail the build even in case of duplicate but identical classes/resources (as per their SHA256).
+If you don't want that, then use these two for more fine-grained control:
+
+    <failBuildInCaseOfDifferentContentConflict>true</failBuildInCaseOfDifferentContentConflict>
+    <failBuildInCaseOfEqualContentConflict>false</failBuildInCaseOfEqualContentConflict>
+
+
 == Verbose output
 
 By default the plugin will not print duplicate but identical classes/resources (as per SHA256).
 If you want to see those classes/resources, add this configuration option:
 
     <printEqualFiles>true</printEqualFiles>
+
+Note that this flag is ignored if either <tt>failBuildInCaseOfConflict</tt> or
+<tt>failBuildInCaseOfEqualContentConflict</tt> are set to <tt>true</tt>.
+
+Note that
 
 = License
 
