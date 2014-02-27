@@ -368,8 +368,6 @@ If you want to see those classes/resources, add this configuration option:
 Note that this flag is ignored if either <tt>failBuildInCaseOfConflict</tt> or
 <tt>failBuildInCaseOfEqualContentConflict</tt> are set to <tt>true</tt>.
 
-Note that
-
 = License
 
 See COPYING file.
