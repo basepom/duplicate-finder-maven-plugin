@@ -358,7 +358,7 @@ public class DuplicateFinderMojo extends AbstractMojo
                 printWarningMessage(resourceEqualConflictsByArtifactNames, "(but equal)", "resources");
             }
 
-            return CONFLICT_CONTENT_EQUAL;
+            conflict = CONFLICT_CONTENT_EQUAL;
         }
 
         if (!resourceDifferentConflictsByArtifactNames.isEmpty()) {
