@@ -437,6 +437,7 @@ public class DuplicateFinderMojo extends AbstractMojo
      */
     private String getSHA256HexOfElement(final File file, final String resourcePath) throws IOException
     {
+        ZipFile zip = null;
         InputStream in;
 
         if (file.isDirectory()) {
@@ -444,7 +445,7 @@ public class DuplicateFinderMojo extends AbstractMojo
             in = new BufferedInputStream(new FileInputStream(resourceFile));
         }
         else {
-            ZipFile zip = new ZipFile(file);
+            zip = new ZipFile(file);
             ZipEntry zipEntry = zip.getEntry(resourcePath);
 
             if (zipEntry == null) {
@@ -458,6 +459,13 @@ public class DuplicateFinderMojo extends AbstractMojo
         }
         finally {
             IOUtils.closeQuietly(in);
+            if (zip != null) {
+                try {
+                    zip.close();
+                } catch (IOException ioe) {
+                    // swallow exception
+                }
+            }
         }
     }
 
