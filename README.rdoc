@@ -286,6 +286,7 @@ Adding exceptions for resources works the same way:
       </resources>
       <resourcePatterns>
         <resourcePattern>files.*</resourcePattern>
+      </resourcePatterns>
     </exception>
 
 Note that there is no corresponding concept to packages for resources, you'll have to specify each resource individually.
