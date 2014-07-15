@@ -31,7 +31,7 @@ Usually, the plugin does not need to be configured in the POM. You can simply ex
 This will check for the latest version of the plugin, download it if necessary, and then execute it. Note that you might get snapshot versions this way.
 You can also run a specific version using the fully qualified plugin identifier:
 
-    mvn com.ning.maven.plugins:maven-duplicate-finder-plugin:1.0.6:check
+    mvn com.ning.maven.plugins:maven-duplicate-finder-plugin:1.0.7:check
 
 If you want to include it in the normal build, configure it like this:
 
