@@ -13,21 +13,18 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-
 package com.ning.maven.plugins.duplicatefinder;
-
-import org.apache.commons.lang.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
@@ -36,18 +33,21 @@ import org.apache.maven.artifact.versioning.OverConstrainedVersionException;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.model.Dependency;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
+@SuppressFBWarnings("BAD_PRACTICE")
 public class Exception
 {
     public static final String CURRENT_PROJECT_IDENTIFIER = "<current project>";
 
     private DependencyWrapper[] conflictingDependencies;
     private boolean currentProject;
-    private Set classes = new HashSet();
-    private Set packages = new HashSet();
-    private Set resources = new HashSet();
-    private Pattern [] matchingResources = new Pattern[0];
+    private final Set<String> classes = new HashSet<String>();
+    private final Set<String> packages = new HashSet<String>();
+    private final Set<String> resources = new HashSet<String>();
+    private Pattern[] matchingResources = new Pattern[0];
 
-    public void setConflictingDependencies(Dependency[] conflictingDependencies) throws InvalidVersionSpecificationException
+    public void setConflictingDependencies(final Dependency[] conflictingDependencies) throws InvalidVersionSpecificationException
     {
         this.conflictingDependencies = new DependencyWrapper[conflictingDependencies.length];
         for (int idx = 0; idx < conflictingDependencies.length; idx++) {
@@ -55,7 +55,7 @@ public class Exception
         }
     }
 
-    public void setResourcePatterns(String[] resourcePatterns)
+    public void setResourcePatterns(final String[] resourcePatterns)
     {
         this.matchingResources = new Pattern[resourcePatterns.length];
         for (int i = 0; i < resourcePatterns.length; i++) {
@@ -68,44 +68,44 @@ public class Exception
         return currentProject;
     }
 
-    public void setCurrentProject(boolean currentProject)
+    public void setCurrentProject(final boolean currentProject)
     {
         this.currentProject = currentProject;
     }
 
     public String[] getClasses()
     {
-        return (String[])classes.toArray(new String[classes.size()]);
+        return classes.toArray(new String[classes.size()]);
     }
 
-    public void setClasses(String[] classes)
+    public void setClasses(final String[] classes)
     {
         this.classes.addAll(Arrays.asList(classes));
     }
 
     public String[] getPackages()
     {
-        return (String[])packages.toArray(new String[packages.size()]);
+        return packages.toArray(new String[packages.size()]);
     }
 
-    public void setPackages(String[] packages)
+    public void setPackages(final String[] packages)
     {
         this.packages.addAll(Arrays.asList(packages));
     }
 
     public String[] getResources()
     {
-        return (String[])resources.toArray(new String[resources.size()]);
+        return resources.toArray(new String[resources.size()]);
     }
 
-    public void setResources(String[] resources)
+    public void setResources(final String[] resources)
     {
         this.resources.addAll(Arrays.asList(resources));
     }
 
-    public List getDependencyNames()
+    public List<String> getDependencyNames()
     {
-        List result = new ArrayList();
+        final List<String> result = new ArrayList<String>();
 
         if (conflictingDependencies != null) {
             for (int idx = 0; idx < conflictingDependencies.length; idx++) {
@@ -119,13 +119,11 @@ public class Exception
         return result;
     }
 
-    public boolean isForArtifacts(Collection artifacts, Artifact projectArtifact)
+    public boolean isForArtifacts(final Collection<Artifact> artifacts, final Artifact projectArtifact)
     {
         int numMatches = 0;
 
-        for (Iterator artifactIt = artifacts.iterator(); artifactIt.hasNext();) {
-            Artifact artifact = (Artifact)artifactIt.next();
-
+        for (Artifact artifact : artifacts) {
             if (conflictingDependencies != null) {
                 for (int idx = 0; idx < conflictingDependencies.length; idx++) {
                     if (conflictingDependencies[idx].matches(artifact)) {
@@ -140,9 +138,9 @@ public class Exception
         return numMatches == artifacts.size();
     }
 
-    private boolean currentProjectDependencyMatches(Artifact artifact, Artifact projectArtifact)
+    private boolean currentProjectDependencyMatches(final Artifact artifact, final Artifact projectArtifact)
     {
-        VersionRange versionRange = projectArtifact.getVersionRange();
+        final VersionRange versionRange = projectArtifact.getVersionRange();
         ArtifactVersion version;
 
         try {
@@ -153,7 +151,7 @@ public class Exception
                 version = new DefaultArtifactVersion(artifact.getVersion());
             }
         }
-        catch (OverConstrainedVersionException ex) {
+        catch (final OverConstrainedVersionException ex) {
             return false;
         }
 
@@ -161,17 +159,17 @@ public class Exception
             StringUtils.equals(projectArtifact.getArtifactId(), artifact.getArtifactId()) &&
             StringUtils.equals(StringUtils.defaultIfEmpty(projectArtifact.getType(), "jar"), StringUtils.defaultIfEmpty(artifact.getType(), "jar")) &&
             StringUtils.equals(projectArtifact.getClassifier(), artifact.getClassifier()) &&
-            ((versionRange != null && versionRange.containsVersion(version)) || artifact.getVersion().equals(projectArtifact.getVersion()));
+            (versionRange != null && versionRange.containsVersion(version) || artifact.getVersion().equals(projectArtifact.getVersion()));
     }
 
-    public boolean containsClass(String className)
+    public boolean containsClass(final String className)
     {
         if (classes.contains(className)) {
             return true;
         }
         else {
-            for (Iterator pckgNameIt = packages.iterator(); pckgNameIt.hasNext();) {
-                if (className.startsWith((String)pckgNameIt.next())) {
+            for (String packageName : packages) {
+                if (className.startsWith(packageName)) {
                     return true;
                 }
             }
@@ -179,9 +177,9 @@ public class Exception
         }
     }
 
-    public boolean containsResource(String resource)
+    public boolean containsResource(final String resource)
     {
-        String resourceAsRelative = (resource.startsWith("/") || resource.startsWith("\\") ? resource.substring(1) : resource);
+        final String resourceAsRelative = resource.startsWith("/") || resource.startsWith("\\") ? resource.substring(1) : resource;
 
         if (resources.contains(resourceAsRelative) ||
             resources.contains("/" + resourceAsRelative) ||

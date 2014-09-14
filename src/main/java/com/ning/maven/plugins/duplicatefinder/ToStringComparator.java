@@ -13,14 +13,15 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-
 package com.ning.maven.plugins.duplicatefinder;
 
+import java.io.Serializable;
 import java.util.Comparator;
 
-public class ToStringComparator implements Comparator
+public class ToStringComparator implements Comparator<Object>, Serializable
 {
-    public int compare(Object objA, Object objB)
+    @Override
+    public int compare(final Object objA, final Object objB)
     {
         if (objA == null) {
             return objB == null ? 0 : -1;

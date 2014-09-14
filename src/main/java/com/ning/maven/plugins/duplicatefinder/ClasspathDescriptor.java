@@ -13,19 +13,16 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-
 package com.ning.maven.plugins.duplicatefinder;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -42,27 +39,27 @@ import org.apache.maven.plugin.MojoExecutionException;
 public class ClasspathDescriptor
 {
     private static final Pattern[] DEFAULT_IGNORED_RESOURCES = { Pattern.compile("(META-INF/)?ASL2\\.0(\\.TXT)?"),
-                                                                 Pattern.compile("META-INF/DEPENDENCIES(\\.TXT)?"),
-                                                                 Pattern.compile("META-INF/DISCLAIMER(\\.TXT)?"),
-                                                                 Pattern.compile("(META-INF/)?[A-Z_-]*LICENSE.*"),
-                                                                 Pattern.compile("META-INF/MANIFEST\\.MF"),
-                                                                 Pattern.compile("META-INF/INDEX\\.LIST"),
-                                                                 Pattern.compile("META-INF/MAVEN/.*"),
-                                                                 Pattern.compile("META-INF/PLEXUS/.*"),
-                                                                 Pattern.compile("META-INF/SERVICES/.*"),
-                                                                 Pattern.compile("(META-INF/)?NOTICE(\\.TXT)?"),
-                                                                 Pattern.compile("META-INF/README"),
-                                                                 Pattern.compile("OSGI-INF/.*"),
-                                                                 Pattern.compile("README(\\.TXT)?"),
-                                                                 Pattern.compile(".*PACKAGE\\.HTML"),
-                                                                 Pattern.compile(".*OVERVIEW\\.HTML"),
-                                                                 Pattern.compile("META-INF/SPRING\\.HANDLERS"),
-                                                                 Pattern.compile("META-INF/SPRING\\.SCHEMAS"),
-                                                                 Pattern.compile("META-INF/SPRING\\.TOOLING")};
-    
-    private static final Set IGNORED_LOCAL_DIRECTORIES = new HashSet();
+                    Pattern.compile("META-INF/DEPENDENCIES(\\.TXT)?"),
+                    Pattern.compile("META-INF/DISCLAIMER(\\.TXT)?"),
+                    Pattern.compile("(META-INF/)?[A-Z_-]*LICENSE.*"),
+                    Pattern.compile("META-INF/MANIFEST\\.MF"),
+                    Pattern.compile("META-INF/INDEX\\.LIST"),
+                    Pattern.compile("META-INF/MAVEN/.*"),
+                    Pattern.compile("META-INF/PLEXUS/.*"),
+                    Pattern.compile("META-INF/SERVICES/.*"),
+                    Pattern.compile("(META-INF/)?NOTICE(\\.TXT)?"),
+                    Pattern.compile("META-INF/README"),
+                    Pattern.compile("OSGI-INF/.*"),
+                    Pattern.compile("README(\\.TXT)?"),
+                    Pattern.compile(".*PACKAGE\\.HTML"),
+                    Pattern.compile(".*OVERVIEW\\.HTML"),
+                    Pattern.compile("META-INF/SPRING\\.HANDLERS"),
+                    Pattern.compile("META-INF/SPRING\\.SCHEMAS"),
+                    Pattern.compile("META-INF/SPRING\\.TOOLING") };
 
-    private static final Map CACHED_BY_ELEMENT = new HashMap();
+    private static final Set<String> IGNORED_LOCAL_DIRECTORIES = new HashSet<String>();
+
+    private static final Map<File, Cached> CACHED_BY_ELEMENT = new HashMap<File, Cached>();
 
     static {
         IGNORED_LOCAL_DIRECTORIES.add(".GIT");
@@ -71,43 +68,41 @@ public class ClasspathDescriptor
         IGNORED_LOCAL_DIRECTORIES.add(".BZR");
     }
 
-    // TreeMap<String, File>
-    private Map classesWithElements = new TreeMap();
-    
-    // TreeMap<String, File>
-    private Map resourcesWithElements = new TreeMap();
-    
+    private final Map<String, Set<File>> classesWithElements = new TreeMap<String, Set<File>>();
+
+    private final Map<String, Set<File>> resourcesWithElements = new TreeMap<String, Set<File>>();
+
     private boolean useDefaultResourceIgnoreList = true;
 
-    private Pattern [] ignoredResourcesPatterns = null;
+    private Pattern[] ignoredResourcesPatterns = null;
 
     public boolean isUseDefaultResourceIgnoreList()
     {
         return useDefaultResourceIgnoreList;
     }
 
-    public void setUseDefaultResourceIgnoreList(boolean useDefaultResourceIgnoreList)
+    public void setUseDefaultResourceIgnoreList(final boolean useDefaultResourceIgnoreList)
     {
         this.useDefaultResourceIgnoreList = useDefaultResourceIgnoreList;
     }
 
-    public void setIgnoredResources(final String [] ignoredResources) throws MojoExecutionException
+    public void setIgnoredResources(final String[] ignoredResources) throws MojoExecutionException
     {
         if (ignoredResources != null) {
-            ignoredResourcesPatterns = new Pattern [ignoredResources.length];
+            ignoredResourcesPatterns = new Pattern[ignoredResources.length];
 
             try {
-                for (int i = 0 ; i < ignoredResources.length; i++) {
+                for (int i = 0; i < ignoredResources.length; i++) {
                     ignoredResourcesPatterns[i] = Pattern.compile(ignoredResources[i].toUpperCase());
                 }
             }
-            catch (PatternSyntaxException pse) {
+            catch (final PatternSyntaxException pse) {
                 throw new MojoExecutionException("Error compiling resourceIgnore pattern: " + pse.getMessage());
             }
         }
     }
 
-    public void add(File element) throws IOException
+    public void add(final File element) throws IOException
     {
         if (!element.exists()) {
             throw new FileNotFoundException("Path " + element + " doesn't exist");
@@ -120,60 +115,60 @@ public class ClasspathDescriptor
         }
     }
 
-    public Set getClasss()
+    public Set<String> getClasss()
     {
         return Collections.unmodifiableSet(classesWithElements.keySet());
     }
 
-    public Set getResources()
+    public Set<String> getResources()
     {
         return Collections.unmodifiableSet(resourcesWithElements.keySet());
     }
 
-    public Set getElementsHavingClass(String className)
+    public Set<File> getElementsHavingClass(final String className)
     {
-        Set elements = (Set)classesWithElements.get(className);
+        final Set<File> elements = classesWithElements.get(className);
 
         return elements == null ? null : Collections.unmodifiableSet(elements);
     }
 
-    public Set getElementsHavingResource(String resource)
+    public Set<File> getElementsHavingResource(final String resource)
     {
-        Set elements = (Set)resourcesWithElements.get(resource);
+        final Set<File> elements = resourcesWithElements.get(resource);
 
         return elements == null ? null : Collections.unmodifiableSet(elements);
     }
 
-    private void addDirectory(File element)
+    private void addDirectory(final File element)
     {
         addDirectory(element, null, element);
     }
 
-    private void addDirectory(File element, String parentPackageName, File directory)
+    private void addDirectory(final File element, final String parentPackageName, final File directory)
     {
         if (addCached(element)) {
             return;
         }
 
-        List classes = new ArrayList();
-        List resources = new ArrayList();
-        File[] files    = directory.listFiles();
-        String pckgName = (element.equals(directory) ? null : (parentPackageName == null ? "" : parentPackageName + ".") + directory.getName());
+        final List<String> classes = new ArrayList<String>();
+        final List<String> resources = new ArrayList<String>();
+        final File[] files = directory.listFiles();
+        final String pckgName = element.equals(directory) ? null : (parentPackageName == null ? "" : parentPackageName + ".") + directory.getName();
 
-        if ((files != null) && (files.length > 0)) {
+        if (files != null && files.length > 0) {
             for (int idx = 0; idx < files.length; idx++) {
                 if (files[idx].isDirectory() && !IGNORED_LOCAL_DIRECTORIES.contains(files[idx].getName().toUpperCase())) {
                     addDirectory(element, pckgName, files[idx]);
                 }
                 else if (files[idx].isFile()) {
                     if ("class".equals(FilenameUtils.getExtension(files[idx].getName()))) {
-                        String className = (pckgName == null ? "" : pckgName + ".") + FilenameUtils.getBaseName(files[idx].getName());
+                        final String className = (pckgName == null ? "" : pckgName + ".") + FilenameUtils.getBaseName(files[idx].getName());
 
                         classes.add(className);
                         addClass(className, element);
                     }
                     else {
-                        String resourcePath = (pckgName == null ? "" : pckgName.replace('.', '/') + "/")  + files[idx].getName();
+                        final String resourcePath = (pckgName == null ? "" : pckgName.replace('.', '/') + "/") + files[idx].getName();
 
                         resources.add(resourcePath);
                         addResource(resourcePath, element);
@@ -185,35 +180,35 @@ public class ClasspathDescriptor
         CACHED_BY_ELEMENT.put(element, new Cached(classes, resources));
     }
 
-    private void addArchive(File element) throws IOException
+    private void addArchive(final File element) throws IOException
     {
         if (addCached(element)) {
             return;
         }
 
-        List classes = new ArrayList();
-        List resources = new ArrayList();
-        InputStream    input    = null;
+        final List<String> classes = new ArrayList<String>();
+        final List<String> resources = new ArrayList<String>();
+        InputStream input = null;
         ZipInputStream zipInput = null;
 
         try {
-            input    = element.toURI().toURL().openStream();
+            input = element.toURI().toURL().openStream();
             zipInput = new ZipInputStream(input);
 
             ZipEntry entry;
 
             while ((entry = zipInput.getNextEntry()) != null) {
                 if (!entry.isDirectory()) {
-                    String name = entry.getName();
+                    final String name = entry.getName();
 
                     if ("class".equals(FilenameUtils.getExtension(name))) {
-                        String className = FilenameUtils.removeExtension(name).replace('/', '.').replace('\\', '.');
+                        final String className = FilenameUtils.removeExtension(name).replace('/', '.').replace('\\', '.');
 
                         classes.add(className);
                         addClass(className, element);
                     }
                     else {
-                        String resourcePath = name.replace('\\', File.separatorChar);
+                        final String resourcePath = name.replace('\\', File.separatorChar);
 
                         resources.add(resourcePath);
                         addResource(resourcePath, element);
@@ -234,33 +229,33 @@ public class ClasspathDescriptor
         }
     }
 
-    private void addClass(String className, File element)
+    private void addClass(final String className, final File element)
     {
         if (className.indexOf('$') < 0) {
-            Set elements = (Set)classesWithElements.get(className);
+            Set<File> elements = classesWithElements.get(className);
 
             if (elements == null) {
-                elements = new HashSet();
+                elements = new HashSet<File>();
                 classesWithElements.put(className, elements);
             }
             elements.add(element);
         }
     }
 
-    private void addResource(String path, File element)
+    private void addResource(final String path, final File element)
     {
         if (!ignore(path)) {
-            Set elements = (Set)resourcesWithElements.get(path);
+            Set<File> elements = resourcesWithElements.get(path);
 
             if (elements == null) {
-                elements = new HashSet();
+                elements = new HashSet<File>();
                 resourcesWithElements.put(path, elements);
             }
             elements.add(element);
         }
     }
 
-    private boolean ignore(String path)
+    private boolean ignore(final String path)
     {
         final String uppercasedPath = path.toUpperCase().replace(File.separatorChar, '/');
 
@@ -286,23 +281,20 @@ public class ClasspathDescriptor
         return false;
     }
 
-    private boolean addCached(File element)
+    private boolean addCached(final File element)
     {
-        Cached cached = (Cached) CACHED_BY_ELEMENT.get(element);
+        final Cached cached = CACHED_BY_ELEMENT.get(element);
 
         if (cached == null) {
             return false;
         }
 
-        Iterator cachedClasses = cached.getClasses().iterator();
-        Iterator cachedResources = cached.getResources().iterator();
-
-        while (cachedClasses.hasNext()) {
-            addClass((String) cachedClasses.next(), element);
+        for (String className : cached.getClasses()) {
+            addClass(className, element);
         }
 
-        while (cachedResources.hasNext()) {
-            addResource((String) cachedResources.next(), element);
+        for (String resourceName : cached.getResources()) {
+            addResource(resourceName, element);
         }
 
         return true;
@@ -310,20 +302,22 @@ public class ClasspathDescriptor
 
     private static class Cached
     {
-        private final List classes;
-        private final List resources;
+        private final List<String> classes;
+        private final List<String> resources;
 
-        private Cached(List classes, List resources)
+        private Cached(final List<String> classes, final List<String> resources)
         {
             this.classes = classes;
             this.resources = resources;
         }
 
-        public List getClasses() {
+        public List<String> getClasses()
+        {
             return classes;
         }
 
-        public List getResources() {
+        public List<String> getResources()
+        {
             return resources;
         }
     }

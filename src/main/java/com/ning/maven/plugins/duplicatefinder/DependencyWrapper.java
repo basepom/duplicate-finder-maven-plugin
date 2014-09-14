@@ -13,7 +13,6 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-
 package com.ning.maven.plugins.duplicatefinder;
 
 import org.apache.commons.lang.StringUtils;
@@ -27,29 +26,30 @@ import org.apache.maven.model.Dependency;
 
 public class DependencyWrapper
 {
-    private final Dependency   dependency;
+    private final Dependency dependency;
     private final VersionRange versionRange;
 
-    public DependencyWrapper(Dependency dependency) throws InvalidVersionSpecificationException
+    public DependencyWrapper(final Dependency dependency) throws InvalidVersionSpecificationException
     {
-        this.dependency   = dependency;
+        this.dependency = dependency;
         this.versionRange = VersionRange.createFromVersionSpec(dependency.getVersion());
     }
 
+    @Override
     public String toString()
     {
         String result = dependency.getGroupId() + ":" + dependency.getArtifactId() + ":" + dependency.getVersion();
 
-        if ((dependency.getType() != null) && !"jar".equals(dependency.getType())) {
-            result = result +  ":" + dependency.getType();
+        if (dependency.getType() != null && !"jar".equals(dependency.getType())) {
+            result = result + ":" + dependency.getType();
         }
-        if ((dependency.getClassifier() != null) && (!"tests".equals(dependency.getClassifier()) || !"test-jar".equals(dependency.getType()))) {
-            result = result +  ":" + dependency.getClassifier();
+        if (dependency.getClassifier() != null && (!"tests".equals(dependency.getClassifier()) || !"test-jar".equals(dependency.getType()))) {
+            result = result + ":" + dependency.getClassifier();
         }
         return result;
     }
 
-    public boolean matches(Artifact artifact)
+    public boolean matches(final Artifact artifact)
     {
         ArtifactVersion version;
 
@@ -61,14 +61,14 @@ public class DependencyWrapper
                 version = new DefaultArtifactVersion(artifact.getVersion());
             }
         }
-        catch (OverConstrainedVersionException ex) {
+        catch (final OverConstrainedVersionException ex) {
             return false;
-        }                
+        }
 
         return StringUtils.equals(dependency.getGroupId(), artifact.getGroupId()) &&
-               StringUtils.equals(dependency.getArtifactId(), artifact.getArtifactId()) &&
-               StringUtils.equals(StringUtils.defaultIfEmpty(dependency.getType(), "jar"), StringUtils.defaultIfEmpty(artifact.getType(), "jar")) &&
-               StringUtils.equals(dependency.getClassifier(), artifact.getClassifier()) &&
-               (versionRange == null || versionRange.containsVersion(version) || StringUtils.equals(artifact.getVersion(), dependency.getVersion()));
+            StringUtils.equals(dependency.getArtifactId(), artifact.getArtifactId()) &&
+            StringUtils.equals(StringUtils.defaultIfEmpty(dependency.getType(), "jar"), StringUtils.defaultIfEmpty(artifact.getType(), "jar")) &&
+            StringUtils.equals(dependency.getClassifier(), artifact.getClassifier()) &&
+            (versionRange == null || versionRange.containsVersion(version) || StringUtils.equals(artifact.getVersion(), dependency.getVersion()));
     }
 }
