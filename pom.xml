@@ -1,20 +1,17 @@
 <!--
-Licensed to the Apache Software Foundation (ASF) under one
-or more contributor license agreements.  See the NOTICE file
-distributed with this work for additional information
-regarding copyright ownership.  The ASF licenses this file
-to you under the Apache License, Version 2.0 (the
-"License"); you may not use this file except in compliance
-with the License.  You may obtain a copy of the License at
- 
-  http://www.apache.org/licenses/LICENSE-2.0
- 
-Unless required by applicable law or agreed to in writing,
-software distributed under the License is distributed on an
-"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-KIND, either express or implied.  See the License for the
-specific language governing permissions and limitations
-under the License.
+~   Copyright 2010 Ning, Inc.
+~
+~   Ning licenses this file to you under the Apache License, version 2.0
+~   (the "License"); you may not use this file except in compliance with the
+~   License.  You may obtain a copy of the License at:
+~
+~      http://www.apache.org/licenses/LICENSE-2.0
+~
+~   Unless required by applicable law or agreed to in writing, software
+~   distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+~   WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+~   License for the specific language governing permissions and limitations
+~   under the License.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <parent>
@@ -24,10 +21,10 @@ under the License.
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.ning.maven.plugins</groupId>
-  <artifactId>maven-duplicate-finder-plugin</artifactId>
+  <artifactId>duplicate-finder-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
-  <version>1.0.8-SNAPSHOT</version>
-  <name>maven-duplicate-finder-plugin Maven Mojo</name>
+  <version>1.1.0-SNAPSHOT</version>
+  <name>duplicate-finder-maven-plugin Maven Mojo</name>
   <description>
     The maven-duplicate-class-finder-plugin is a plugin that will search for classes with the same name, as well as resources with the same path,
     in the classpaths of a maven project. More specifically, it will check the compile, runtime, and test classpaths for
@@ -115,8 +112,8 @@ under the License.
         <artifactId>maven-compiler-plugin</artifactId>
         <version>2.3.2</version>
         <configuration>
-          <source>1.4</source>
-          <target>1.4</target>
+          <source>1.6</source>
+          <target>1.6</target>
           <encoding>UTF-8</encoding>
         </configuration>
       </plugin>
@@ -157,7 +154,7 @@ under the License.
                   <version>2.0.9</version>
                 </requireMavenVersion>
                 <requireJavaVersion>
-                  <version>1.4</version>
+                  <version>1.6</version>
                 </requireJavaVersion>
               </rules>
             </configuration>
@@ -187,7 +184,7 @@ under the License.
             <exclude>.git/**</exclude>
             <exclude>.gitignore</exclude>
             <exclude>COPYING</exclude>
-            <exclude>README.rdoc</exclude>
+            <exclude>README.md</exclude>
           </excludes>
         </configuration>
         <executions>
@@ -233,8 +230,8 @@ under the License.
         <version>2.5</version>
         <configuration>
           <additionalparam>-quiet</additionalparam>
-          <source>1.4</source>
-          <target>1.4</target>
+          <source>1.6</source>
+          <target>1.6</target>
           <encoding>UTF-8</encoding>
           <maxmemory>1g</maxmemory>
           <links>
