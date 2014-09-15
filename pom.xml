@@ -229,6 +229,10 @@
                         <mapping>
                             <groovy>SLASHSTAR_STYLE</groovy>
                         </mapping>
+                        <excludes combine.children="append">
+                            <exclude>**/conflict-different-content</exclude>
+                            <exclude>**/conflict-same-content</exclude>
+                        </excludes>
                     </configuration>
                 </plugin>
             </plugins>

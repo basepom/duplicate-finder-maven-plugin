@@ -379,7 +379,7 @@ It is possible to specify additional resources on the classpath that are exclude
 ```xml
 <ignoredResources>
   <ignoredResource>overview\.html</ignoredResource>
-</ignoredResource>
+</ignoredResources>
 ```
 
 will ignore all occurences of `overview.html` on the classpath. This is useful for resources that are present in many dependencies. 
