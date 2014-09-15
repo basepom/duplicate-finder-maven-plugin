@@ -15,6 +15,11 @@
  */
 package com.ning.maven.plugins.duplicatefinder;
 
+import static com.google.common.base.Preconditions.checkState;
+import static com.ning.maven.plugins.duplicatefinder.DuplicateFinderMojo.ConflictState.CONFLICT_CONTENT_DIFFERENT;
+import static com.ning.maven.plugins.duplicatefinder.DuplicateFinderMojo.ConflictState.CONFLICT_CONTENT_EQUAL;
+import static com.ning.maven.plugins.duplicatefinder.DuplicateFinderMojo.ConflictState.NO_CONFLICT;
+
 import static org.apache.maven.artifact.Artifact.SCOPE_COMPILE;
 import static org.apache.maven.artifact.Artifact.SCOPE_PROVIDED;
 import static org.apache.maven.artifact.Artifact.SCOPE_RUNTIME;
@@ -66,18 +71,31 @@ import org.slf4j.LoggerFactory;
                 threadSafe = true,
                 defaultPhase = LifecyclePhase.VERIFY,
                 requiresDependencyResolution = ResolutionScope.TEST)
-public class DuplicateFinderMojo extends AbstractMojo
+public final class DuplicateFinderMojo extends AbstractMojo
 {
-    protected final Logger LOG = LoggerFactory.getLogger(this.getClass());
+    private static final Logger LOG = LoggerFactory.getLogger(DuplicateFinderMojo.class);
 
-    // the constants for conflicts
-    private static final int NO_CONFLICT = 0;
-    private static final int CONFLICT_CONTENT_EQUAL = 1;
-    private static final int CONFLICT_CONTENT_DIFFERENT = 2;
+    enum ConflictState {
+        // Conflict states in order from low to high.
+        NO_CONFLICT, CONFLICT_CONTENT_EQUAL, CONFLICT_CONTENT_DIFFERENT;
+
+        public static ConflictState max(ConflictState ... states)
+        {
+            checkState(states.length > 0, "states is empty");
+
+            ConflictState result = states[0];
+            for (int i = 1; i < states.length; i++) {
+                if (states[i].ordinal() > result.ordinal()) {
+                    result = states[i];
+                }
+            }
+
+            return result;
+        }
+    }
 
     private static final Set<String> COMPILE_SCOPE = ImmutableSet.of(SCOPE_COMPILE, SCOPE_PROVIDED, SCOPE_SYSTEM);
     private static final Set<String> RUNTIME_SCOPE = ImmutableSet.of(SCOPE_COMPILE, SCOPE_RUNTIME);
-    private static final Set<String> TEST_SCOPE = ImmutableSet.of("test");
 
     /**
      * The maven project (effective pom).
@@ -270,18 +288,18 @@ public class DuplicateFinderMojo extends AbstractMojo
     {
         final ClasspathDescriptor classpathDesc = createClasspathDescriptor(classpathElements);
 
-        final int foundDuplicateClassesConflict = checkForDuplicateClasses(classpathDesc, artifactsByFile);
-        final int foundDuplicateResourcesConflict = checkForDuplicateResources(classpathDesc, artifactsByFile);
-        final int maxConflict = Math.max(foundDuplicateClassesConflict, foundDuplicateResourcesConflict);
+        final ConflictState foundDuplicateClassesConflict = checkForDuplicateClasses(classpathDesc, artifactsByFile);
+        final ConflictState foundDuplicateResourcesConflict = checkForDuplicateResources(classpathDesc, artifactsByFile);
+        final ConflictState maxConflict = ConflictState.max(foundDuplicateClassesConflict, foundDuplicateResourcesConflict);
 
-        if (failBuildInCaseOfConflict && maxConflict > NO_CONFLICT ||
-            failBuildInCaseOfDifferentContentConflict && maxConflict == CONFLICT_CONTENT_DIFFERENT ||
-            failBuildInCaseOfEqualContentConflict && maxConflict >= CONFLICT_CONTENT_EQUAL) {
+        if (failBuildInCaseOfConflict && maxConflict.compareTo(NO_CONFLICT) > 0  ||
+            failBuildInCaseOfEqualContentConflict && maxConflict.compareTo(CONFLICT_CONTENT_EQUAL) >= 0 ||
+            failBuildInCaseOfDifferentContentConflict && maxConflict.compareTo(CONFLICT_CONTENT_DIFFERENT) >= 0) {
             throw new MojoExecutionException("Found duplicate classes/resources");
         }
     }
 
-    private int checkForDuplicateClasses(final ClasspathDescriptor classpathDesc, final Map<File, Artifact> artifactsByFile) throws MojoExecutionException
+    private ConflictState checkForDuplicateClasses(final ClasspathDescriptor classpathDesc, final Map<File, Artifact> artifactsByFile) throws MojoExecutionException
     {
         final Map<String, List<String>> classDifferentConflictsByArtifactNames = new TreeMap<String, List<String>>(new ToStringComparator());
         final Map<String, List<String>> classEqualConflictsByArtifactNames = new TreeMap<String, List<String>>(new ToStringComparator());
@@ -318,7 +336,7 @@ public class DuplicateFinderMojo extends AbstractMojo
             }
         }
 
-        int conflict = NO_CONFLICT;
+        ConflictState conflict = NO_CONFLICT;
 
         if (!classEqualConflictsByArtifactNames.isEmpty()) {
             if (printEqualFiles ||
@@ -340,7 +358,7 @@ public class DuplicateFinderMojo extends AbstractMojo
         return conflict;
     }
 
-    private int checkForDuplicateResources(final ClasspathDescriptor classpathDesc, final Map<File, Artifact> artifactsByFile) throws MojoExecutionException
+    private ConflictState checkForDuplicateResources(final ClasspathDescriptor classpathDesc, final Map<File, Artifact> artifactsByFile) throws MojoExecutionException
     {
         final Map<String, List<String>> resourceDifferentConflictsByArtifactNames = new TreeMap<String, List<String>>(new ToStringComparator());
         final Map<String, List<String>> resourceEqualConflictsByArtifactNames = new TreeMap<String, List<String>>(new ToStringComparator());
@@ -376,7 +394,7 @@ public class DuplicateFinderMojo extends AbstractMojo
             }
         }
 
-        int conflict = NO_CONFLICT;
+        ConflictState conflict = NO_CONFLICT;
 
         if (!resourceEqualConflictsByArtifactNames.isEmpty()) {
             if (printEqualFiles ||
