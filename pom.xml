@@ -227,7 +227,7 @@
                     <configuration>
                         <header>src/build/license-header.txt</header>
                         <mapping>
-                            <bsh>SLASHSTAR_STYLE</bsh>
+                            <groovy>SLASHSTAR_STYLE</groovy>
                         </mapping>
                     </configuration>
                 </plugin>
@@ -283,6 +283,20 @@
                         <excludeRoot>target/generated-sources/plugin</excludeRoot>
                     </excludeRoots>
                 </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-invoker-plugin</artifactId>
+
+                <!-- dependency for verify.groovy scripts -->
+                <dependencies>
+                    <dependency>
+                        <groupId>com.google.guava</groupId>
+                        <artifactId>guava</artifactId>
+                        <version>${dep.guava.version}</version>
+                    </dependency>
+                </dependencies>
             </plugin>
         </plugins>
     </build>
