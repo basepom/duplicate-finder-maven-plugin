@@ -15,7 +15,10 @@
  */
 package com.ning.maven.plugins.duplicatefinder;
 
-import org.apache.commons.lang.StringUtils;
+import com.google.common.base.MoreObjects;
+import com.google.common.base.Objects;
+import com.google.common.base.Strings;
+
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
@@ -65,10 +68,15 @@ public class DependencyWrapper
             return false;
         }
 
-        return StringUtils.equals(dependency.getGroupId(), artifact.getGroupId()) &&
-            StringUtils.equals(dependency.getArtifactId(), artifact.getArtifactId()) &&
-            StringUtils.equals(StringUtils.defaultIfEmpty(dependency.getType(), "jar"), StringUtils.defaultIfEmpty(artifact.getType(), "jar")) &&
-            StringUtils.equals(dependency.getClassifier(), artifact.getClassifier()) &&
-            (versionRange == null || versionRange.containsVersion(version) || StringUtils.equals(artifact.getVersion(), dependency.getVersion()));
+        return Objects.equal(dependency.getGroupId(), artifact.getGroupId())
+                        && Objects.equal(dependency.getArtifactId(), artifact.getArtifactId())
+                        && Objects.equal(jarDefault(dependency.getType()), jarDefault(artifact.getType()))
+                        && Objects.equal(dependency.getClassifier(), artifact.getClassifier())
+                        && (versionRange == null || versionRange.containsVersion(version) || Objects.equal(artifact.getVersion(), dependency.getVersion()));
+    }
+
+    public static final String jarDefault(String type)
+    {
+        return MoreObjects.firstNonNull(Strings.emptyToNull(type), "jar");
     }
 }

@@ -28,6 +28,7 @@ import static org.apache.maven.artifact.Artifact.SCOPE_RUNTIME;
 import static org.apache.maven.artifact.Artifact.SCOPE_SYSTEM;
 
 import java.io.BufferedInputStream;
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -35,21 +36,25 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder;
+import com.google.common.hash.HashFunction;
+import com.google.common.hash.Hashing;
+import com.google.common.io.ByteStreams;
+import com.google.common.io.Closer;
 import com.pyx4j.log4j.MavenLogAppender;
 
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
@@ -78,6 +83,9 @@ public final class DuplicateFinderMojo extends AbstractMojo
 {
     private static final Logger LOG = LoggerFactory.getLogger(DuplicateFinderMojo.class);
 
+    private static final HashFunction SHA_256 = Hashing.sha256();
+
+
     enum ConflictState {
         // Conflict states in order from low to high.
         NO_CONFLICT, CONFLICT_CONTENT_EQUAL, CONFLICT_CONTENT_DIFFERENT;
@@ -99,6 +107,7 @@ public final class DuplicateFinderMojo extends AbstractMojo
 
     private static final Set<String> COMPILE_SCOPE = ImmutableSet.of(SCOPE_COMPILE, SCOPE_PROVIDED, SCOPE_SYSTEM);
     private static final Set<String> RUNTIME_SCOPE = ImmutableSet.of(SCOPE_COMPILE, SCOPE_RUNTIME);
+    private static final Set<String> TEST_SCOPE = ImmutableSet.<String>of(); // Empty == all scopes
 
     /**
      * The maven project (effective pom).
@@ -145,7 +154,7 @@ public final class DuplicateFinderMojo extends AbstractMojo
      * Ignored resources, which are not checked for multiple occurences.
      */
     @Parameter
-    protected String[] ignoredResources;
+    protected String[] ignoredResources = new String [0];
 
     /**
      * Artifacts with expected and resolved versions that are checked.
@@ -191,7 +200,6 @@ public final class DuplicateFinderMojo extends AbstractMojo
     @Parameter(defaultValue="false")
     protected boolean quiet = false;
 
-
     public void setIgnoredDependencies(final Dependency[] ignoredDependencies) throws InvalidVersionSpecificationException
     {
         this.ignoredDependencies = new DependencyWrapper[ignoredDependencies.length];
@@ -215,14 +223,27 @@ public final class DuplicateFinderMojo extends AbstractMojo
                 LOG.debug("Skipping execution!");
             }
             else {
-                if (checkCompileClasspath) {
-                    checkCompileClasspath();
+                try {
+                    if (checkCompileClasspath) {
+                        report("Checking compile classpath");
+                        Iterable<Artifact> artifacts = buildScopedArtifacts(COMPILE_SCOPE);
+                        checkClasspath(project.getCompileClasspathElements(), createArtifactsByFileMap(artifacts, getOutputDirectory()));
+                    }
+
+                    if (checkRuntimeClasspath) {
+                        report("Checking runtime classpath");
+                        Iterable<Artifact> artifacts = buildScopedArtifacts(RUNTIME_SCOPE);
+                        checkClasspath(project.getCompileClasspathElements(), createArtifactsByFileMap(artifacts, getOutputDirectory()));
+                    }
+
+                    if (checkTestClasspath) {
+                        report("Checking test classpath");
+                        Iterable<Artifact> artifacts = buildScopedArtifacts(TEST_SCOPE);
+                        checkClasspath(project.getCompileClasspathElements(), createArtifactsByFileMap(artifacts, getOutputDirectory(), getTestOutputDirectory()));
+                    }
                 }
-                if (checkRuntimeClasspath) {
-                    checkRuntimeClasspath();
-                }
-                if (checkTestClasspath) {
-                    checkTestClasspath();
+                catch (final DependencyResolutionRequiredException ex) {
+                    throw new MojoExecutionException("Could not resolve dependencies", ex);
                 }
             }
         }
@@ -231,77 +252,22 @@ public final class DuplicateFinderMojo extends AbstractMojo
         }
     }
 
-    private void checkCompileClasspath() throws MojoExecutionException
-    {
-        try {
-            report("Checking compile classpath");
+    private Iterable<Artifact> buildScopedArtifacts(Set<String> scopes) {
 
-            final Set<Artifact> allArtifacts = project.getArtifacts();
-            final ImmutableSet.Builder<Artifact> inScopeBuilder = ImmutableSet.builder();
-            for (final Artifact artifact : allArtifacts) {
-                if (artifact.getArtifactHandler().isAddedToClasspath() && COMPILE_SCOPE.contains(artifact.getScope())) {
+        final Set<Artifact> allArtifacts = project.getArtifacts();
+        final ImmutableSet.Builder<Artifact> inScopeBuilder = ImmutableSet.builder();
+        for (final Artifact artifact : allArtifacts) {
+            if (artifact.getArtifactHandler().isAddedToClasspath()) {
+                if (scopes.isEmpty() || scopes.contains(artifact.getScope())) {
                     inScopeBuilder.add(artifact);
                 }
             }
-
-            final Map<File, Artifact> artifactsByFile = createArtifactsByFileMap(inScopeBuilder.build());
-
-            addOutputDirectory(artifactsByFile);
-            checkClasspath(project.getCompileClasspathElements(), artifactsByFile);
         }
-        catch (final DependencyResolutionRequiredException ex) {
-            throw new MojoExecutionException("Could not resolve dependencies", ex);
-        }
+
+        return inScopeBuilder.build();
     }
 
-    private void checkRuntimeClasspath() throws MojoExecutionException
-    {
-        try {
-            report("Checking runtime classpath");
-
-            final Set<Artifact> allArtifacts = project.getArtifacts();
-            final ImmutableSet.Builder<Artifact> inScopeBuilder = ImmutableSet.builder();
-            for (final Artifact artifact : allArtifacts) {
-                if (artifact.getArtifactHandler().isAddedToClasspath() && RUNTIME_SCOPE.contains(artifact.getScope())) {
-                    inScopeBuilder.add(artifact);
-                }
-            }
-
-            final Map<File, Artifact> artifactsByFile = createArtifactsByFileMap(inScopeBuilder.build());
-
-            addOutputDirectory(artifactsByFile);
-            checkClasspath(project.getRuntimeClasspathElements(), artifactsByFile);
-        }
-        catch (final DependencyResolutionRequiredException ex) {
-            throw new MojoExecutionException("Could not resolve dependencies", ex);
-        }
-    }
-
-    private void checkTestClasspath() throws MojoExecutionException
-    {
-        try {
-            report("Checking test classpath");
-
-            final Set<Artifact> allArtifacts = project.getArtifacts();
-            final ImmutableSet.Builder<Artifact> inScopeBuilder = ImmutableSet.builder();
-            for (final Artifact artifact : allArtifacts) {
-                if (artifact.getArtifactHandler().isAddedToClasspath()) {
-                    inScopeBuilder.add(artifact);
-                }
-            }
-
-            final Map<File, Artifact> artifactsByFile = createArtifactsByFileMap(inScopeBuilder.build());
-
-            addOutputDirectory(artifactsByFile);
-            addTestOutputDirectory(artifactsByFile);
-            checkClasspath(project.getTestClasspathElements(), artifactsByFile);
-        }
-        catch (final DependencyResolutionRequiredException ex) {
-            throw new MojoExecutionException("Could not resolve dependencies", ex);
-        }
-    }
-
-    private void checkClasspath(final List<String> classpathElements, final Map<File, Artifact> artifactsByFile) throws MojoExecutionException
+    private void checkClasspath(final List<String> classpathElements, final Map<File, Optional<Artifact>> artifactsByFile) throws MojoExecutionException
     {
         final ClasspathDescriptor classpathDesc = createClasspathDescriptor(classpathElements);
 
@@ -316,10 +282,10 @@ public final class DuplicateFinderMojo extends AbstractMojo
         }
     }
 
-    private ConflictState checkForDuplicateClasses(final ClasspathDescriptor classpathDesc, final Map<File, Artifact> artifactsByFile) throws MojoExecutionException
+    private ConflictState checkForDuplicateClasses(final ClasspathDescriptor classpathDesc, final Map<File, Optional<Artifact>> artifactsByFile) throws MojoExecutionException
     {
-        final Map<String, List<String>> classDifferentConflictsByArtifactNames = new TreeMap<String, List<String>>(new ToStringComparator());
-        final Map<String, List<String>> classEqualConflictsByArtifactNames = new TreeMap<String, List<String>>(new ToStringComparator());
+        final Multimap<String, String> classDifferentConflictsByArtifactNames = MultimapBuilder.treeKeys(new ToStringComparator()).linkedListValues().build();
+        final Multimap<String, String> classEqualConflictsByArtifactNames = MultimapBuilder.treeKeys(new ToStringComparator()).linkedListValues().build();
 
         for (final String className : classpathDesc.getClasss()) {
             final Set<File> elements = classpathDesc.getElementsHavingClass(className);
@@ -332,10 +298,9 @@ public final class DuplicateFinderMojo extends AbstractMojo
                     continue;
                 }
 
-                Map<String, List<String>> conflictsByArtifactNames;
+                Multimap<String, String> conflictsByArtifactNames;
 
-                if (isAllElementsAreEqual(elements, className.replace('.', '/') + ".class"))
-                {
+                if (isAllElementsAreEqual(elements, className.replace('.', '/') + ".class")) {
                     conflictsByArtifactNames = classEqualConflictsByArtifactNames;
                 }
                 else {
@@ -343,13 +308,7 @@ public final class DuplicateFinderMojo extends AbstractMojo
                 }
 
                 final String artifactNames = getArtifactsToString(artifacts);
-                List<String> classNames = conflictsByArtifactNames.get(artifactNames);
-
-                if (classNames == null) {
-                    classNames = new ArrayList<String>();
-                    conflictsByArtifactNames.put(artifactNames, classNames);
-                }
-                classNames.add(className);
+                conflictsByArtifactNames.put(artifactNames, className);
             }
         }
 
@@ -375,10 +334,10 @@ public final class DuplicateFinderMojo extends AbstractMojo
         return conflict;
     }
 
-    private ConflictState checkForDuplicateResources(final ClasspathDescriptor classpathDesc, final Map<File, Artifact> artifactsByFile) throws MojoExecutionException
+    private ConflictState checkForDuplicateResources(final ClasspathDescriptor classpathDesc, final Map<File, Optional<Artifact>> artifactsByFile) throws MojoExecutionException
     {
-        final Map<String, List<String>> resourceDifferentConflictsByArtifactNames = new TreeMap<String, List<String>>(new ToStringComparator());
-        final Map<String, List<String>> resourceEqualConflictsByArtifactNames = new TreeMap<String, List<String>>(new ToStringComparator());
+        final Multimap<String, String> resourceDifferentConflictsByArtifactNames = MultimapBuilder.treeKeys(new ToStringComparator()).linkedListValues().build();
+        final Multimap<String, String> resourceEqualConflictsByArtifactNames = MultimapBuilder.treeKeys(new ToStringComparator()).linkedListValues().build();
 
         for (final String resource : classpathDesc.getResources()) {
             final Set<File> elements = classpathDesc.getElementsHavingResource(resource);
@@ -391,7 +350,7 @@ public final class DuplicateFinderMojo extends AbstractMojo
                     continue;
                 }
 
-                Map<String, List<String>> conflictsByArtifactNames;
+                Multimap<String, String> conflictsByArtifactNames;
 
                 if (isAllElementsAreEqual(elements, resource)) {
                     conflictsByArtifactNames = resourceEqualConflictsByArtifactNames;
@@ -401,13 +360,7 @@ public final class DuplicateFinderMojo extends AbstractMojo
                 }
 
                 final String artifactNames = getArtifactsToString(artifacts);
-                List<String> resources = conflictsByArtifactNames.get(artifactNames);
-
-                if (resources == null) {
-                    resources = new ArrayList<String>();
-                    conflictsByArtifactNames.put(artifactNames, resources);
-                }
-                resources.add(resource);
+                conflictsByArtifactNames.put(artifactNames, resource);
             }
         }
 
@@ -440,11 +393,11 @@ public final class DuplicateFinderMojo extends AbstractMojo
      * @param hint hint with the type of the conflict ("all equal" or "content different")
      * @param type type of conflict (class or resource)
      */
-    private void printWarningMessage(final Map<String, List<String>> conflictsByArtifactNames, final String hint, final String type)
+    private void printWarningMessage(Multimap<String, String> conflictsByArtifactNames, final String hint, final String type)
     {
-        for (final Map.Entry<String, List<String>> entry : conflictsByArtifactNames.entrySet()) {
+        for (final Map.Entry<String, Collection<String>> entry : conflictsByArtifactNames.asMap().entrySet()) {
             final String artifactNames = entry.getKey();
-            final List<String> classNames = entry.getValue();
+            final Collection<String> classNames = entry.getValue();
 
             LOG.warn("Found duplicate " + hint + " " + type + " in " + artifactNames + " :");
             for (String className : classNames) {
@@ -476,7 +429,7 @@ public final class DuplicateFinderMojo extends AbstractMojo
                     firstFile = element;
                 }
                 else if (!newSHA256.equals(firstSHA256)) {
-                    LOG.debug("Found different SHA256 hashs for elements " + resourcePath + " in file " + firstFile + " and " + element);
+                    LOG.debug("Found different SHA256 hashes for elements " + resourcePath + " in file " + firstFile + " and " + element);
                     return false;
                 }
             }
@@ -498,36 +451,37 @@ public final class DuplicateFinderMojo extends AbstractMojo
      */
     private String getSHA256HexOfElement(final File file, final String resourcePath) throws IOException
     {
-        ZipFile zip = null;
+        Closer closer = Closer.create();
         InputStream in;
 
-        if (file.isDirectory()) {
-            final File resourceFile = new File(file, resourcePath);
-            in = new BufferedInputStream(new FileInputStream(resourceFile));
-        }
-        else {
-            zip = new ZipFile(file);
-            final ZipEntry zipEntry = zip.getEntry(resourcePath);
-
-            if (zipEntry == null) {
-                throw new IOException("Could not find " + resourcePath + " in archive " + file);
-            }
-            in = zip.getInputStream(zipEntry);
-        }
-
         try {
-            return DigestUtils.sha256Hex(in);
+            if (file.isDirectory()) {
+                final File resourceFile = new File(file, resourcePath);
+                in = closer.register(new BufferedInputStream(new FileInputStream(resourceFile)));
+            }
+            else {
+                final ZipFile zip = new ZipFile(file);
+
+                closer.register(new Closeable() {
+                    @Override
+                    public void close() throws IOException {
+                        zip.close();
+                    }
+                });
+
+                final ZipEntry zipEntry = zip.getEntry(resourcePath);
+
+                if (zipEntry == null) {
+                    throw new IOException("Could not find " + resourcePath + " in archive " + file);
+                }
+
+                in = zip.getInputStream(zipEntry);
+            }
+
+            return SHA_256.newHasher().putBytes(ByteStreams.toByteArray(in)).hash().toString();
         }
         finally {
-            IOUtils.closeQuietly(in);
-            if (zip != null) {
-                try {
-                    zip.close();
-                }
-                catch (final IOException ioe) {
-                    // swallow exception
-                }
-            }
+            closer.close();
         }
     }
 
@@ -586,17 +540,13 @@ public final class DuplicateFinderMojo extends AbstractMojo
         return result;
     }
 
-    private Set<Artifact> getArtifactsForElements(final Collection<File> elements, final Map<File, Artifact> artifactsByFile)
+    private Set<Artifact> getArtifactsForElements(final Collection<File> elements, final Map<File, Optional<Artifact>> artifactsByFile)
     {
         final Set<Artifact> artifacts = new TreeSet<Artifact>();
 
         for (final File element : elements) {
-            Artifact artifact = artifactsByFile.get(element);
-
-            if (artifact == null) {
-                artifact = project.getArtifact();
-            }
-            artifacts.add(artifact);
+            Optional<Artifact> artifact = artifactsByFile.get(element);
+            artifacts.add(artifact.or(project.getArtifact()));
         }
         return artifacts;
     }
@@ -638,9 +588,9 @@ public final class DuplicateFinderMojo extends AbstractMojo
         return classpathDesc;
     }
 
-    private Map<File, Artifact> createArtifactsByFileMap(final Collection<Artifact> artifacts) throws DependencyResolutionRequiredException
+    private ImmutableMap<File, Optional<Artifact>> createArtifactsByFileMap(final Iterable<Artifact> artifacts, File ... localFolders) throws DependencyResolutionRequiredException
     {
-        final Map<File, Artifact> artifactsByFile = new HashMap<File, Artifact>(artifacts.size());
+        final ImmutableMap.Builder<File, Optional<Artifact>> artifactsByFileBuilder = ImmutableMap.builder();
 
         for (final Artifact artifact : artifacts) {
             final File localPath = getLocalProjectPath(artifact);
@@ -650,13 +600,21 @@ public final class DuplicateFinderMojo extends AbstractMojo
                 throw new DependencyResolutionRequiredException(artifact);
             }
             if (localPath != null) {
-                artifactsByFile.put(localPath, artifact);
+                artifactsByFileBuilder.put(localPath, Optional.of(artifact));
             }
             if (repoPath != null) {
-                artifactsByFile.put(repoPath, artifact);
+                artifactsByFileBuilder.put(repoPath, Optional.of(artifact));
             }
         }
-        return artifactsByFile;
+
+        // Add local folders (source folder, test folder etc.)
+        for (File localFolder : localFolders) {
+            if (localFolder.exists()) {
+                artifactsByFileBuilder.put(localFolder, Optional.<Artifact>absent());
+            }
+        }
+
+        return artifactsByFileBuilder.build();
     }
 
     private File getLocalProjectPath(final Artifact artifact) throws DependencyResolutionRequiredException
@@ -679,22 +637,14 @@ public final class DuplicateFinderMojo extends AbstractMojo
         return null;
     }
 
-    private void addOutputDirectory(final Map<File, Artifact> artifactsByFile)
+    private File getOutputDirectory()
     {
-        final File outputDir = new File(project.getBuild().getOutputDirectory());
-
-        if (outputDir.exists()) {
-            artifactsByFile.put(outputDir, null);
-        }
+        return new File(project.getBuild().getOutputDirectory());
     }
 
-    private void addTestOutputDirectory(final Map<File, Artifact> artifactsByFile)
+    private File getTestOutputDirectory()
     {
-        final File testOutputDir = new File(project.getBuild().getTestOutputDirectory());
-
-        if (testOutputDir.exists()) {
-            artifactsByFile.put(testOutputDir, null);
-        }
+        return new File(project.getBuild().getTestOutputDirectory());
     }
 
     private String getQualifiedName(final Artifact artifact)

@@ -15,6 +15,8 @@
  */
 package com.ning.maven.plugins.duplicatefinder;
 
+import static com.ning.maven.plugins.duplicatefinder.DependencyWrapper.jarDefault;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -24,7 +26,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang.StringUtils;
+import com.google.common.base.Objects;
+
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
@@ -155,11 +158,11 @@ public class Exception
             return false;
         }
 
-        return StringUtils.equals(projectArtifact.getGroupId(), artifact.getGroupId()) &&
-            StringUtils.equals(projectArtifact.getArtifactId(), artifact.getArtifactId()) &&
-            StringUtils.equals(StringUtils.defaultIfEmpty(projectArtifact.getType(), "jar"), StringUtils.defaultIfEmpty(artifact.getType(), "jar")) &&
-            StringUtils.equals(projectArtifact.getClassifier(), artifact.getClassifier()) &&
-            (versionRange != null && versionRange.containsVersion(version) || artifact.getVersion().equals(projectArtifact.getVersion()));
+        return Objects.equal(projectArtifact.getGroupId(), artifact.getGroupId())
+                        && Objects.equal(projectArtifact.getArtifactId(), artifact.getArtifactId())
+                        && Objects.equal(jarDefault(projectArtifact.getType()), jarDefault(artifact.getType()))
+                        && Objects.equal(projectArtifact.getClassifier(), artifact.getClassifier())
+                        && (versionRange != null && versionRange.containsVersion(version) || artifact.getVersion().equals(projectArtifact.getVersion()));
     }
 
     public boolean containsClass(final String className)
