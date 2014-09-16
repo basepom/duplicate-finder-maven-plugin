@@ -673,10 +673,10 @@ public final class DuplicateFinderMojo extends AbstractMojo
 
     private void addTestOutputDirectory(final Map<File, Artifact> artifactsByFile)
     {
-        final File outputDir = new File(project.getBuild().getOutputDirectory());
+        final File testOutputDir = new File(project.getBuild().getTestOutputDirectory());
 
-        if (outputDir.exists()) {
-            artifactsByFile.put(outputDir, null);
+        if (testOutputDir.exists()) {
+            artifactsByFile.put(testOutputDir, null);
         }
     }
 
