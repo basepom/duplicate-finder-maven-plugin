@@ -15,6 +15,8 @@
  */
 package com.ning.maven.plugins.duplicatefinder;
 
+import static java.lang.String.format;
+
 import static com.google.common.base.Preconditions.checkState;
 import static com.ning.maven.plugins.duplicatefinder.DuplicateFinderMojo.ConflictState.CONFLICT_CONTENT_DIFFERENT;
 import static com.ning.maven.plugins.duplicatefinder.DuplicateFinderMojo.ConflictState.CONFLICT_CONTENT_EQUAL;
@@ -54,6 +56,7 @@ import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -180,6 +183,15 @@ public final class DuplicateFinderMojo extends AbstractMojo
     @Parameter(defaultValue = "false")
     protected boolean skip = false;
 
+    /**
+     * Quiets the plugin (report only errors).
+     *
+     * @since 1.1.0
+     */
+    @Parameter(defaultValue="false")
+    protected boolean quiet = false;
+
+
     public void setIgnoredDependencies(final Dependency[] ignoredDependencies) throws InvalidVersionSpecificationException
     {
         this.ignoredDependencies = new DependencyWrapper[ignoredDependencies.length];
@@ -189,10 +201,15 @@ public final class DuplicateFinderMojo extends AbstractMojo
     }
 
     @Override
+    public void setLog(Log log)
+    {
+        super.setLog(log);
+        MavenLogAppender.startPluginLog(this);
+    }
+
+    @Override
     public void execute() throws MojoExecutionException
     {
-        MavenLogAppender.startPluginLog(this);
-
         try {
             if (skip) {
                 LOG.debug("Skipping execution!");
@@ -217,7 +234,7 @@ public final class DuplicateFinderMojo extends AbstractMojo
     private void checkCompileClasspath() throws MojoExecutionException
     {
         try {
-            LOG.info("Checking compile classpath");
+            report("Checking compile classpath");
 
             final Set<Artifact> allArtifacts = project.getArtifacts();
             final ImmutableSet.Builder<Artifact> inScopeBuilder = ImmutableSet.builder();
@@ -240,7 +257,7 @@ public final class DuplicateFinderMojo extends AbstractMojo
     private void checkRuntimeClasspath() throws MojoExecutionException
     {
         try {
-            LOG.info("Checking runtime classpath");
+            report("Checking runtime classpath");
 
             final Set<Artifact> allArtifacts = project.getArtifacts();
             final ImmutableSet.Builder<Artifact> inScopeBuilder = ImmutableSet.builder();
@@ -263,7 +280,7 @@ public final class DuplicateFinderMojo extends AbstractMojo
     private void checkTestClasspath() throws MojoExecutionException
     {
         try {
-            LOG.info("Checking test classpath");
+            report("Checking test classpath");
 
             final Set<Artifact> allArtifacts = project.getArtifacts();
             final ImmutableSet.Builder<Artifact> inScopeBuilder = ImmutableSet.builder();
@@ -691,5 +708,15 @@ public final class DuplicateFinderMojo extends AbstractMojo
             result = result + ":" + artifact.getClassifier();
         }
         return result;
+    }
+
+    private void report(String formatString, Object ... args)
+    {
+        if (!quiet) {
+            LOG.info(format(formatString, args));
+        }
+        else {
+            LOG.debug(format(formatString, args));
+        }
     }
 }
