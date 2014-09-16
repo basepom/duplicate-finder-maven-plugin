@@ -19,16 +19,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.ning.maven.plugins.duplicate-finder-maven-plugin</groupId>
-    <artifactId>test-conflict-equals-ok</artifactId>
+    <artifactId>test-resource-conflict-equal-fail</artifactId>
     <version>@project.version@</version>
-    <description>
-        tests the plugin default settings, with printEqualsFiles set.
-
-        expected outcome:
-        * build succeeding
-        * list the resources with different content
-        * list the resources with same content
-    </description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -56,11 +48,18 @@
                 <artifactId>duplicate-finder-maven-plugin</artifactId>
                 <version>@project.version@</version>
                 <configuration>
+                    <printEqualFiles>true</printEqualFiles>
+                    <failBuildInCaseOfConflict>true</failBuildInCaseOfConflict>
+                    <ignoredResources>
+                        <ignoredResource>conflict-different-content</ignoredResource>
+                    </ignoredResources>
+<!--
+                    <failBuildInCaseOfEqualContentConflict>false</failBuildInCaseOfEqualContentConflict>
+                    <failBuildInCaseOfDifferentContentConflict>false</failBuildInCaseOfDifferentContentConflict>
+-->
                     <checkCompileClasspath>false</checkCompileClasspath>
                     <checkRuntimeClasspath>false</checkRuntimeClasspath>
                     <checkTestClasspath>true</checkTestClasspath>
-
-                    <printEqualFiles>true</printEqualFiles>
                 </configuration>
                 <executions>
                     <execution>

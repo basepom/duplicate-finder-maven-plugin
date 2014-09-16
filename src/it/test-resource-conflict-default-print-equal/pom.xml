@@ -19,7 +19,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.ning.maven.plugins.duplicate-finder-maven-plugin</groupId>
-    <artifactId>test-conflict-equals-ok</artifactId>
+    <artifactId>test-resource-conflict-default-print-equal</artifactId>
     <version>@project.version@</version>
 
     <properties>
@@ -48,17 +48,19 @@
                 <artifactId>duplicate-finder-maven-plugin</artifactId>
                 <version>@project.version@</version>
                 <configuration>
-                    <failBuildInCaseOfConflict>false</failBuildInCaseOfConflict>
-                    <failBuildInCaseOfDifferentContentConflict>true</failBuildInCaseOfDifferentContentConflict>
-                    <failBuildInCaseOfEqualContentConflict>false</failBuildInCaseOfEqualContentConflict>
                     <printEqualFiles>true</printEqualFiles>
+<!--
+                    <failBuildInCaseOfEqualContentConflict>false</failBuildInCaseOfEqualContentConflict>
+                    <failBuildInCaseOfDifferentContentConflict>false</failBuildInCaseOfDifferentContentConflict>
+                    <failBuildInCaseOfConflict>false</failBuildInCaseOfConflict>
+                    <ignoredResources>
+                        <ignoredResource>conflict-same-content</ignoredResource>
+                        <ignoredResource>conflict-different-content</ignoredResource>
+                    </ignoredResources>
+-->
                     <checkCompileClasspath>false</checkCompileClasspath>
                     <checkRuntimeClasspath>false</checkRuntimeClasspath>
                     <checkTestClasspath>true</checkTestClasspath>
-                    <!-- not testing for different content right now -->
-                    <ignoredResources>
-                        <ignoredResource>conflict-different-content</ignoredResource>
-                    </ignoredResources>
                 </configuration>
                 <executions>
                     <execution>

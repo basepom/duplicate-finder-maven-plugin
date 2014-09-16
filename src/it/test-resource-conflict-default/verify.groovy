@@ -27,7 +27,6 @@ def includeMessages = [
 ]
 
 def excludeMessages = [
-  // Defaults do not list equal resources
   "Found duplicate (but equal) resources"
 ]
 

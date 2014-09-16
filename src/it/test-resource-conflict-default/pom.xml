@@ -19,15 +19,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.ning.maven.plugins.duplicate-finder-maven-plugin</groupId>
-    <artifactId>test-conflict-equals-ok</artifactId>
+    <artifactId>test-resource-conflict-default</artifactId>
     <version>@project.version@</version>
-    <description>
-        tests the plugin default settings.
-
-        expected outcome:
-        * build succeeding
-        * list the resources with different content
-    </description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -55,6 +48,16 @@
                 <artifactId>duplicate-finder-maven-plugin</artifactId>
                 <version>@project.version@</version>
                 <configuration>
+<!--
+                    <printEqualFiles>false</printEqualFiles>
+                    <failBuildInCaseOfEqualContentConflict>false</failBuildInCaseOfEqualContentConflict>
+                    <failBuildInCaseOfDifferentContentConflict>false</failBuildInCaseOfDifferentContentConflict>
+                    <failBuildInCaseOfConflict>false</failBuildInCaseOfConflict>
+                    <ignoredResources>
+                        <ignoredResource>conflict-same-content</ignoredResource>
+                        <ignoredResource>conflict-different-content</ignoredResource>
+                    </ignoredResources>
+-->
                     <checkCompileClasspath>false</checkCompileClasspath>
                     <checkRuntimeClasspath>false</checkRuntimeClasspath>
                     <checkTestClasspath>true</checkTestClasspath>
