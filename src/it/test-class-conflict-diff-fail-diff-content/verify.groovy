@@ -22,14 +22,22 @@ def buildLogLines = CharStreams.readLines(buildFileReader)
 def linefilter = {line -> line.startsWith("[INFO]") || line.startsWith("[WARNING]") || line.startsWith("[ERROR]")}
 def relevantLogLines = buildLogLines.findAll(linefilter).reverse()
 
-def messages = [
-    "[WARNING] Found duplicate (but equal) classes in [junit:junit:4.8.2,junit:junit-dep:4.8.2]",
-    "[WARNING] Found duplicate (but equal) classes in [junit:junit:4.8.2,org.hamcrest:hamcrest-core:1.1]"
+def includeMessages = [
+  "[WARNING] Found duplicate and different classes in [com.ning.maven.plugins.duplicate-finder-maven-plugin:first-class-jar:1.0,com.ning.maven.plugins.duplicate-finder-maven-plugin:first-diff-jar:1.0]"
 ]
 
-messages.each() { message ->
-    def found = relevantLogLines.find() { line -> return line.indexOf(message) == 0 }
-    assert found != null, "Could not find '" + message + "' in the build output!"
+def excludeMessages = [
+  "Found duplicate (but equal) classes"
+]
+
+includeMessages.each() { message ->
+    def found = relevantLogLines.find() { line -> return line.indexOf(message) >= 0 }
+    assert found != null, "Did not find '" + message + "' in the build output!"
+}
+
+excludeMessages.each() { message ->
+    def found = relevantLogLines.find() { line -> return line.indexOf(message) >= 0 }
+    assert found == null, "Found '" + message + "' in the build output!"
 }
 
 return true
