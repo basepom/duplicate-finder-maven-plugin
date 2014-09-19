@@ -45,24 +45,11 @@ import org.apache.maven.plugin.MojoExecutionException;
 public class ClasspathDescriptor
 {
     private static final Pattern[] DEFAULT_IGNORED_RESOURCES = {
-        Pattern.compile("(META-INF/)?ASL2\\.0(\\.TXT)?"),
-        Pattern.compile("META-INF/DEPENDENCIES(\\.TXT)?"),
-        Pattern.compile("META-INF/DISCLAIMER(\\.TXT)?"),
-        Pattern.compile("(META-INF/)?[A-Z_-]*LICENSE.*"),
-        Pattern.compile("META-INF/MANIFEST\\.MF"),
-        Pattern.compile("META-INF/INDEX\\.LIST"),
-        Pattern.compile("META-INF/MAVEN/.*"),
-        Pattern.compile("META-INF/PLEXUS/.*"),
-        Pattern.compile("META-INF/SERVICES/.*"),
-        Pattern.compile("(META-INF/)?NOTICE(\\.TXT)?"),
-        Pattern.compile("META-INF/README"),
+        Pattern.compile("META-INF/.*"),
         Pattern.compile("OSGI-INF/.*"),
         Pattern.compile("README(\\.TXT)?"),
         Pattern.compile(".*PACKAGE\\.HTML"),
-        Pattern.compile(".*OVERVIEW\\.HTML"),
-        Pattern.compile("META-INF/SPRING\\.HANDLERS"),
-        Pattern.compile("META-INF/SPRING\\.SCHEMAS"),
-        Pattern.compile("META-INF/SPRING\\.TOOLING")
+        Pattern.compile(".*OVERVIEW\\.HTML")
     };
 
     private static final ImmutableSet<String> IGNORED_LOCAL_DIRECTORIES;
