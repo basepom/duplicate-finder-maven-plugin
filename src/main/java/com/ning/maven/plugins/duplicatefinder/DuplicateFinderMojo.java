@@ -489,8 +489,8 @@ public final class DuplicateFinderMojo extends AbstractMojo
     {
         if (ignoredDependencies != null) {
             for (int idx = 0; idx < ignoredDependencies.length; idx++) {
-                for (final Iterator artifactIt = artifacts.iterator(); artifactIt.hasNext();) {
-                    final Artifact artifact = (Artifact) artifactIt.next();
+                for (final Iterator<Artifact> artifactIt = artifacts.iterator(); artifactIt.hasNext();) {
+                    final Artifact artifact = artifactIt.next();
 
                     if (ignoredDependencies[idx].matches(artifact)) {
                         artifactIt.remove();
@@ -502,10 +502,10 @@ public final class DuplicateFinderMojo extends AbstractMojo
 
     private boolean isExceptedClass(final String className, final Collection<Artifact> artifacts)
     {
-        final List exceptions = getExceptionsFor(artifacts);
+        final List<Exception> exceptions = getExceptionsFor(artifacts);
 
-        for (final Iterator it = exceptions.iterator(); it.hasNext();) {
-            final Exception exception = (Exception) it.next();
+        for (final Iterator<Exception> it = exceptions.iterator(); it.hasNext();) {
+            final Exception exception = it.next();
 
             if (exception.containsClass(className)) {
                 return true;
