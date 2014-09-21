@@ -234,13 +234,13 @@ public final class DuplicateFinderMojo extends AbstractMojo
                     if (checkRuntimeClasspath) {
                         report("Checking runtime classpath");
                         Iterable<Artifact> artifacts = buildScopedArtifacts(RUNTIME_SCOPE);
-                        checkClasspath(project.getCompileClasspathElements(), createArtifactsByFileMap(artifacts, getOutputDirectory()));
+                        checkClasspath(project.getRuntimeClasspathElements(), createArtifactsByFileMap(artifacts, getOutputDirectory()));
                     }
 
                     if (checkTestClasspath) {
                         report("Checking test classpath");
                         Iterable<Artifact> artifacts = buildScopedArtifacts(TEST_SCOPE);
-                        checkClasspath(project.getCompileClasspathElements(), createArtifactsByFileMap(artifacts, getOutputDirectory(), getTestOutputDirectory()));
+                        checkClasspath(project.getTestClasspathElements(), createArtifactsByFileMap(artifacts, getOutputDirectory(), getTestOutputDirectory()));
                     }
                 }
                 catch (final DependencyResolutionRequiredException ex) {
