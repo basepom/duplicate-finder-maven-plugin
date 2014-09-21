@@ -31,10 +31,10 @@ import java.io.BufferedInputStream;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -53,6 +53,7 @@ import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.Closer;
+import com.ning.maven.plugins.duplicatefinder.classpath.ClasspathDescriptor;
 import com.pyx4j.log4j.MavenLogAppender;
 
 import org.apache.maven.artifact.Artifact;
@@ -287,13 +288,15 @@ public final class DuplicateFinderMojo extends AbstractMojo
         final Multimap<String, String> classDifferentConflictsByArtifactNames = MultimapBuilder.treeKeys(new ToStringComparator()).linkedListValues().build();
         final Multimap<String, String> classEqualConflictsByArtifactNames = MultimapBuilder.treeKeys(new ToStringComparator()).linkedListValues().build();
 
-        for (final String className : classpathDesc.getClasss()) {
-            final Set<File> elements = classpathDesc.getElementsHavingClass(className);
+        for (final Map.Entry<String, Collection<File>> entry : classpathDesc.getClasses().entrySet()) {
+            final String className = entry.getKey();
+            final Collection<File> elements = entry.getValue();
 
             if (elements.size() > 1) {
                 final Set<Artifact> artifacts = getArtifactsForElements(elements, artifactsByFile);
 
                 filterIgnoredDependencies(artifacts);
+
                 if (artifacts.size() < 2 || isExceptedClass(className, artifacts)) {
                     continue;
                 }
@@ -339,8 +342,9 @@ public final class DuplicateFinderMojo extends AbstractMojo
         final Multimap<String, String> resourceDifferentConflictsByArtifactNames = MultimapBuilder.treeKeys(new ToStringComparator()).linkedListValues().build();
         final Multimap<String, String> resourceEqualConflictsByArtifactNames = MultimapBuilder.treeKeys(new ToStringComparator()).linkedListValues().build();
 
-        for (final String resource : classpathDesc.getResources()) {
-            final Set<File> elements = classpathDesc.getElementsHavingResource(resource);
+        for (final Map.Entry<String, Collection<File>> entry : classpathDesc.getResources().entrySet()) {
+            final String resource = entry.getKey();
+            final Collection<File> elements = entry.getValue();
 
             if (elements.size() > 1) {
                 final Set<Artifact> artifacts = getArtifactsForElements(elements, artifactsByFile);
@@ -413,7 +417,7 @@ public final class DuplicateFinderMojo extends AbstractMojo
      * @param elements the files contains the duplicates
      * @return true if all classes are "byte equal" and false if any class differ
      */
-    private boolean isAllElementsAreEqual(final Set<File> elements, final String resourcePath)
+    private boolean isAllElementsAreEqual(final Iterable<File> elements, final String resourcePath)
     {
         File firstFile = null;
         String firstSHA256 = null;
@@ -504,9 +508,7 @@ public final class DuplicateFinderMojo extends AbstractMojo
     {
         final List<Exception> exceptions = getExceptionsFor(artifacts);
 
-        for (final Iterator<Exception> it = exceptions.iterator(); it.hasNext();) {
-            final Exception exception = it.next();
-
+        for (Exception exception : exceptions) {
             if (exception.containsClass(className)) {
                 return true;
             }
@@ -531,9 +533,9 @@ public final class DuplicateFinderMojo extends AbstractMojo
         final List<Exception> result = new ArrayList<Exception>();
 
         if (exceptions != null) {
-            for (int idx = 0; idx < exceptions.length; idx++) {
-                if (exceptions[idx].isForArtifacts(artifacts, project.getArtifact())) {
-                    result.add(exceptions[idx]);
+            for (Exception exception : Arrays.asList(exceptions)) {
+                if (exception.isForArtifacts(artifacts, project.getArtifact())) {
+                    result.add(exception);
                 }
             }
         }
@@ -568,18 +570,18 @@ public final class DuplicateFinderMojo extends AbstractMojo
 
     private ClasspathDescriptor createClasspathDescriptor(final List<String> classpathElements) throws MojoExecutionException
     {
-        final ClasspathDescriptor classpathDesc = new ClasspathDescriptor();
-
-        classpathDesc.setUseDefaultResourceIgnoreList(useDefaultResourceIgnoreList);
-        classpathDesc.setIgnoredResources(ignoredResources);
+        final ClasspathDescriptor classpathDesc = new ClasspathDescriptor(useDefaultResourceIgnoreList, Arrays.asList(ignoredResources));
 
         for (final String element : classpathElements) {
 
             try {
-                classpathDesc.add(new File(element));
-            }
-            catch (final FileNotFoundException ex) {
-                LOG.debug("Could not access classpath element " + element);
+                File file = new File(element);
+                if (file.exists()) {
+                    classpathDesc.add(file);
+                }
+                else {
+                    LOG.debug(format("Classpath element '%s' does not exist.", file.getAbsolutePath()));
+                }
             }
             catch (final IOException ex) {
                 throw new MojoExecutionException("Error trying to access element " + element, ex);
