@@ -60,6 +60,7 @@ import com.pyx4j.log4j.MavenLogAppender;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
+import org.apache.maven.artifact.versioning.OverConstrainedVersionException;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -161,14 +162,14 @@ public final class DuplicateFinderMojo extends AbstractMojo
     /**
      * Artifacts with expected and resolved versions that are checked.
      */
-    @Parameter
-    protected Exception[] exceptions;
+    @Parameter(alias="exceptions", property="exceptions")
+    protected ConflictingDependency [] conflictingDependencies;
 
     /**
      * Dependencies that should not be checked at all.
      */
     @Parameter(property = "ignoredDependencies")
-    protected Dependency[] ignoredDependencies;
+    protected Dependency [] ignoredDependencies;
 
     /**
      * Check resources and classes on the compile class path.
@@ -242,6 +243,9 @@ public final class DuplicateFinderMojo extends AbstractMojo
                 catch (final InvalidVersionSpecificationException e) {
                     throw new MojoExecutionException("Invalid version specified", e);
                 }
+                catch (OverConstrainedVersionException e) {
+                    throw new MojoExecutionException("Version too constrained", e);
+                }
             }
         }
         finally {
@@ -266,7 +270,7 @@ public final class DuplicateFinderMojo extends AbstractMojo
         return inScopeBuilder.build();
     }
 
-    private void checkClasspath(final List<String> classpathElements, final Map<File, Optional<Artifact>> artifactsByFile) throws MojoExecutionException, InvalidVersionSpecificationException
+    private void checkClasspath(final List<String> classpathElements, final Map<File, Optional<Artifact>> artifactsByFile) throws MojoExecutionException, InvalidVersionSpecificationException, OverConstrainedVersionException
     {
         final ClasspathDescriptor classpathDesc = createClasspathDescriptor(classpathElements, artifactsByFile);
 
@@ -281,7 +285,7 @@ public final class DuplicateFinderMojo extends AbstractMojo
         }
     }
 
-    private ConflictState checkForDuplicateClasses(final ClasspathDescriptor classpathDesc, final Map<File, Optional<Artifact>> artifactsByFile) throws MojoExecutionException
+    private ConflictState checkForDuplicateClasses(final ClasspathDescriptor classpathDesc, final Map<File, Optional<Artifact>> artifactsByFile) throws MojoExecutionException, OverConstrainedVersionException
     {
         final Multimap<String, String> classDifferentConflictsByArtifactNames = MultimapBuilder.treeKeys().linkedListValues().build();
         final Multimap<String, String> classEqualConflictsByArtifactNames = MultimapBuilder.treeKeys().linkedListValues().build();
@@ -330,7 +334,7 @@ public final class DuplicateFinderMojo extends AbstractMojo
         return conflict;
     }
 
-    private ConflictState checkForDuplicateResources(final ClasspathDescriptor classpathDesc, final Map<File, Optional<Artifact>> artifactsByFile) throws MojoExecutionException
+    private ConflictState checkForDuplicateResources(final ClasspathDescriptor classpathDesc, final Map<File, Optional<Artifact>> artifactsByFile) throws MojoExecutionException, OverConstrainedVersionException
     {
         final Multimap<String, String> resourceDifferentConflictsByArtifactNames = MultimapBuilder.treeKeys().linkedListValues().build();
         final Multimap<String, String> resourceEqualConflictsByArtifactNames = MultimapBuilder.treeKeys().linkedListValues().build();
@@ -477,38 +481,38 @@ public final class DuplicateFinderMojo extends AbstractMojo
         }
     }
 
-    private boolean isExceptedClass(final String className, final Collection<Artifact> artifacts)
+    private boolean isExceptedClass(final String className, final Collection<Artifact> artifacts) throws OverConstrainedVersionException
     {
-        final List<Exception> exceptions = getExceptionsFor(artifacts);
+        final List<ConflictingDependency> conflictingDependencies = getExceptionsFor(artifacts);
 
-        for (Exception exception : exceptions) {
-            if (exception.containsClass(className)) {
+        for (ConflictingDependency conflictingDependency : conflictingDependencies) {
+            if (conflictingDependency.containsClass(className)) {
                 return true;
             }
         }
         return false;
     }
 
-    private boolean isExceptedResource(final String resource, final Collection<Artifact> artifacts)
+    private boolean isExceptedResource(final String resource, final Collection<Artifact> artifacts) throws OverConstrainedVersionException
     {
-        final List<Exception> exceptions = getExceptionsFor(artifacts);
+        final List<ConflictingDependency> conflictingDependencies = getExceptionsFor(artifacts);
 
-        for (Exception exception : exceptions) {
-            if (exception.containsResource(resource)) {
+        for (ConflictingDependency conflictingDependency : conflictingDependencies) {
+            if (conflictingDependency.containsResource(resource)) {
                 return true;
             }
         }
         return false;
     }
 
-    private List<Exception> getExceptionsFor(final Collection<Artifact> artifacts)
+    private List<ConflictingDependency> getExceptionsFor(final Collection<Artifact> artifacts) throws OverConstrainedVersionException
     {
-        final List<Exception> result = new ArrayList<Exception>();
+        final List<ConflictingDependency> result = new ArrayList<ConflictingDependency>();
 
-        if (exceptions != null) {
-            for (Exception exception : Arrays.asList(exceptions)) {
-                if (exception.isForArtifacts(artifacts, project.getArtifact())) {
-                    result.add(exception);
+        if (conflictingDependencies != null) {
+            for (ConflictingDependency conflictingDependency : Arrays.asList(conflictingDependencies)) {
+                if (conflictingDependency.isForArtifacts(artifacts, project.getArtifact())) {
+                    result.add(conflictingDependency);
                 }
             }
         }

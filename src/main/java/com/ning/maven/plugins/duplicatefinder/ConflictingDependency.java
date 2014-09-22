@@ -15,8 +15,6 @@
  */
 package com.ning.maven.plugins.duplicatefinder;
 
-import static com.ning.maven.plugins.duplicatefinder.DependencyWrapper.jarDefault;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -26,38 +24,34 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import com.google.common.base.Objects;
+import com.ning.maven.plugins.duplicatefinder.artifact.MavenCoordinates;
 
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.versioning.ArtifactVersion;
-import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.OverConstrainedVersionException;
-import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.model.Dependency;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-
-@SuppressFBWarnings("BAD_PRACTICE")
-public class Exception
+public class ConflictingDependency
 {
     public static final String CURRENT_PROJECT_IDENTIFIER = "<current project>";
 
-    private DependencyWrapper[] conflictingDependencies;
+    private MavenCoordinates[] conflictingDependencies;
     private boolean currentProject;
     private final Set<String> classes = new HashSet<String>();
     private final Set<String> packages = new HashSet<String>();
     private final Set<String> resources = new HashSet<String>();
     private Pattern[] matchingResources = new Pattern[0];
 
+    // Called by maven
     public void setConflictingDependencies(final Dependency[] conflictingDependencies) throws InvalidVersionSpecificationException
     {
-        this.conflictingDependencies = new DependencyWrapper[conflictingDependencies.length];
+        this.conflictingDependencies = new MavenCoordinates[conflictingDependencies.length];
         for (int idx = 0; idx < conflictingDependencies.length; idx++) {
-            this.conflictingDependencies[idx] = new DependencyWrapper(conflictingDependencies[idx]);
+            this.conflictingDependencies[idx] = new MavenCoordinates(conflictingDependencies[idx]);
         }
     }
 
+    // Called by maven
     public void setResourcePatterns(final String[] resourcePatterns)
     {
         this.matchingResources = new Pattern[resourcePatterns.length];
@@ -81,6 +75,7 @@ public class Exception
         return classes.toArray(new String[classes.size()]);
     }
 
+    // Called by maven
     public void setClasses(final String[] classes)
     {
         this.classes.addAll(Arrays.asList(classes));
@@ -91,6 +86,7 @@ public class Exception
         return packages.toArray(new String[packages.size()]);
     }
 
+    // Called by maven
     public void setPackages(final String[] packages)
     {
         this.packages.addAll(Arrays.asList(packages));
@@ -101,6 +97,7 @@ public class Exception
         return resources.toArray(new String[resources.size()]);
     }
 
+    // Called by maven
     public void setResources(final String[] resources)
     {
         this.resources.addAll(Arrays.asList(resources));
@@ -122,7 +119,7 @@ public class Exception
         return result;
     }
 
-    public boolean isForArtifacts(final Collection<Artifact> artifacts, final Artifact projectArtifact)
+    public boolean isForArtifacts(final Collection<Artifact> artifacts, final Artifact projectArtifact) throws OverConstrainedVersionException
     {
         int numMatches = 0;
 
@@ -141,28 +138,11 @@ public class Exception
         return numMatches == artifacts.size();
     }
 
-    private boolean currentProjectDependencyMatches(final Artifact artifact, final Artifact projectArtifact)
+    private boolean currentProjectDependencyMatches(final Artifact artifact, final Artifact projectArtifact) throws OverConstrainedVersionException
     {
-        final VersionRange versionRange = projectArtifact.getVersionRange();
-        ArtifactVersion version;
+        final MavenCoordinates projectCoordinates = new MavenCoordinates(projectArtifact);
 
-        try {
-            if (artifact.getVersionRange() != null) {
-                version = artifact.getSelectedVersion();
-            }
-            else {
-                version = new DefaultArtifactVersion(artifact.getVersion());
-            }
-        }
-        catch (final OverConstrainedVersionException ex) {
-            return false;
-        }
-
-        return Objects.equal(projectArtifact.getGroupId(), artifact.getGroupId())
-                        && Objects.equal(projectArtifact.getArtifactId(), artifact.getArtifactId())
-                        && Objects.equal(jarDefault(projectArtifact.getType()), jarDefault(artifact.getType()))
-                        && Objects.equal(projectArtifact.getClassifier(), artifact.getClassifier())
-                        && (versionRange != null && versionRange.containsVersion(version) || artifact.getVersion().equals(projectArtifact.getVersion()));
+        return projectCoordinates.matches(artifact);
     }
 
     public boolean containsClass(final String className)

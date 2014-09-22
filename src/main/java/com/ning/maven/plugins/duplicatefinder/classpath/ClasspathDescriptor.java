@@ -54,6 +54,8 @@ public class ClasspathDescriptor
         "^META-INF/.*",
         "^OSGI-INF/.*",
         "^licenses/.*",
+        ".*license(\\.txt)?$",
+        "notice(\\.txt)?$",
         "readme(\\.txt)?$",
         ".*package\\.html$",
         ".*overview\\.html$"
