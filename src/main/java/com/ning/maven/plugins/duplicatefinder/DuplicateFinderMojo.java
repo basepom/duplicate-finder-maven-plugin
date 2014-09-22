@@ -283,8 +283,8 @@ public final class DuplicateFinderMojo extends AbstractMojo
 
     private ConflictState checkForDuplicateClasses(final ClasspathDescriptor classpathDesc, final Map<File, Optional<Artifact>> artifactsByFile) throws MojoExecutionException
     {
-        final Multimap<String, String> classDifferentConflictsByArtifactNames = MultimapBuilder.treeKeys(new ToStringComparator()).linkedListValues().build();
-        final Multimap<String, String> classEqualConflictsByArtifactNames = MultimapBuilder.treeKeys(new ToStringComparator()).linkedListValues().build();
+        final Multimap<String, String> classDifferentConflictsByArtifactNames = MultimapBuilder.treeKeys().linkedListValues().build();
+        final Multimap<String, String> classEqualConflictsByArtifactNames = MultimapBuilder.treeKeys().linkedListValues().build();
 
         for (final Map.Entry<String, Collection<File>> entry : classpathDesc.getClasses().entrySet()) {
             final String className = entry.getKey();
@@ -332,8 +332,8 @@ public final class DuplicateFinderMojo extends AbstractMojo
 
     private ConflictState checkForDuplicateResources(final ClasspathDescriptor classpathDesc, final Map<File, Optional<Artifact>> artifactsByFile) throws MojoExecutionException
     {
-        final Multimap<String, String> resourceDifferentConflictsByArtifactNames = MultimapBuilder.treeKeys(new ToStringComparator()).linkedListValues().build();
-        final Multimap<String, String> resourceEqualConflictsByArtifactNames = MultimapBuilder.treeKeys(new ToStringComparator()).linkedListValues().build();
+        final Multimap<String, String> resourceDifferentConflictsByArtifactNames = MultimapBuilder.treeKeys().linkedListValues().build();
+        final Multimap<String, String> resourceEqualConflictsByArtifactNames = MultimapBuilder.treeKeys().linkedListValues().build();
 
         for (final Map.Entry<String, Collection<File>> entry : classpathDesc.getResources().entrySet()) {
             final String resource = entry.getKey();
