@@ -51,12 +51,17 @@ public class ClasspathDescriptor
     private static final Logger LOG = LoggerFactory.getLogger(ClasspathDescriptor.class);
 
     private static final Predicate<String> DEFAULT_IGNORED_RESOURCES_PREDICATE = new MatchPatternPredicate(Arrays.asList(
+        // Standard jar folders
         "^META-INF/.*",
         "^OSGI-INF/.*",
+        // directory name that shows up all the time
         "^licenses/.*",
+        // file names that show up all the time
         ".*license(\\.txt)?$",
-        "notice(\\.txt)?$",
-        "readme(\\.txt)?$",
+        ".*notice(\\.txt)?$",
+        ".*readme(\\.txt)?$",
+        ".*third-party(\\.txt)?$",
+        // HTML stuff from javadocs.
         ".*package\\.html$",
         ".*overview\\.html$"
     ));
