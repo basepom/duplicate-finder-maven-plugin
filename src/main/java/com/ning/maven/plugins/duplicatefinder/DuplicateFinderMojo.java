@@ -53,6 +53,7 @@ import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.Closer;
+import com.ning.maven.plugins.duplicatefinder.artifact.MatchArtifactPredicate;
 import com.ning.maven.plugins.duplicatefinder.classpath.ClasspathDescriptor;
 import com.pyx4j.log4j.MavenLogAppender;
 
@@ -167,7 +168,7 @@ public final class DuplicateFinderMojo extends AbstractMojo
      * Dependencies that should not be checked at all.
      */
     @Parameter(property = "ignoredDependencies")
-    protected DependencyWrapper[] ignoredDependencies;
+    protected Dependency[] ignoredDependencies;
 
     /**
      * Check resources and classes on the compile class path.
@@ -200,14 +201,6 @@ public final class DuplicateFinderMojo extends AbstractMojo
      */
     @Parameter(defaultValue="false")
     protected boolean quiet = false;
-
-    public void setIgnoredDependencies(final Dependency[] ignoredDependencies) throws InvalidVersionSpecificationException
-    {
-        this.ignoredDependencies = new DependencyWrapper[ignoredDependencies.length];
-        for (int idx = 0; idx < ignoredDependencies.length; idx++) {
-            this.ignoredDependencies[idx] = new DependencyWrapper(ignoredDependencies[idx]);
-        }
-    }
 
     @Override
     public void setLog(Log log)
@@ -243,8 +236,11 @@ public final class DuplicateFinderMojo extends AbstractMojo
                         checkClasspath(project.getTestClasspathElements(), createArtifactsByFileMap(artifacts, getOutputDirectory(), getTestOutputDirectory()));
                     }
                 }
-                catch (final DependencyResolutionRequiredException ex) {
-                    throw new MojoExecutionException("Could not resolve dependencies", ex);
+                catch (final DependencyResolutionRequiredException e) {
+                    throw new MojoExecutionException("Could not resolve dependencies", e);
+                }
+                catch (final InvalidVersionSpecificationException e) {
+                    throw new MojoExecutionException("Invalid version specified", e);
                 }
             }
         }
@@ -253,9 +249,11 @@ public final class DuplicateFinderMojo extends AbstractMojo
         }
     }
 
-    private Iterable<Artifact> buildScopedArtifacts(Set<String> scopes) {
-
+    private Iterable<Artifact> buildScopedArtifacts(Set<String> scopes)
+        throws InvalidVersionSpecificationException
+    {
         final Set<Artifact> allArtifacts = project.getArtifacts();
+
         final ImmutableSet.Builder<Artifact> inScopeBuilder = ImmutableSet.builder();
         for (final Artifact artifact : allArtifacts) {
             if (artifact.getArtifactHandler().isAddedToClasspath()) {
@@ -268,9 +266,9 @@ public final class DuplicateFinderMojo extends AbstractMojo
         return inScopeBuilder.build();
     }
 
-    private void checkClasspath(final List<String> classpathElements, final Map<File, Optional<Artifact>> artifactsByFile) throws MojoExecutionException
+    private void checkClasspath(final List<String> classpathElements, final Map<File, Optional<Artifact>> artifactsByFile) throws MojoExecutionException, InvalidVersionSpecificationException
     {
-        final ClasspathDescriptor classpathDesc = createClasspathDescriptor(classpathElements);
+        final ClasspathDescriptor classpathDesc = createClasspathDescriptor(classpathElements, artifactsByFile);
 
         final ConflictState foundDuplicateClassesConflict = checkForDuplicateClasses(classpathDesc, artifactsByFile);
         final ConflictState foundDuplicateResourcesConflict = checkForDuplicateResources(classpathDesc, artifactsByFile);
@@ -295,23 +293,18 @@ public final class DuplicateFinderMojo extends AbstractMojo
             if (elements.size() > 1) {
                 final Set<Artifact> artifacts = getArtifactsForElements(elements, artifactsByFile);
 
-                filterIgnoredDependencies(artifacts);
-
                 if (artifacts.size() < 2 || isExceptedClass(className, artifacts)) {
                     continue;
                 }
 
-                Multimap<String, String> conflictsByArtifactNames;
+                final String artifactNames = getArtifactsToString(artifacts);
 
                 if (isAllElementsAreEqual(elements, className.replace('.', '/') + ".class")) {
-                    conflictsByArtifactNames = classEqualConflictsByArtifactNames;
+                    classEqualConflictsByArtifactNames.put(artifactNames, className);
                 }
                 else {
-                    conflictsByArtifactNames = classDifferentConflictsByArtifactNames;
+                    classDifferentConflictsByArtifactNames.put(artifactNames, className);
                 }
-
-                final String artifactNames = getArtifactsToString(artifacts);
-                conflictsByArtifactNames.put(artifactNames, className);
             }
         }
 
@@ -349,22 +342,17 @@ public final class DuplicateFinderMojo extends AbstractMojo
             if (elements.size() > 1) {
                 final Set<Artifact> artifacts = getArtifactsForElements(elements, artifactsByFile);
 
-                filterIgnoredDependencies(artifacts);
                 if (artifacts.size() < 2 || isExceptedResource(resource, artifacts)) {
                     continue;
                 }
 
-                Multimap<String, String> conflictsByArtifactNames;
-
+                final String artifactNames = getArtifactsToString(artifacts);
                 if (isAllElementsAreEqual(elements, resource)) {
-                    conflictsByArtifactNames = resourceEqualConflictsByArtifactNames;
+                    resourceEqualConflictsByArtifactNames.put(artifactNames, resource);
                 }
                 else {
-                    conflictsByArtifactNames = resourceDifferentConflictsByArtifactNames;
+                    resourceDifferentConflictsByArtifactNames.put(artifactNames, resource);
                 }
-
-                final String artifactNames = getArtifactsToString(artifacts);
-                conflictsByArtifactNames.put(artifactNames, resource);
             }
         }
 
@@ -489,21 +477,6 @@ public final class DuplicateFinderMojo extends AbstractMojo
         }
     }
 
-    private void filterIgnoredDependencies(final Set<Artifact> artifacts)
-    {
-        if (ignoredDependencies != null) {
-            for (int idx = 0; idx < ignoredDependencies.length; idx++) {
-                for (final Iterator<Artifact> artifactIt = artifacts.iterator(); artifactIt.hasNext();) {
-                    final Artifact artifact = artifactIt.next();
-
-                    if (ignoredDependencies[idx].matches(artifact)) {
-                        artifactIt.remove();
-                    }
-                }
-            }
-        }
-    }
-
     private boolean isExceptedClass(final String className, final Collection<Artifact> artifacts)
     {
         final List<Exception> exceptions = getExceptionsFor(artifacts);
@@ -548,6 +521,7 @@ public final class DuplicateFinderMojo extends AbstractMojo
 
         for (final File element : elements) {
             Optional<Artifact> artifact = artifactsByFile.get(element);
+            checkState(artifact != null, "Could not find '%s' in the artifact cache!", element.getAbsolutePath());
             artifacts.add(artifact.or(project.getArtifact()));
         }
         return artifacts;
@@ -568,16 +542,24 @@ public final class DuplicateFinderMojo extends AbstractMojo
         return result.toString();
     }
 
-    private ClasspathDescriptor createClasspathDescriptor(final List<String> classpathElements) throws MojoExecutionException
+    private ClasspathDescriptor createClasspathDescriptor(final List<String> classpathElements, final Map<File, Optional<Artifact>> artifactsByFile) throws MojoExecutionException, InvalidVersionSpecificationException
     {
         final ClasspathDescriptor classpathDesc = new ClasspathDescriptor(useDefaultResourceIgnoreList, Arrays.asList(ignoredResources));
+        final MatchArtifactPredicate matchArtifactPredicate = new MatchArtifactPredicate(ignoredDependencies);
 
         for (final String element : classpathElements) {
 
             try {
                 File file = new File(element);
                 if (file.exists()) {
-                    classpathDesc.add(file);
+                    Optional<Artifact> artifact = artifactsByFile.get(file);
+                    checkState(artifact != null, "Could not find '%s' in the artifact cache!", file.getAbsolutePath());
+
+                    // Add to the classpath if either no artifact exists (then it is an output folder) or the artifact
+                    // predicate does not apply (then it is not in the ignoredDependencies list).
+                    if (!artifact.isPresent() || !matchArtifactPredicate.apply(artifact.get())) {
+                        classpathDesc.add(file);
+                    }
                 }
                 else {
                     LOG.debug(format("Classpath element '%s' does not exist.", file.getAbsolutePath()));
