@@ -182,6 +182,7 @@ under the License.
             <exclude>.idea/**</exclude>
             <exclude>.git/**</exclude>
             <exclude>.gitignore</exclude>
+            <exclude>.checkstyle</exclude>
             <exclude>COPYING</exclude>
             <exclude>README.rdoc</exclude>
           </excludes>
