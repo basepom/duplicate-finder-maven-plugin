@@ -183,6 +183,7 @@ under the License.
             <exclude>.git/**</exclude>
             <exclude>.gitignore</exclude>
             <exclude>.checkstyle</exclude>
+            <exclude>.travis.yml</exclude>
             <exclude>COPYING</exclude>
             <exclude>README.rdoc</exclude>
           </excludes>
