@@ -59,7 +59,7 @@ public class ClasspathDescriptor
                                                                  Pattern.compile("META-INF/SPRING\\.HANDLERS"),
                                                                  Pattern.compile("META-INF/SPRING\\.SCHEMAS"),
                                                                  Pattern.compile("META-INF/SPRING\\.TOOLING")};
-    
+
     private static final Set IGNORED_LOCAL_DIRECTORIES = new HashSet();
 
     private static final Map CACHED_BY_ELEMENT = new HashMap();
@@ -73,10 +73,10 @@ public class ClasspathDescriptor
 
     // TreeMap<String, File>
     private Map classesWithElements = new TreeMap();
-    
+
     // TreeMap<String, File>
     private Map resourcesWithElements = new TreeMap();
-    
+
     private boolean useDefaultResourceIgnoreList = true;
 
     private Pattern [] ignoredResourcesPatterns = null;

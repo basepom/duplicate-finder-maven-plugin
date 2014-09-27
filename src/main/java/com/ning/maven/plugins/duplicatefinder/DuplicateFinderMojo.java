@@ -63,9 +63,9 @@ public class DuplicateFinderMojo extends AbstractMojo
     protected final Logger LOG = LoggerFactory.getLogger(this.getClass());
 
     // the constants for conflicts
-    private final static int NO_CONFLICT = 0;
-    private final static int CONFLICT_CONTENT_EQUAL = 1;
-    private final static int CONFLICT_CONTENT_DIFFERENT = 2;
+    private static final int NO_CONFLICT = 0;
+    private static final int CONFLICT_CONTENT_EQUAL = 1;
+    private static final int CONFLICT_CONTENT_DIFFERENT = 2;
 
     /**
      * The maven project (effective pom).
@@ -97,7 +97,7 @@ public class DuplicateFinderMojo extends AbstractMojo
     private boolean failBuildInCaseOfEqualContentConflict;
 
     /**
-     * Whether the mojo should fail the build if a conflict was found. 
+     * Whether the mojo should fail the build if a conflict was found.
      * @parameter default-value="false"
      */
     private boolean failBuildInCaseOfConflict;
@@ -244,9 +244,9 @@ public class DuplicateFinderMojo extends AbstractMojo
         int foundDuplicateResourcesConflict = checkForDuplicateResources(classpathDesc, artifactsByFile);
         int maxConflict = Math.max(foundDuplicateClassesConflict, foundDuplicateResourcesConflict);
 
-        if ( (failBuildInCaseOfConflict && maxConflict > NO_CONFLICT) ||        		
+        if ( (failBuildInCaseOfConflict && maxConflict > NO_CONFLICT) ||
              (failBuildInCaseOfDifferentContentConflict && maxConflict == CONFLICT_CONTENT_DIFFERENT) ||
-             (failBuildInCaseOfEqualContentConflict && maxConflict >= CONFLICT_CONTENT_EQUAL)	) {
+             (failBuildInCaseOfEqualContentConflict && maxConflict >= CONFLICT_CONTENT_EQUAL)) {
             throw new MojoExecutionException("Found duplicate classes/resources");
         }
     }
@@ -279,7 +279,7 @@ public class DuplicateFinderMojo extends AbstractMojo
                 }
 
                 String artifactNames = getArtifactsToString(artifacts);
-                List classNames = (List)conflictsByArtifactNames.get(artifactNames); 
+                List classNames = (List)conflictsByArtifactNames.get(artifactNames);
 
                 if (classNames == null) {
                     classNames = new ArrayList();
@@ -338,7 +338,7 @@ public class DuplicateFinderMojo extends AbstractMojo
                 }
 
                 String artifactNames = getArtifactsToString(artifacts);
-                List resources = (List)conflictsByArtifactNames.get(artifactNames); 
+                List resources = (List)conflictsByArtifactNames.get(artifactNames);
 
                 if (resources == null) {
                     resources = new ArrayList();
@@ -371,8 +371,8 @@ public class DuplicateFinderMojo extends AbstractMojo
     }
 
     /**
-     * Prints the conflict messages. 
-     * 
+     * Prints the conflict messages.
+     *
      * @param conflictsByArtifactNames the Map of conflicts (Artifactnames, List of classes)
      * @param hint hint with the type of the conflict ("all equal" or "content different")
      * @param type type of conflict (class or resource)
@@ -393,12 +393,12 @@ public class DuplicateFinderMojo extends AbstractMojo
 
     /**
      * Detects class/resource differences via SHA256 hash comparsion.
-     * 
+     *
      * @param resourcePath the class or resource path that has duplicates in classpath
      * @param elements the files contains the duplicates
      * @return true if all classes are "byte equal" and false if any class differ
      */
-    private boolean isAllElementsAreEqual(final Set elements, final String resourcePath) 
+    private boolean isAllElementsAreEqual(final Set elements, final String resourcePath)
     {
         File firstFile = null;
         String firstSHA256 = null;
@@ -429,7 +429,7 @@ public class DuplicateFinderMojo extends AbstractMojo
 
     /**
      * Calculates the SHA256 Hash of a class in a file.
-     * 
+     *
      * @param file the archive contains the class
      * @param resourcePath the name of the class
      * @return the MD% Hash as Hex-Value

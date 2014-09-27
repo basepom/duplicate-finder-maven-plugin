@@ -63,7 +63,7 @@ public class DependencyWrapper
         }
         catch (OverConstrainedVersionException ex) {
             return false;
-        }                
+        }
 
         return StringUtils.equals(dependency.getGroupId(), artifact.getGroupId()) &&
                StringUtils.equals(dependency.getArtifactId(), artifact.getArtifactId()) &&
