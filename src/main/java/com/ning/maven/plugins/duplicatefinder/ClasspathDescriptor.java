@@ -20,13 +20,13 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -98,7 +98,7 @@ public class ClasspathDescriptor
 
             try {
                 for (int i = 0 ; i < ignoredResources.length; i++) {
-                    ignoredResourcesPatterns[i] = Pattern.compile(ignoredResources[i].toUpperCase());
+                    ignoredResourcesPatterns[i] = Pattern.compile(ignoredResources[i].toUpperCase(Locale.ENGLISH));
                 }
             }
             catch (PatternSyntaxException pse) {
@@ -162,7 +162,7 @@ public class ClasspathDescriptor
 
         if ((files != null) && (files.length > 0)) {
             for (int idx = 0; idx < files.length; idx++) {
-                if (files[idx].isDirectory() && !IGNORED_LOCAL_DIRECTORIES.contains(files[idx].getName().toUpperCase())) {
+                if (files[idx].isDirectory() && !IGNORED_LOCAL_DIRECTORIES.contains(files[idx].getName().toUpperCase(Locale.ENGLISH))) {
                     addDirectory(element, pckgName, files[idx]);
                 }
                 else if (files[idx].isFile()) {
@@ -262,7 +262,7 @@ public class ClasspathDescriptor
 
     private boolean ignore(String path)
     {
-        final String uppercasedPath = path.toUpperCase().replace(File.separatorChar, '/');
+        final String uppercasedPath = path.toUpperCase(Locale.ENGLISH).replace(File.separatorChar, '/');
 
         // Unless it has been turned off...
         if (useDefaultResourceIgnoreList) {
