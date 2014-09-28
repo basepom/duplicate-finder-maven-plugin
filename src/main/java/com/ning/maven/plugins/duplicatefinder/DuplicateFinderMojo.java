@@ -75,8 +75,6 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Finds duplicate classes/resources.
@@ -88,7 +86,7 @@ import org.slf4j.LoggerFactory;
                 requiresDependencyResolution = ResolutionScope.TEST)
 public final class DuplicateFinderMojo extends AbstractMojo
 {
-    private static final Logger LOG = LoggerFactory.getLogger(DuplicateFinderMojo.class);
+    private static final PluginLog LOG = new PluginLog(DuplicateFinderMojo.class);
 
     private static final HashFunction SHA_256 = Hashing.sha256();
 
@@ -227,19 +225,19 @@ public final class DuplicateFinderMojo extends AbstractMojo
 
                 try {
                     if (checkCompileClasspath) {
-                        report("Checking compile classpath");
+                        LOG.report(quiet, "Checking compile classpath");
                         ImmutableSet<Artifact> artifacts = buildScopedArtifacts(COMPILE_SCOPE);
                         checkClasspath(project.getCompileClasspathElements(), createArtifactsByFileMap(artifacts, getOutputDirectory(project)));
                     }
 
                     if (checkRuntimeClasspath) {
-                        report("Checking runtime classpath");
+                        LOG.report(quiet, "Checking runtime classpath");
                         ImmutableSet<Artifact> artifacts = buildScopedArtifacts(RUNTIME_SCOPE);
                         checkClasspath(project.getRuntimeClasspathElements(), createArtifactsByFileMap(artifacts, getOutputDirectory(project)));
                     }
 
                     if (checkTestClasspath) {
-                        report("Checking test classpath");
+                        LOG.report(quiet, "Checking test classpath");
                         ImmutableSet<Artifact> artifacts = buildScopedArtifacts(TEST_SCOPE);
                         checkClasspath(project.getTestClasspathElements(), createArtifactsByFileMap(artifacts, getOutputDirectory(project), getTestOutputDirectory(project)));
                     }
@@ -403,9 +401,9 @@ public final class DuplicateFinderMojo extends AbstractMojo
             final String artifactNames = entry.getKey();
             final Collection<String> classNames = entry.getValue();
 
-            LOG.warn(format("Found duplicate %s %s in %s :", hint, type, artifactNames));
+            LOG.warn("Found duplicate %s %s in %s :", hint, type, artifactNames);
             for (String className : classNames) {
-                LOG.warn(format("  %s", className));
+                LOG.warn("  %s", className);
             }
         }
     }
@@ -433,12 +431,12 @@ public final class DuplicateFinderMojo extends AbstractMojo
                     firstFile = element;
                 }
                 else if (!newSHA256.equals(firstSHA256)) {
-                    LOG.debug(format("Found different SHA256 hashes for elements %s in file %s and %s", resourcePath, firstFile, element));
+                    LOG.debug("Found different SHA256 hashes for elements %s in file %s and %s", resourcePath, firstFile, element);
                     return false;
                 }
             }
             catch (final IOException ex) {
-                LOG.warn(format("Could not read content from file %s!", element), ex);
+                LOG.warn(ex, "Could not read content from file %s!", element);
             }
         }
 
@@ -559,7 +557,7 @@ public final class DuplicateFinderMojo extends AbstractMojo
                     }
                 }
                 else {
-                    LOG.debug(format("Classpath element '%s' does not exist.", file.getAbsolutePath()));
+                    LOG.debug("Classpath element '%s' does not exist.", file.getAbsolutePath());
                 }
             }
             catch (final IOException ex) {
@@ -671,15 +669,5 @@ public final class DuplicateFinderMojo extends AbstractMojo
     private boolean isTestArtifact(Artifact artifact)
     {
         return "test-jar".equals(artifact.getType()) || "tests".equals(artifact.getClassifier());
-    }
-
-    private void report(String formatString, Object ... args)
-    {
-        if (!quiet) {
-            LOG.info(format(formatString, args));
-        }
-        else {
-            LOG.debug(format(formatString, args));
-        }
     }
 }

@@ -15,8 +15,6 @@
  */
 package com.ning.maven.plugins.duplicatefinder.classpath;
 
-import static java.lang.String.format;
-
 import static com.google.common.base.Preconditions.checkState;
 
 import java.io.File;
@@ -41,14 +39,13 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import com.google.common.io.Closer;
 import com.google.common.io.Files;
+import com.ning.maven.plugins.duplicatefinder.PluginLog;
 
 import org.apache.maven.plugin.MojoExecutionException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ClasspathDescriptor
 {
-    private static final Logger LOG = LoggerFactory.getLogger(ClasspathDescriptor.class);
+    private static final PluginLog LOG = new PluginLog(ClasspathDescriptor.class);
 
     private static final Predicate<String> DEFAULT_IGNORED_RESOURCES_PREDICATE = new MatchPatternPredicate(Arrays.asList(
         // Standard jar folders
@@ -128,7 +125,7 @@ public class ClasspathDescriptor
             cached = MoreObjects.firstNonNull(oldCached, newCached);
         }
         else {
-            LOG.debug("Cache hit for '" + element.getAbsolutePath() + "'");
+            LOG.debug("Cache hit for '%s'", element.getAbsolutePath());
         }
 
         cached.putResources(resourcesWithElements, resourcesPredicate);
@@ -154,7 +151,7 @@ public class ClasspathDescriptor
             for (File file : Arrays.asList(files)) {
                 if (file.isDirectory()) {
                     if (DEFAULT_IGNORED_LOCAL_DIRECTORIES.apply(file.getName())) {
-                        LOG.debug("Ignoring local directory '" + file.getAbsolutePath() + "'");
+                        LOG.debug("Ignoring local directory '%s'", file.getAbsolutePath());
                     }
                     else {
                         addDirectory(cacheBuilder, file, packageName.getChildPackage(file.getName()));
@@ -172,7 +169,7 @@ public class ClasspathDescriptor
                     }
                 }
                 else {
-                    LOG.warn("Ignoring unknown file type for '" + file.getAbsolutePath() + "'");
+                    LOG.warn("Ignoring unknown file type for '%s'", file.getAbsolutePath());
                 }
             }
         }
@@ -194,7 +191,7 @@ public class ClasspathDescriptor
                     if ("class".equals(Files.getFileExtension(name))) {
                         final List<String> nameElements = Splitter.on("/").splitToList(name); // ZIP/Jars always use "/" as separators
                         if (nameElements.isEmpty()) {
-                            LOG.warn(format("ZIP entry '%s' split into empty list!", entry));
+                            LOG.warn("ZIP entry '%s' split into empty list!", entry);
                         }
                         else {
                             final PackageNameHolder packageName = new PackageNameHolder(nameElements.subList(0, nameElements.size() - 1));

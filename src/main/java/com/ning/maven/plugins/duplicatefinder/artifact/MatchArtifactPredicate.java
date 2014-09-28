@@ -15,25 +15,22 @@
  */
 package com.ning.maven.plugins.duplicatefinder.artifact;
 
-import static java.lang.String.format;
-
 import java.util.List;
 
 import javax.annotation.Nonnull;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
+import com.ning.maven.plugins.duplicatefinder.PluginLog;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.OverConstrainedVersionException;
 import org.apache.maven.model.Dependency;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class MatchArtifactPredicate implements Predicate<Artifact>
 {
-    private static final Logger LOG = LoggerFactory.getLogger(MatchArtifactPredicate.class);
+    private static final PluginLog LOG = new PluginLog(MatchArtifactPredicate.class);
 
     private final List<MavenCoordinates> mavenCoordinates;
 
@@ -53,12 +50,12 @@ public class MatchArtifactPredicate implements Predicate<Artifact>
         for (MavenCoordinates mavenCoordinate : mavenCoordinates) {
             try {
                 if (mavenCoordinate.matches(artifact)) {
-                    LOG.debug(format("Ignoring artifact '%s' (matches %s)", artifact, mavenCoordinate));
+                    LOG.debug("Ignoring artifact '%s' (matches %s)", artifact, mavenCoordinate);
                     return true;
                 }
             }
             catch (OverConstrainedVersionException e) {
-                LOG.warn(format("Caught '%s' while comparing '%s' to '%s'", e.getMessage(), mavenCoordinate, artifact));
+                LOG.warn("Caught '%s' while comparing '%s' to '%s'", e.getMessage(), mavenCoordinate, artifact);
             }
         }
 

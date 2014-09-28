@@ -15,8 +15,6 @@
  */
 package com.ning.maven.plugins.duplicatefinder.classpath;
 
-import static java.lang.String.format;
-
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Collection;
@@ -28,13 +26,11 @@ import javax.annotation.Nonnull;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.ning.maven.plugins.duplicatefinder.PluginLog;
 
 class MatchPatternPredicate implements Predicate<String>
 {
-    private static final Logger LOG = LoggerFactory.getLogger(MatchPatternPredicate.class);
+    private static final PluginLog LOG = new PluginLog(MatchPatternPredicate.class);
 
     private final List<Pattern>patterns;
 
@@ -56,7 +52,7 @@ class MatchPatternPredicate implements Predicate<String>
         String value = input.toUpperCase(Locale.ENGLISH);
         for (Pattern pattern: patterns) {
             if (pattern.matcher(value).matches()) {
-                LOG.debug(format("Ignoring '%s' (matches %s)", input, pattern.pattern()));
+                LOG.debug("Ignoring '%s' (matches %s)", input, pattern.pattern());
                 return true;
             }
         }
