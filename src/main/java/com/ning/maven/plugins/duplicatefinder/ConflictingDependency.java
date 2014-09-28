@@ -15,15 +15,17 @@
  */
 package com.ning.maven.plugins.duplicatefinder;
 
+import static com.google.common.base.Preconditions.checkState;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import com.google.common.collect.Sets;
 import com.ning.maven.plugins.duplicatefinder.artifact.MavenCoordinates;
 
 import org.apache.maven.artifact.Artifact;
@@ -35,11 +37,11 @@ public class ConflictingDependency
 {
     public static final String CURRENT_PROJECT_IDENTIFIER = "<current project>";
 
-    private MavenCoordinates[] conflictingDependencies;
+    private MavenCoordinates[] conflictingDependencies = new MavenCoordinates[0];
     private boolean currentProject;
-    private final Set<String> classes = new HashSet<String>();
-    private final Set<String> packages = new HashSet<String>();
-    private final Set<String> resources = new HashSet<String>();
+    private final Set<String> classes = Sets.newHashSet();
+    private final Set<String> packages = Sets.newHashSet();
+    private final Set<String> resources = Sets.newHashSet();
     private Pattern[] matchingResources = new Pattern[0];
 
     // Called by maven
@@ -107,14 +109,15 @@ public class ConflictingDependency
     {
         final List<String> result = new ArrayList<String>();
 
-        if (conflictingDependencies != null) {
-            for (int idx = 0; idx < conflictingDependencies.length; idx++) {
-                result.add(conflictingDependencies[idx].toString());
-            }
+        checkState(conflictingDependencies != null, "conflictingDependencies is null");
+        for (int idx = 0; idx < conflictingDependencies.length; idx++) {
+            result.add(conflictingDependencies[idx].toString());
         }
-        if (currentProject) {
+
+        if (isCurrentProject()) {
             result.add(CURRENT_PROJECT_IDENTIFIER);
         }
+
         Collections.sort(result);
         return result;
     }
@@ -152,7 +155,7 @@ public class ConflictingDependency
         }
         else {
             for (String packageName : packages) {
-                if (className.startsWith(packageName)) {
+                if (className.startsWith(packageName)) { // TODO - bug here. foo.bar matches foo.barbaz
                     return true;
                 }
             }
