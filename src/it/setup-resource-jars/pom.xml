@@ -18,9 +18,9 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.ning.maven.plugins.duplicate-finder-maven-plugin</groupId>
+    <groupId>testjar</groupId>
     <artifactId>setup-resource-jars</artifactId>
-    <version>1.0</version>
+    <version>1.0.under-test</version>
     <packaging>pom</packaging>
 
     <modules>

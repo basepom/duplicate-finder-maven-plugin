@@ -18,9 +18,9 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.ning.maven.plugins.duplicate-finder-maven-plugin</groupId>
+    <groupId>@project.groupId@.@project.artifactId@</groupId>
     <artifactId>test-resource-conflict-diff-fail</artifactId>
-    <version>@project.version@</version>
+    <version>1.0.under-test</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -28,14 +28,14 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.ning.maven.plugins.duplicate-finder-maven-plugin</groupId>
+            <groupId>testjar</groupId>
             <artifactId>first-jar</artifactId>
-            <version>1.0</version>
+            <version>1.0.under-test</version>
         </dependency>
         <dependency>
-            <groupId>com.ning.maven.plugins.duplicate-finder-maven-plugin</groupId>
+            <groupId>testjar</groupId>
             <artifactId>second-jar</artifactId>
-            <version>1.0</version>
+            <version>1.0.under-test</version>
         </dependency>
     </dependencies>
 
@@ -44,8 +44,8 @@
 
         <plugins>
             <plugin>
-                <groupId>com.ning.maven.plugins</groupId>
-                <artifactId>duplicate-finder-maven-plugin</artifactId>
+                <groupId>@project.groupId@</groupId>
+                <artifactId>@project.artifactId@</artifactId>
                 <version>@project.version@</version>
                 <configuration>
                     <printEqualFiles>true</printEqualFiles>

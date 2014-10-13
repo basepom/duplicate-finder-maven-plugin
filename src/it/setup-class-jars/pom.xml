@@ -18,9 +18,9 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.ning.maven.plugins.duplicate-finder-maven-plugin</groupId>
+    <groupId>testjar</groupId>
     <artifactId>setup-class-jars</artifactId>
-    <version>1.0</version>
+    <version>1.0.under-test</version>
     <packaging>pom</packaging>
     <description>
         Creates and installs two jars with nearly identical content into the integration
@@ -50,14 +50,14 @@
                         </goals>
                         <!-- third jar is an identical copy of first-jar -->
                         <configuration>
-                            <groupId>com.ning.maven.plugins.duplicate-finder-maven-plugin</groupId>
+                            <groupId>${groupId}</groupId>
                             <artifactId>second-equal-jar</artifactId>
-                            <version>1.0</version>
+                            <version>1.0.under-test</version>
                             <generatePom>true</generatePom>
                             <createChecksum>true</createChecksum>
                             <packaging>jar</packaging>
-                            <version>1.0</version>
-                            <file>second-class-jar/target/second-class-jar-1.0.jar</file>
+                            <version>1.0.under-test</version>
+                            <file>second-class-jar/target/second-class-jar-1.0.under-test.jar</file>
                         </configuration>
                     </execution>
                 </executions>

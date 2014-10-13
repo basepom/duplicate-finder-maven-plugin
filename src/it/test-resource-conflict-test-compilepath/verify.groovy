@@ -19,11 +19,14 @@ import com.google.common.io.CharStreams
 def buildFileReader = new FileReader(new File(basedir, "build.log").getCanonicalFile())
 def buildLogLines = CharStreams.readLines(buildFileReader)
 
+def classFolder = new File(basedir, "target/classes")
+def testClassFolder = new File(basedir, "target/test-classes")
+
 def linefilter = {line -> line.startsWith("[INFO]") || line.startsWith("[WARNING]") || line.startsWith("[ERROR]")}
 def relevantLogLines = buildLogLines.findAll(linefilter).reverse()
 
 def includeMessages = [
-  "[WARNING] Found duplicate and different resources in [com.ning.maven.plugins.duplicate-finder-maven-plugin:first-jar:1.0,com.ning.maven.plugins.duplicate-finder-maven-plugin:test-resource-conflict-test-compilepath:1.0.under-test]"
+  "[WARNING] Found duplicate and different resources in ["  + classFolder + ", testjar:first-jar:1.0.under-test]"
 ]
 
 def excludeMessages = [

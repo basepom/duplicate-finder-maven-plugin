@@ -23,7 +23,7 @@ def linefilter = {line -> line.startsWith("[INFO]") || line.startsWith("[WARNING
 def relevantLogLines = buildLogLines.findAll(linefilter).reverse()
 
 def includeMessages = [
-  "[WARNING] Found duplicate and different classes in [com.ning.maven.plugins.duplicate-finder-maven-plugin:first-class-jar:1.0,com.ning.maven.plugins.duplicate-finder-maven-plugin:first-diff-jar:1.0]"
+  "[WARNING] Found duplicate and different classes in [testjar:first-class-jar:1.0.under-test, testjar:first-diff-jar:1.0.under-test]"
 ]
 
 def excludeMessages = [
