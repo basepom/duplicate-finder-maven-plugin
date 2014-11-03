@@ -13,17 +13,21 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package com.ning.maven.plugins.duplicatefinder.classpath;
+package com.ning.maven.plugins.duplicatefinder;
 
-import javax.annotation.Nonnull;
-
-import com.google.common.base.Predicate;
-
-class MatchInnerClassesPredicate implements Predicate<String>
+public enum ConflictType
 {
-    @Override
-    public boolean apply(@Nonnull final String className)
+    CLASS("classes"), RESOURCE("resources");
+
+    private final String type;
+
+    private ConflictType(String type)
     {
-        return className.indexOf('$') >= 0; // >= 0: inner class.
+        this.type = type;
+    }
+
+    public String getType()
+    {
+        return type;
     }
 }

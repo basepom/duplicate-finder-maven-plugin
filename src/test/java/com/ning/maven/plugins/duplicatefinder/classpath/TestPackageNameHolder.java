@@ -18,7 +18,6 @@ package com.ning.maven.plugins.duplicatefinder.classpath;
 import static org.junit.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableList;
-import com.ning.maven.plugins.duplicatefinder.classpath.PackageNameHolder;
 
 import org.junit.Test;
 
@@ -27,11 +26,11 @@ public class TestPackageNameHolder
     @Test
     public void testEmpty()
     {
-        PackageNameHolder p1 = new PackageNameHolder();
+        final PackageNameHolder p1 = new PackageNameHolder();
         assertEquals("foo", p1.getQualifiedName("foo"));
         assertEquals("foo", p1.getQualifiedPath("foo"));
 
-        PackageNameHolder p2 = p1.getChildPackage("bar");
+        final PackageNameHolder p2 = p1.getChildPackage("bar");
         assertEquals("bar.foo", p2.getQualifiedName("foo"));
         assertEquals("bar/foo", p2.getQualifiedPath("foo"));
     }
@@ -39,11 +38,11 @@ public class TestPackageNameHolder
     @Test
     public void testPrefilled()
     {
-        PackageNameHolder p1 = new PackageNameHolder(ImmutableList.of("hello", "world"));
+        final PackageNameHolder p1 = new PackageNameHolder(ImmutableList.of("hello", "world"));
         assertEquals("hello.world.foo", p1.getQualifiedName("foo"));
         assertEquals("hello/world/foo", p1.getQualifiedPath("foo"));
 
-        PackageNameHolder p2 = p1.getChildPackage("bar");
+        final PackageNameHolder p2 = p1.getChildPackage("bar");
         assertEquals("hello.world.bar.foo", p2.getQualifiedName("foo"));
         assertEquals("hello/world/bar/foo", p2.getQualifiedPath("foo"));
     }

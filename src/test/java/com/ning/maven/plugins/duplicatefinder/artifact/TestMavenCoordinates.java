@@ -179,7 +179,6 @@ public class TestMavenCoordinates
         assertEquals("special", coordinates.getClassifier().get());
     }
 
-
     @Test
     public void testBasicMismatches() throws java.lang.Exception
     {
@@ -244,9 +243,6 @@ public class TestMavenCoordinates
         // match inside
         assertTrue(dependencyCoordinatesVersionRange.matches(new MavenCoordinates(new DefaultArtifact("test.group", "test-artifact", "2.2", "test", "jar", null, new DefaultArtifactHandler()))));
 
-
-
     }
-
 
 }

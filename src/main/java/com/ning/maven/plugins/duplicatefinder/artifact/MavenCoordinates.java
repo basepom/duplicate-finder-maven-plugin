@@ -48,7 +48,7 @@ public class MavenCoordinates
         this.groupId = checkNotNull(dependency.getGroupId(), "groupId for dependency '%s' is null", dependency);
 
         final String version = dependency.getVersion();
-        this.version = (version == null) ? Optional.<ArtifactVersion>absent() : Optional.of(new DefaultArtifactVersion(version));
+        this.version = version == null ? Optional.<ArtifactVersion>absent() : Optional.of(new DefaultArtifactVersion(version));
 
         if (this.version.isPresent()) {
             this.versionRange = Optional.of(VersionRange.createFromVersionSpec(version));
@@ -81,8 +81,8 @@ public class MavenCoordinates
             this.version = Optional.fromNullable(artifact.getSelectedVersion());
         }
         else {
-            final String version = artifact.getVersion();
-            this.version = (version == null) ? Optional.<ArtifactVersion>absent() : Optional.of(new DefaultArtifactVersion(version));
+            final String version = artifact.getBaseVersion();
+            this.version = version == null ? Optional.<ArtifactVersion>absent() : Optional.of(new DefaultArtifactVersion(version));
         }
 
         final String type = artifact.getType();
@@ -132,18 +132,18 @@ public class MavenCoordinates
         return matches(new MavenCoordinates(artifact));
     }
 
-    public boolean matches(MavenCoordinates other)
+    public boolean matches(final MavenCoordinates other)
     {
         if (!(Objects.equal(getGroupId(), other.getGroupId())
-              && Objects.equal(getArtifactId(), other.getArtifactId())
-              && Objects.equal(getType(), other.getType()))) {
+            && Objects.equal(getArtifactId(), other.getArtifactId())
+            && Objects.equal(getType(), other.getType()))) {
             return false;
         }
 
         // If a classifier is present, try to match the other classifier,
         // otherwise, if no classifier is present, it matches all classifiers from the other MavenCoordinates.
         if (getClassifier().isPresent()) {
-            if (!(Objects.equal(getClassifier().get(), other.getClassifier().orNull()))) {
+            if (!Objects.equal(getClassifier().get(), other.getClassifier().orNull())) {
                 return false;
             }
         }
@@ -163,7 +163,7 @@ public class MavenCoordinates
         // version range local and version in other
         if (getVersionRange().isPresent()) {
             // is there a recommended version?
-            ArtifactVersion recommendedVersion = getVersionRange().get().getRecommendedVersion();
+            final ArtifactVersion recommendedVersion = getVersionRange().get().getRecommendedVersion();
             if (recommendedVersion != null) {
                 // Yes, then it must be matched.
                 return Objects.equal(recommendedVersion, other.getVersion().orNull());
@@ -182,7 +182,7 @@ public class MavenCoordinates
     @Override
     public String toString()
     {
-        ImmutableList.Builder<String> builder = ImmutableList.builder();
+        final ImmutableList.Builder<String> builder = ImmutableList.builder();
 
         builder.add(getGroupId());
         builder.add(getArtifactId());

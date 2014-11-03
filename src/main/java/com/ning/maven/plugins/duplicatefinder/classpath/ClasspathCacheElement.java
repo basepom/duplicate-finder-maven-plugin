@@ -29,7 +29,7 @@ class ClasspathCacheElement
     private final ImmutableSet<String> classes;
     private final ImmutableSet<String> resources;
 
-    public static ClasspathCacheElement.Builder builder(File element)
+    public static ClasspathCacheElement.Builder builder(final File element)
     {
         return new Builder(element);
     }
@@ -43,14 +43,14 @@ class ClasspathCacheElement
 
     void putClasses(final Multimap<String, File> classMap, final Predicate<String> excludePredicate)
     {
-        for (String className : Collections2.filter(classes, Predicates.not(excludePredicate))) {
+        for (final String className : Collections2.filter(classes, Predicates.not(excludePredicate))) {
             classMap.put(className, element);
         }
     }
 
     void putResources(final Multimap<String, File> resourceMap, final Predicate<String> excludePredicate)
     {
-        for (String resource : Collections2.filter(resources, Predicates.not(excludePredicate))) {
+        for (final String resource : Collections2.filter(resources, Predicates.not(excludePredicate))) {
             resourceMap.put(resource, element);
         }
     }
@@ -66,12 +66,12 @@ class ClasspathCacheElement
             this.element = element;
         }
 
-        void addClass(String className)
+        void addClass(final String className)
         {
             classBuilder.add(className);
         }
 
-        void addResource(String resource)
+        void addResource(final String resource)
         {
             resourcesBuilder.add(resource);
         }

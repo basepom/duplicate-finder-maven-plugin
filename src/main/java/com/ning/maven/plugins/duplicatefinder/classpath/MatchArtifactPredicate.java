@@ -13,8 +13,11 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package com.ning.maven.plugins.duplicatefinder.artifact;
+package com.ning.maven.plugins.duplicatefinder.classpath;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import java.util.Collection;
 import java.util.List;
 
 import javax.annotation.Nonnull;
@@ -22,6 +25,7 @@ import javax.annotation.Nonnull;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.ning.maven.plugins.duplicatefinder.PluginLog;
+import com.ning.maven.plugins.duplicatefinder.artifact.MavenCoordinates;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
@@ -34,27 +38,27 @@ public class MatchArtifactPredicate implements Predicate<Artifact>
 
     private final List<MavenCoordinates> mavenCoordinates;
 
-    public MatchArtifactPredicate(Dependency ... dependencies)
-        throws InvalidVersionSpecificationException
+    MatchArtifactPredicate(final Collection<Dependency> dependencies) throws InvalidVersionSpecificationException
     {
-        ImmutableList.Builder<MavenCoordinates> builder = ImmutableList.builder();
-        for (Dependency dependency : dependencies) {
+        checkNotNull(dependencies, "dependencies is null");
+        final ImmutableList.Builder<MavenCoordinates> builder = ImmutableList.builder();
+        for (final Dependency dependency : dependencies) {
             builder.add(new MavenCoordinates(dependency));
         }
         this.mavenCoordinates = builder.build();
     }
 
     @Override
-    public boolean apply(@Nonnull Artifact artifact)
+    public boolean apply(@Nonnull final Artifact artifact)
     {
-        for (MavenCoordinates mavenCoordinate : mavenCoordinates) {
+        for (final MavenCoordinates mavenCoordinate : mavenCoordinates) {
             try {
                 if (mavenCoordinate.matches(artifact)) {
                     LOG.debug("Ignoring artifact '%s' (matches %s)", artifact, mavenCoordinate);
                     return true;
                 }
             }
-            catch (OverConstrainedVersionException e) {
+            catch (final OverConstrainedVersionException e) {
                 LOG.warn("Caught '%s' while comparing '%s' to '%s'", e.getMessage(), mavenCoordinate, artifact);
             }
         }

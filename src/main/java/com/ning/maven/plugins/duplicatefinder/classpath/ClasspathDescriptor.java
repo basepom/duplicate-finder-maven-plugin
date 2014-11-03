@@ -15,6 +15,9 @@
  */
 package com.ning.maven.plugins.duplicatefinder.classpath;
 
+import static java.lang.String.format;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import java.io.File;
@@ -23,6 +26,7 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.PatternSyntaxException;
 import java.util.zip.ZipEntry;
@@ -39,9 +43,14 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import com.google.common.io.Closer;
 import com.google.common.io.Files;
+import com.ning.maven.plugins.duplicatefinder.ConflictType;
 import com.ning.maven.plugins.duplicatefinder.PluginLog;
 
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
+import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.project.MavenProject;
 
 public class ClasspathDescriptor
 {
@@ -61,14 +70,14 @@ public class ClasspathDescriptor
         // HTML stuff from javadocs.
         ".*package\\.html$",
         ".*overview\\.html$"
-    ));
+        ));
 
     private static final Predicate<String> DEFAULT_IGNORED_LOCAL_DIRECTORIES = new MatchPatternPredicate(Arrays.asList(
         "^.git$",
         "^.svn$",
         "^.hg$",
         "^.bzr$"
-    ));
+        ));
 
     /**
      * This is a global, static cache which can be reused through multiple runs of the plugin in the same VM,
@@ -82,10 +91,83 @@ public class ClasspathDescriptor
     private final Predicate<String> resourcesPredicate;
     private final Predicate<String> classPredicate;
 
-    public ClasspathDescriptor(boolean useDefaultResourceIgnoreList, Collection<String> ignoredResources)
-        throws MojoExecutionException
+    public static ClasspathDescriptor createClasspathDescriptor(final MavenProject project,
+                                                                final Map<File, Artifact> fileToArtifactMap,
+                                                                final Collection<String> ignoredResources,
+                                                                final Collection<Dependency> ignoredDependencies,
+                                                                final boolean useDefaultResourceIgnoreList,
+                                                                final File[] projectFolders) throws MojoExecutionException, InvalidVersionSpecificationException
     {
+        checkNotNull(project, "project is null");
+        checkNotNull(fileToArtifactMap, "fileToArtifactMap is null");
+        checkNotNull(ignoredResources, "ignoredResources is null");
+        checkNotNull(ignoredDependencies, "ignoredDependencies is null");
+        checkNotNull(projectFolders, "projectFolders is null");
+
+        final Artifact projectArtifact = project.getArtifact();
+
+        final ClasspathDescriptor classpathDescriptor = new ClasspathDescriptor(useDefaultResourceIgnoreList, ignoredResources);
+        final MatchArtifactPredicate matchArtifactPredicate = new MatchArtifactPredicate(ignoredDependencies);
+
+        Artifact artifact = null;
+        File file = null;
+
+        try {
+            // any entry is either a jar in the repo or a folder in the target folder of a referenced
+            // project. Add the elements that are not ignored by the ignoredDependencies predicate to
+            // the classpath descriptor.
+            for (final Map.Entry<File, Artifact> entry : fileToArtifactMap.entrySet()) {
+                artifact = entry.getValue();
+                file = entry.getKey();
+
+                if (file.exists()) {
+                    // Add to the classpath if the artifact predicate does not apply (then it is not in the ignoredDependencies list).
+                    if (!matchArtifactPredicate.apply(artifact)) {
+                        classpathDescriptor.addClasspathElement(file, artifact);
+                    }
+                }
+                else {
+                    // e.g. when running the goal explicitly on a cleaned multi-module project, referenced
+                    // projects will try to use the output folders of a referenced project but these do not
+                    // exist. Obviously, in this case the plugin might return incorrect results (unfortunately
+                    // false negatives, but there is not much it can do here (besides fail the build here with a
+                    // cryptic error message. Maybe add a flag?).
+                    LOG.debug("Classpath element '%s' does not exist.", file.getAbsolutePath());
+                }
+            }
+        }
+        catch (final IOException ex) {
+            throw new MojoExecutionException(format("Error trying to access file '%s' for artifact '%s'", file, artifact), ex);
+        }
+
+        try {
+            // Add project folders unconditionally.
+            for (final File projectFile : projectFolders) {
+                file = projectFile;
+                if (projectFile.exists()) {
+                    classpathDescriptor.addClasspathElement(file, projectArtifact);
+                }
+                else {
+                    // See above. This may happen in the project has been cleaned before running the goal directly.
+                    LOG.debug("Project folder '%s' does not exist.", file.getAbsolutePath());
+                }
+            }
+        }
+        catch (final IOException ex) {
+            throw new MojoExecutionException(format("Error trying to access project folder '%s'", file), ex);
+        }
+
+        return classpathDescriptor;
+    }
+
+    private ClasspathDescriptor(final boolean useDefaultResourceIgnoreList,
+                                final Collection<String> ignoredResources)
+                    throws MojoExecutionException
+    {
+        // Class predicate simply ignores inner and nested classes.
         this.classPredicate = new MatchInnerClassesPredicate();
+
+        // ResourcePredicate is a bit more complicated...
         Predicate<String> resourcesPredicate = Predicates.alwaysFalse();
 
         // predicate matching the default ignores
@@ -106,7 +188,20 @@ public class ClasspathDescriptor
         this.resourcesPredicate = resourcesPredicate;
     }
 
-    public void add(final File element) throws IOException
+    public ImmutableMap<String, Collection<File>> getClasspathElementLocations(final ConflictType type)
+    {
+        checkNotNull(type, "type is null");
+        switch (type) {
+            case CLASS:
+                return ImmutableMultimap.copyOf(classesWithElements).asMap();
+            case RESOURCE:
+                return ImmutableMultimap.copyOf(resourcesWithElements).asMap();
+            default:
+                throw new IllegalStateException("Type '" + type + "' unknown!");
+        }
+    }
+
+    private void addClasspathElement(final File element, final Artifact artifact) throws IOException
     {
         checkState(element.exists(), "Path '%s' does not exist!", element.getAbsolutePath());
 
@@ -120,8 +215,8 @@ public class ClasspathDescriptor
             else {
                 addArchive(cacheBuilder, element);
             }
-            ClasspathCacheElement newCached = cacheBuilder.build();
-            ClasspathCacheElement oldCached = CACHED_BY_FILE.putIfAbsent(element, newCached);
+            final ClasspathCacheElement newCached = cacheBuilder.build();
+            final ClasspathCacheElement oldCached = CACHED_BY_FILE.putIfAbsent(element, newCached);
             cached = MoreObjects.firstNonNull(oldCached, newCached);
         }
         else {
@@ -133,22 +228,12 @@ public class ClasspathDescriptor
 
     }
 
-    public ImmutableMap<String, Collection<File>> getClasses()
-    {
-        return ImmutableMultimap.copyOf(classesWithElements).asMap();
-    }
-
-    public ImmutableMap<String, Collection<File>> getResources()
-    {
-        return ImmutableMultimap.copyOf(resourcesWithElements).asMap();
-    }
-
     private void addDirectory(final ClasspathCacheElement.Builder cacheBuilder, final File workDir, final PackageNameHolder packageName)
     {
         final File[] files = workDir.listFiles();
 
         if (files != null) {
-            for (File file : Arrays.asList(files)) {
+            for (final File file : Arrays.asList(files)) {
                 if (file.isDirectory()) {
                     if (DEFAULT_IGNORED_LOCAL_DIRECTORIES.apply(file.getName())) {
                         LOG.debug("Ignoring local directory '%s'", file.getAbsolutePath());
@@ -177,11 +262,11 @@ public class ClasspathDescriptor
 
     private void addArchive(final ClasspathCacheElement.Builder cacheBuilder, final File element) throws IOException
     {
-        Closer closer = Closer.create();
+        final Closer closer = Closer.create();
 
         try {
-            InputStream input = closer.register(element.toURI().toURL().openStream());
-            ZipInputStream zipInput = closer.register(new ZipInputStream(input));
+            final InputStream input = closer.register(element.toURI().toURL().openStream());
+            final ZipInputStream zipInput = closer.register(new ZipInputStream(input));
 
             ZipEntry entry;
 

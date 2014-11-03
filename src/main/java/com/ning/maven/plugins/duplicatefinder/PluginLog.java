@@ -26,65 +26,65 @@ public final class PluginLog
 {
     private final Logger logger;
 
-    public PluginLog(Class<?> clazz)
+    public PluginLog(final Class<?> clazz)
     {
         checkNotNull(clazz, "clazz is null");
         this.logger = LoggerFactory.getLogger(clazz);
     }
 
-    public void debug(String fmt, Object ... args)
+    public void debug(final String fmt, final Object ... args)
     {
         checkNotNull(fmt, "fmt is null");
         logger.debug(format(fmt, args));
     }
 
-    public void debug(Throwable t, String fmt, Object ... args)
+    public void debug(final Throwable t, final String fmt, final Object ... args)
     {
         checkNotNull(fmt, "fmt is null");
         checkNotNull(t, "t is null");
         logger.debug(format(fmt, args), t);
     }
 
-    public void info(String fmt, Object ... args)
+    public void info(final String fmt, final Object ... args)
     {
         checkNotNull(fmt, "fmt is null");
-        logger.debug(format(fmt, args));
+        logger.info(format(fmt, args));
     }
 
-    public void info(Throwable t, String fmt, Object ... args)
-    {
-        checkNotNull(fmt, "fmt is null");
-        checkNotNull(t, "t is null");
-        logger.debug(format(fmt, args), t);
-    }
-
-    public void warn(String fmt, Object ... args)
-    {
-        checkNotNull(fmt, "fmt is null");
-        logger.debug(format(fmt, args));
-    }
-
-    public void warn(Throwable t, String fmt, Object ... args)
+    public void info(final Throwable t, final String fmt, final Object ... args)
     {
         checkNotNull(fmt, "fmt is null");
         checkNotNull(t, "t is null");
-        logger.debug(format(fmt, args), t);
+        logger.info(format(fmt, args), t);
     }
 
-    public void error(String fmt, Object ... args)
+    public void warn(final String fmt, final Object ... args)
     {
         checkNotNull(fmt, "fmt is null");
-        logger.debug(format(fmt, args));
+        logger.warn(format(fmt, args));
     }
 
-    public void error(Throwable t, String fmt, Object ... args)
+    public void warn(final Throwable t, final String fmt, final Object ... args)
     {
         checkNotNull(fmt, "fmt is null");
         checkNotNull(t, "t is null");
-        logger.debug(format(fmt, args), t);
+        logger.warn(format(fmt, args), t);
     }
 
-    public void report(boolean quiet, String fmt, Object ... args)
+    public void error(final String fmt, final Object ... args)
+    {
+        checkNotNull(fmt, "fmt is null");
+        logger.error(format(fmt, args));
+    }
+
+    public void error(final Throwable t, final String fmt, final Object ... args)
+    {
+        checkNotNull(fmt, "fmt is null");
+        checkNotNull(t, "t is null");
+        logger.error(format(fmt, args), t);
+    }
+
+    public void report(final boolean quiet, final String fmt, final Object ... args)
     {
         if (quiet) {
             debug(fmt, args);
@@ -94,4 +94,3 @@ public final class PluginLog
         }
     }
 }
-

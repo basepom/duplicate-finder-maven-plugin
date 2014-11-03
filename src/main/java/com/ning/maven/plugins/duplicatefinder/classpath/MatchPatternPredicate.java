@@ -32,14 +32,14 @@ class MatchPatternPredicate implements Predicate<String>
 {
     private static final PluginLog LOG = new PluginLog(MatchPatternPredicate.class);
 
-    private final List<Pattern>patterns;
+    private final List<Pattern> patterns;
 
-    MatchPatternPredicate(Collection<String> patternStrings)
+    MatchPatternPredicate(final Collection<String> patternStrings)
     {
         checkNotNull(patternStrings, "patternStrings is null");
 
         final ImmutableList.Builder<Pattern> builder = ImmutableList.builder();
-        for (String patternString : patternStrings) {
+        for (final String patternString : patternStrings) {
             builder.add(Pattern.compile(patternString.toUpperCase(Locale.ENGLISH)));
         }
 
@@ -47,10 +47,10 @@ class MatchPatternPredicate implements Predicate<String>
     }
 
     @Override
-    public boolean apply(@Nonnull String input)
+    public boolean apply(@Nonnull final String input)
     {
-        String value = input.toUpperCase(Locale.ENGLISH);
-        for (Pattern pattern: patterns) {
+        final String value = input.toUpperCase(Locale.ENGLISH);
+        for (final Pattern pattern : patterns) {
             if (pattern.matcher(value).matches()) {
                 LOG.debug("Ignoring '%s' (matches %s)", input, pattern.pattern());
                 return true;

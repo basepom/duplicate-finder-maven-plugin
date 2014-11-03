@@ -15,11 +15,12 @@
  */
 package com.ning.maven.plugins.duplicatefinder;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -33,12 +34,12 @@ import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException
 import org.apache.maven.artifact.versioning.OverConstrainedVersionException;
 import org.apache.maven.model.Dependency;
 
+/**
+ * Captures the &lt;exceptions&gt; section from the plugin configuration.
+ */
 public class ConflictingDependency
 {
-    public static final String CURRENT_PROJECT_IDENTIFIER = "<current project>";
-
     private MavenCoordinates[] conflictingDependencies = new MavenCoordinates[0];
-    private boolean currentProject;
     private final Set<String> classes = Sets.newHashSet();
     private final Set<String> packages = Sets.newHashSet();
     private final Set<String> resources = Sets.newHashSet();
@@ -47,6 +48,8 @@ public class ConflictingDependency
     // Called by maven
     public void setConflictingDependencies(final Dependency[] conflictingDependencies) throws InvalidVersionSpecificationException
     {
+        checkArgument(conflictingDependencies != null && conflictingDependencies.length > 1, "For an exception, at least two dependencies must be given!");
+
         this.conflictingDependencies = new MavenCoordinates[conflictingDependencies.length];
         for (int idx = 0; idx < conflictingDependencies.length; idx++) {
             this.conflictingDependencies[idx] = new MavenCoordinates(conflictingDependencies[idx]);
@@ -60,16 +63,6 @@ public class ConflictingDependency
         for (int i = 0; i < resourcePatterns.length; i++) {
             this.matchingResources[i] = Pattern.compile(resourcePatterns[i], Pattern.CASE_INSENSITIVE);
         }
-    }
-
-    public boolean isCurrentProject()
-    {
-        return currentProject;
-    }
-
-    public void setCurrentProject(final boolean currentProject)
-    {
-        this.currentProject = currentProject;
     }
 
     public String[] getClasses()
@@ -114,31 +107,32 @@ public class ConflictingDependency
             result.add(conflictingDependencies[idx].toString());
         }
 
-        if (isCurrentProject()) {
-            result.add(CURRENT_PROJECT_IDENTIFIER);
-        }
-
         Collections.sort(result);
         return result;
     }
 
-    public boolean isForArtifacts(final Collection<Artifact> artifacts, final Artifact projectArtifact) throws OverConstrainedVersionException
+    public boolean isForArtifacts(final Set<Artifact> artifacts) throws OverConstrainedVersionException
     {
-        int numMatches = 0;
+        checkNotNull(artifacts, "artifacts is null");
+        checkState(conflictingDependencies != null, "conflictingDependencies is null");
+        checkState(conflictingDependencies.length > 1, "conflictingDependencies has not at least two dependencies");
 
-        for (Artifact artifact : artifacts) {
-            if (conflictingDependencies != null) {
-                for (int idx = 0; idx < conflictingDependencies.length; idx++) {
-                    if (conflictingDependencies[idx].matches(artifact)) {
-                        numMatches++;
-                    }
-                    else if (currentProject && currentProjectDependencyMatches(artifact, projectArtifact)) {
-                        numMatches++;
+        if (artifacts.size() != conflictingDependencies.length) {
+            return false;
+        }
+
+        int numMatches = conflictingDependencies.length;
+
+        for (final Artifact artifact : artifacts) {
+            for (int idx = 0; idx < conflictingDependencies.length; idx++) {
+                if (conflictingDependencies[idx].matches(artifact)) {
+                    if (--numMatches == 0) {
+                        return true;
                     }
                 }
             }
         }
-        return numMatches == artifacts.size();
+        return false;
     }
 
     private boolean currentProjectDependencyMatches(final Artifact artifact, final Artifact projectArtifact) throws OverConstrainedVersionException
@@ -150,11 +144,16 @@ public class ConflictingDependency
 
     public boolean containsClass(final String className)
     {
+        if (classes.isEmpty() && packages.isEmpty()) {
+            // Nothing given --> match everything.
+            return true;
+        }
+
         if (classes.contains(className)) {
             return true;
         }
         else {
-            for (String packageName : packages) {
+            for (final String packageName : packages) {
                 if (className.startsWith(packageName)) { // TODO - bug here. foo.bar matches foo.barbaz
                     return true;
                 }
