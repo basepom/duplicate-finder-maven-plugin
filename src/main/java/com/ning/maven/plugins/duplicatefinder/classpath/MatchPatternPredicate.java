@@ -32,7 +32,7 @@ class MatchPatternPredicate implements Predicate<String>
 {
     private static final PluginLog LOG = new PluginLog(MatchPatternPredicate.class);
 
-    private final List<Pattern> patterns;
+    private final ImmutableList<Pattern> patterns;
 
     MatchPatternPredicate(final Collection<String> patternStrings)
     {
@@ -44,6 +44,11 @@ class MatchPatternPredicate implements Predicate<String>
         }
 
         this.patterns = builder.build();
+    }
+
+    public ImmutableList<Pattern> getPatterns()
+    {
+        return patterns;
     }
 
     @Override

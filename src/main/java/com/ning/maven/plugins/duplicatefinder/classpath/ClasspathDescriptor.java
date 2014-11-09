@@ -28,6 +28,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
+import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -36,6 +37,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Maps;
@@ -56,7 +58,7 @@ public class ClasspathDescriptor
 {
     private static final PluginLog LOG = new PluginLog(ClasspathDescriptor.class);
 
-    private static final Predicate<String> DEFAULT_IGNORED_RESOURCES_PREDICATE = new MatchPatternPredicate(Arrays.asList(
+    private static final MatchPatternPredicate DEFAULT_IGNORED_RESOURCES_PREDICATE = new MatchPatternPredicate(Arrays.asList(
         // Standard jar folders
         "^META-INF/.*",
         "^OSGI-INF/.*",
@@ -72,7 +74,7 @@ public class ClasspathDescriptor
         ".*overview\\.html$"
         ));
 
-    private static final Predicate<String> DEFAULT_IGNORED_LOCAL_DIRECTORIES = new MatchPatternPredicate(Arrays.asList(
+    private static final MatchPatternPredicate DEFAULT_IGNORED_LOCAL_DIRECTORIES = new MatchPatternPredicate(Arrays.asList(
         "^.git$",
         "^.svn$",
         "^.hg$",
@@ -90,6 +92,8 @@ public class ClasspathDescriptor
 
     private final Predicate<String> resourcesPredicate;
     private final Predicate<String> classPredicate;
+
+    private final ImmutableList<Pattern> resourceExclusionPatterns;
 
     public static ClasspathDescriptor createClasspathDescriptor(final MavenProject project,
                                                                 final Map<File, Artifact> fileToArtifactMap,
@@ -167,18 +171,23 @@ public class ClasspathDescriptor
         // Class predicate simply ignores inner and nested classes.
         this.classPredicate = new MatchInnerClassesPredicate();
 
+        final ImmutableList.Builder<Pattern> resourceExclusionPatternBuilder = ImmutableList.builder();
+
         // ResourcePredicate is a bit more complicated...
         Predicate<String> resourcesPredicate = Predicates.alwaysFalse();
 
         // predicate matching the default ignores
         if (useDefaultResourceIgnoreList) {
             resourcesPredicate = Predicates.or(resourcesPredicate, DEFAULT_IGNORED_RESOURCES_PREDICATE);
+            resourceExclusionPatternBuilder.addAll(DEFAULT_IGNORED_RESOURCES_PREDICATE.getPatterns());
         }
 
         if (!ignoredResources.isEmpty()) {
             try {
                 // predicate matching the user ignores
-                resourcesPredicate = Predicates.or(resourcesPredicate, new MatchPatternPredicate(ignoredResources));
+                MatchPatternPredicate ignoredResourcesPredicate = new MatchPatternPredicate(ignoredResources);
+                resourcesPredicate = Predicates.or(resourcesPredicate, ignoredResourcesPredicate);
+                resourceExclusionPatternBuilder.addAll(ignoredResourcesPredicate.getPatterns());
             }
             catch (final PatternSyntaxException pse) {
                 throw new MojoExecutionException("Error compiling resourceIgnore pattern: " + pse.getMessage());
@@ -186,6 +195,7 @@ public class ClasspathDescriptor
         }
 
         this.resourcesPredicate = resourcesPredicate;
+        this.resourceExclusionPatterns = resourceExclusionPatternBuilder.build();
     }
 
     public ImmutableMap<String, Collection<File>> getClasspathElementLocations(final ConflictType type)
@@ -200,6 +210,17 @@ public class ClasspathDescriptor
                 throw new IllegalStateException("Type '" + type + "' unknown!");
         }
     }
+
+    public ImmutableList<Pattern> getResourceExclusionPatterns()
+    {
+        return resourceExclusionPatterns;
+    }
+
+    public ImmutableList<Pattern> getIgnoredDirectoriesPatterns()
+    {
+        return DEFAULT_IGNORED_LOCAL_DIRECTORIES.getPatterns();
+    }
+
 
     private void addClasspathElement(final File element, final Artifact artifact) throws IOException
     {

@@ -98,6 +98,16 @@ public class ConflictingDependency
         this.resources.addAll(Arrays.asList(resources));
     }
 
+    MavenCoordinates [] getDependencies()
+    {
+        return conflictingDependencies;
+    }
+
+    Pattern [] getResourcePatterns()
+    {
+        return matchingResources;
+    }
+
     public List<String> getDependencyNames()
     {
         final List<String> result = new ArrayList<String>();

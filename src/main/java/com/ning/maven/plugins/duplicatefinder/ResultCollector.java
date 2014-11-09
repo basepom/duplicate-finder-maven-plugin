@@ -72,7 +72,7 @@ public class ResultCollector
 
         ConflictResult conflictResult = new ConflictResult(type, name, conflictArtifactNames, excepted, state);
 
-        results.put(conflictResult.conflictArtifactsName, conflictResult);
+        results.put(conflictResult.getConflictArtifactsName(), conflictResult);
     }
 
     public Map<String, Collection<ConflictResult>> getResults(final ConflictType type, final ConflictState state)
@@ -83,14 +83,20 @@ public class ResultCollector
             public boolean apply(@Nonnull ConflictResult conflictResult)
             {
                 checkNotNull(conflictResult, "conflictResult is null");
-                return conflictResult.excepted == false
-                                && conflictResult.conflictState == state
-                                && conflictResult.type == type;
+                return conflictResult.getConflictState() == state
+                    && conflictResult.getType() == type
+                    && !conflictResult.isExcepted();
             }
         });
 
         return ImmutableMap.copyOf(result.asMap());
     }
+
+    Map<String, Collection<ConflictResult>> getAllResults()
+    {
+        return ImmutableMap.copyOf(results.asMap());
+    }
+
 
     public static class ConflictResult
     {
@@ -101,7 +107,7 @@ public class ResultCollector
         private final ConflictState conflictState;
         private final String conflictArtifactsName;
 
-        public ConflictResult(final ConflictType type,
+        ConflictResult(final ConflictType type,
                               final String name,
                               final Map<String, Optional<Artifact>> conflictArtifactNames,
                               final boolean excepted,
@@ -123,6 +129,31 @@ public class ResultCollector
         public String getName()
         {
             return name;
+        }
+
+        public ConflictType getType()
+        {
+            return type;
+        }
+
+        public Map<String, Optional<Artifact>> getConflictArtifactNames()
+        {
+            return conflictArtifactNames;
+        }
+
+        public boolean isExcepted()
+        {
+            return excepted;
+        }
+
+        public ConflictState getConflictState()
+        {
+            return conflictState;
+        }
+
+        private String getConflictArtifactsName()
+        {
+            return conflictArtifactsName;
         }
     }
 }
