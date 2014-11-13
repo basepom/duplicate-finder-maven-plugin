@@ -61,7 +61,7 @@ public class ConflictingDependency
     {
         this.matchingResources = new Pattern[resourcePatterns.length];
         for (int i = 0; i < resourcePatterns.length; i++) {
-            this.matchingResources[i] = Pattern.compile(resourcePatterns[i], Pattern.CASE_INSENSITIVE);
+            this.matchingResources[i] = Pattern.compile(resourcePatterns[i], Pattern.CASE_INSENSITIVE|Pattern.UNICODE_CASE);
         }
     }
 

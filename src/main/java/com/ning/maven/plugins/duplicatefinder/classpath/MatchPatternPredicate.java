@@ -18,8 +18,6 @@ package com.ning.maven.plugins.duplicatefinder.classpath;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Collection;
-import java.util.List;
-import java.util.Locale;
 import java.util.regex.Pattern;
 
 import javax.annotation.Nonnull;
@@ -40,7 +38,7 @@ class MatchPatternPredicate implements Predicate<String>
 
         final ImmutableList.Builder<Pattern> builder = ImmutableList.builder();
         for (final String patternString : patternStrings) {
-            builder.add(Pattern.compile(patternString.toUpperCase(Locale.ENGLISH)));
+            builder.add(Pattern.compile(patternString, Pattern.CASE_INSENSITIVE|Pattern.UNICODE_CASE));
         }
 
         this.patterns = builder.build();
@@ -54,7 +52,7 @@ class MatchPatternPredicate implements Predicate<String>
     @Override
     public boolean apply(@Nonnull final String input)
     {
-        final String value = input.toUpperCase(Locale.ENGLISH);
+        final String value = input;
         for (final Pattern pattern : patterns) {
             if (pattern.matcher(value).matches()) {
                 LOG.debug("Ignoring '%s' (matches %s)", input, pattern.pattern());
