@@ -82,6 +82,7 @@
         <dep.maven-api.version>3.0</dep.maven-api.version>
         <dep.plexus.version>1.5.5</dep.plexus.version>
         <dep.plugin.plugin.version>3.2</dep.plugin.plugin.version>
+        <dep.groovy.version>2.3.7</dep.groovy.version>
     </properties>
 
     <dependencies>
@@ -223,6 +224,13 @@
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-all</artifactId>
+            <version>${dep.groovy.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -256,6 +264,12 @@
                             <exclude>**/conflict-same-content</exclude>
                         </excludes>
                     </configuration>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.codehaus.gmavenplus</groupId>
+                    <artifactId>gmavenplus-plugin</artifactId>
+                    <version>1.2</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -314,6 +328,10 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-invoker-plugin</artifactId>
+                <configuration>
+                    <!-- Allows access to the groovy utility class in the test source tree. -->
+                    <addTestClassPath>true</addTestClassPath>
+                </configuration>
 
                 <!-- dependency for verify.groovy scripts -->
                 <dependencies>
@@ -322,7 +340,26 @@
                         <artifactId>guava</artifactId>
                         <version>${dep.guava.version}</version>
                     </dependency>
+                    <dependency>
+                        <groupId>org.codehaus.groovy</groupId>
+                        <artifactId>groovy-all</artifactId>
+                        <version>${dep.groovy.version}</version>
+                    </dependency>
                 </dependencies>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.gmavenplus</groupId>
+                <artifactId>gmavenplus-plugin</artifactId>
+                <version>1.2</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>addTestSources</goal>
+                            <goal>testCompile</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

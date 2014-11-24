@@ -216,7 +216,7 @@ public final class DuplicateFinderMojo extends AbstractMojo
      * @since 1.1.0
      */
     @Parameter(defaultValue = "true")
-    protected boolean useResultFile = true;
+    protected boolean useResultFile = false;
 
 
     @Override
