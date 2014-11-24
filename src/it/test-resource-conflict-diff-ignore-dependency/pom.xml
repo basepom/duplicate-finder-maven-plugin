@@ -18,13 +18,13 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>@project.groupId@.@project.artifactId@</groupId>
-    <artifactId>test-resource-conflict-diff-ignore-dependency</artifactId>
-    <version>1.0.under-test</version>
+    <parent>
+        <groupId>@project.groupId@.@project.artifactId@</groupId>
+        <artifactId>basepom</artifactId>
+        <version>1.0.under-test</version>
+    </parent>
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
+    <artifactId>test-resource-conflict-diff-ignore-dependency</artifactId>
 
     <dependencies>
         <dependency>
@@ -40,19 +40,13 @@
     </dependencies>
 
     <build>
-        <defaultGoal>verify</defaultGoal>
-
         <plugins>
             <plugin>
                 <groupId>@project.groupId@</groupId>
                 <artifactId>@project.artifactId@</artifactId>
-                <version>@project.version@</version>
                 <configuration>
                     <printEqualFiles>true</printEqualFiles>
                     <failBuildInCaseOfConflict>true</failBuildInCaseOfConflict>
-                    <checkCompileClasspath>false</checkCompileClasspath>
-                    <checkRuntimeClasspath>false</checkRuntimeClasspath>
-                    <checkTestClasspath>true</checkTestClasspath>
                     <ignoredDependencies>
                         <dependency>
                             <groupId>testjar</groupId>
@@ -60,14 +54,6 @@
                         </dependency>
                     </ignoredDependencies>
                 </configuration>
-                <executions>
-                    <execution>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>

@@ -18,9 +18,13 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>@project.groupId@.@project.artifactId@</groupId>
+    <parent>
+        <groupId>@project.groupId@.@project.artifactId@</groupId>
+        <artifactId>basepom</artifactId>
+        <version>1.0.under-test</version>
+    </parent>
+
     <artifactId>test-class-conflict-ignore-multibuild-class</artifactId>
-    <version>1.0.under-test</version>
     <description>Integration test whether the current project can be referenced in the plugin configuration section</description>
     <packaging>pom</packaging>
     
@@ -28,10 +32,6 @@
         <module>p1</module>
         <module>p2</module>
     </modules>
-
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
 
     <dependencyManagement>
         <dependencies>
@@ -49,19 +49,13 @@
     </dependencyManagement>
 
     <build>
-        <defaultGoal>verify</defaultGoal>
-
         <plugins>
             <plugin>
                 <groupId>@project.groupId@</groupId>
                 <artifactId>@project.artifactId@</artifactId>
-                <version>@project.version@</version>
                 <configuration>
                     <printEqualFiles>true</printEqualFiles>
                     <failBuildInCaseOfConflict>true</failBuildInCaseOfConflict>
-                    <checkCompileClasspath>false</checkCompileClasspath>
-                    <checkRuntimeClasspath>false</checkRuntimeClasspath>
-                    <checkTestClasspath>true</checkTestClasspath>
                     <exceptions>
                         <exception>
                             <conflictingDependencies>
@@ -80,14 +74,6 @@
                         </exception>
                     </exceptions>
                 </configuration>
-                <executions>
-                    <execution>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>
