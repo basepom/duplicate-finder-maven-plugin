@@ -14,30 +14,11 @@
  * under the License.
  */
 
-import com.google.common.io.CharStreams
+import static com.ning.maven.plugins.duplicatefinder.groovy.ITools.*
 
-def buildFileReader = new FileReader(new File(basedir, "build.log").getCanonicalFile())
-def buildLogLines = CharStreams.readLines(buildFileReader)
+def result = loadTestXml(basedir)
 
-def linefilter = {line -> line.startsWith("[INFO]") || line.startsWith("[WARNING]") || line.startsWith("[ERROR]")}
-def relevantLogLines = buildLogLines.findAll(linefilter).reverse()
-
-def includeMessages = [
-  "[WARNING] Found duplicate (but equal) classes in [testjar:second-class-jar:1.0.under-test, testjar:second-equal-jar:1.0.under-test]"
-]
-
-def excludeMessages = [
-  "Found duplicate and different classes"
-]
-
-includeMessages.each() { message ->
-    def found = relevantLogLines.find() { line -> return line.indexOf(message) >= 0 }
-    assert found != null, "Did not find '" + message + "' in the build output!"
-}
-
-excludeMessages.each() { message ->
-    def found = relevantLogLines.find() { line -> return line.indexOf(message) >= 0 }
-    assert found == null, "Found '" + message + "' in the build output!"
-}
+overallState(CONFLICT_EQUAL, 1, NOT_FAILED, result)
+checkConflictResult("demo.Demo", TYPE_CLASS, CONFLICT_EQUAL, NOT_EXCEPTED, PRINTED, NOT_FAILED,  findConflictResult(result, SECOND_CLASS_JAR, SECOND_EQUAL_JAR))
 
 return true

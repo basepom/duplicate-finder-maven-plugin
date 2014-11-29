@@ -23,6 +23,7 @@
         <version>1.0.under-test</version>
     </parent>
 
-    <artifactId>p1</artifactId>
+    <groupId>testjar</groupId>
+    <artifactId>test-class-conflict-ignore-multibuild-class-p1</artifactId>
     <packaging>jar</packaging>
 </project>

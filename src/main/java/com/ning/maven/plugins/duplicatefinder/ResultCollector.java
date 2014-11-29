@@ -38,14 +38,20 @@ import org.apache.maven.artifact.Artifact;
 
 public class ResultCollector
 {
+    private final EnumSet<ConflictState> printState;
+    private final EnumSet<ConflictState> failState;
+
     private final EnumMap<ConflictType, EnumSet<ConflictState>> seenResults = Maps.newEnumMap(ConflictType.class);
 
     private final ListMultimap<String, ConflictResult> results = SetMultimapBuilder.linkedHashKeys().arrayListValues().build();
 
     private ConflictState conflictState = ConflictState.NO_CONFLICT;
 
-    public ResultCollector()
+    ResultCollector(final EnumSet<ConflictState> printState, final EnumSet<ConflictState> failState)
     {
+        this.printState = printState;
+        this.failState = failState;
+
         for (ConflictType conflictType : ConflictType.values()) {
             seenResults.put(conflictType, EnumSet.noneOf(ConflictState.class));
         }
@@ -54,6 +60,11 @@ public class ResultCollector
     public ConflictState getConflictState()
     {
         return conflictState;
+    }
+
+    public boolean isFailed()
+    {
+        return failState.contains(conflictState);
     }
 
     public boolean hasConflictsFor(ConflictType type, ConflictState state)
@@ -97,8 +108,12 @@ public class ResultCollector
         return ImmutableMap.copyOf(results.asMap());
     }
 
+    private static String buildConflictArtifactsName(final Map<String, Optional<Artifact>> conflictArtifactNames)
+    {
+        return Joiner.on(", ").join(conflictArtifactNames.keySet());
+    }
 
-    public static class ConflictResult
+    public class ConflictResult
     {
         private final ConflictType type;
         private final String name;
@@ -108,22 +123,17 @@ public class ResultCollector
         private final String conflictArtifactsName;
 
         ConflictResult(final ConflictType type,
-                              final String name,
-                              final Map<String, Optional<Artifact>> conflictArtifactNames,
-                              final boolean excepted,
-                              final ConflictState conflictState)
+                       final String name,
+                       final Map<String, Optional<Artifact>> conflictArtifactNames,
+                       final boolean excepted,
+                       final ConflictState conflictState)
         {
             this.type = type;
             this.name = name;
             this.conflictArtifactNames = conflictArtifactNames;
             this.excepted = excepted;
             this.conflictState = conflictState;
-            this.conflictArtifactsName = ConflictResult.buildConflictArtifactsName(conflictArtifactNames);
-        }
-
-        private static String buildConflictArtifactsName(final Map<String, Optional<Artifact>> conflictArtifactNames)
-        {
-            return Joiner.on(", ").join(conflictArtifactNames.keySet());
+            this.conflictArtifactsName = ResultCollector.buildConflictArtifactsName(conflictArtifactNames);
         }
 
         public String getName()
@@ -144,6 +154,16 @@ public class ResultCollector
         public boolean isExcepted()
         {
             return excepted;
+        }
+
+        public boolean isPrinted()
+        {
+            return !excepted && printState.contains(conflictState);
+        }
+
+        public boolean isFailed()
+        {
+            return !excepted && failState.contains(conflictState);
         }
 
         public ConflictState getConflictState()

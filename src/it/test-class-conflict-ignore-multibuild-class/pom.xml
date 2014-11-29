@@ -36,13 +36,13 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>p1</artifactId>
+                <groupId>testjar</groupId>
+                <artifactId>test-class-conflict-ignore-multibuild-class-p1</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>p2</artifactId>
+                <groupId>testjar</groupId>
+                <artifactId>test-class-conflict-ignore-multibuild-class-p2</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>
@@ -60,12 +60,12 @@
                         <exception>
                             <conflictingDependencies>
                                 <dependency>
-                                    <groupId>${project.groupId}</groupId>
-                                    <artifactId>p1</artifactId>
+                                    <groupId>testjar</groupId>
+                                    <artifactId>test-class-conflict-ignore-multibuild-class-p1</artifactId>
                                 </dependency>
                                 <dependency>
-                                    <groupId>${project.groupId}</groupId>
-                                    <artifactId>p2</artifactId>
+                                    <groupId>testjar</groupId>
+                                    <artifactId>test-class-conflict-ignore-multibuild-class-p2</artifactId>
                                 </dependency>
                             </conflictingDependencies>
                             <classes>

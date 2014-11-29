@@ -19,7 +19,8 @@ import static java.lang.String.format;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static com.ning.maven.plugins.duplicatefinder.ConflictState.NO_CONFLICT;
+import static com.ning.maven.plugins.duplicatefinder.ConflictState.CONFLICT_CONTENT_DIFFERENT;
+import static com.ning.maven.plugins.duplicatefinder.ConflictState.CONFLICT_CONTENT_EQUAL;
 import static com.ning.maven.plugins.duplicatefinder.ConflictType.CLASS;
 import static com.ning.maven.plugins.duplicatefinder.ConflictType.RESOURCE;
 import static com.ning.maven.plugins.duplicatefinder.artifact.ArtifactHelper.getOutputDirectory;
@@ -123,20 +124,20 @@ public final class DuplicateFinderMojo extends AbstractMojo
      * @since 1.0.3
      */
     @Parameter(defaultValue = "false")
-    protected boolean failBuildInCaseOfDifferentContentConflict;
+    protected boolean failBuildInCaseOfDifferentContentConflict = false;
 
     /**
      * Fail the build if files with the same name and the same content are detected.
      * @since 1.0.3
      */
     @Parameter(defaultValue = "false")
-    protected boolean failBuildInCaseOfEqualContentConflict;
+    protected boolean failBuildInCaseOfEqualContentConflict = false;
 
     /**
      * Fail the build if any files with the same name are found.
      */
     @Parameter(defaultValue = "false")
-    protected boolean failBuildInCaseOfConflict;
+    protected boolean failBuildInCaseOfConflict = false;
 
     /**
      * Use the default resource ignore list.
@@ -218,6 +219,8 @@ public final class DuplicateFinderMojo extends AbstractMojo
     @Parameter(defaultValue = "true")
     protected boolean useResultFile = false;
 
+    private final EnumSet<ConflictState> printState = EnumSet.of(CONFLICT_CONTENT_DIFFERENT);
+    private final EnumSet<ConflictState> failState = EnumSet.noneOf(ConflictState.class);
 
     @Override
     public void setLog(final Log log)
@@ -237,67 +240,85 @@ public final class DuplicateFinderMojo extends AbstractMojo
                 LOG.debug("Ignoring POM project");
             }
             else {
-                // For any of the build failures being set, the equal files should also be print out.
-                printEqualFiles |= failBuildInCaseOfConflict || failBuildInCaseOfEqualContentConflict;
+                if (printEqualFiles) {
+                    printState.add(CONFLICT_CONTENT_EQUAL);
+                }
+
+                if (failBuildInCaseOfConflict || failBuildInCaseOfEqualContentConflict) {
+                    printState.add(CONFLICT_CONTENT_EQUAL);
+
+                    failState.add(CONFLICT_CONTENT_EQUAL);
+                    failState.add(CONFLICT_CONTENT_DIFFERENT);
+                }
+
+                if (failBuildInCaseOfDifferentContentConflict) {
+                    failState.add(CONFLICT_CONTENT_DIFFERENT);
+                }
 
                 try {
                     final ArtifactFileResolver artifactFileResolver = new ArtifactFileResolver(project, preferLocal);
-                    final ImmutableMap.Builder<String, Entry<ResultCollector, ClasspathDescriptor>> resultsBuilder = ImmutableMap.builder();
+                    final ImmutableMap.Builder<String, Entry<ResultCollector, ClasspathDescriptor>> classpathResultBuilder = ImmutableMap.builder();
 
                     if (checkCompileClasspath) {
                         LOG.report(quiet, "Checking compile classpath");
-                        final ResultCollector resultCollector = new ResultCollector();
+                        final ResultCollector resultCollector = new ResultCollector(printState, failState);
                         final ClasspathDescriptor classpathDescriptor = checkClasspath(resultCollector, artifactFileResolver, COMPILE_SCOPE, getOutputDirectory(project));
-                        resultsBuilder.put("compile", new SimpleImmutableEntry<ResultCollector, ClasspathDescriptor>(resultCollector, classpathDescriptor));
+                        classpathResultBuilder.put("compile", new SimpleImmutableEntry<ResultCollector, ClasspathDescriptor>(resultCollector, classpathDescriptor));
                     }
 
                     if (checkRuntimeClasspath) {
                         LOG.report(quiet, "Checking runtime classpath");
-                        final ResultCollector resultCollector = new ResultCollector();
+                        final ResultCollector resultCollector = new ResultCollector(printState, failState);
                         final ClasspathDescriptor classpathDescriptor = checkClasspath(resultCollector, artifactFileResolver, RUNTIME_SCOPE, getOutputDirectory(project));
-                        resultsBuilder.put("runtime", new SimpleImmutableEntry<ResultCollector, ClasspathDescriptor>(resultCollector, classpathDescriptor));
+                        classpathResultBuilder.put("runtime", new SimpleImmutableEntry<ResultCollector, ClasspathDescriptor>(resultCollector, classpathDescriptor));
                     }
 
                     if (checkTestClasspath) {
                         LOG.report(quiet, "Checking test classpath");
-                        final ResultCollector resultCollector = new ResultCollector();
+                        final ResultCollector resultCollector = new ResultCollector(printState, failState);
                         final ClasspathDescriptor classpathDescriptor = checkClasspath(resultCollector, artifactFileResolver, TEST_SCOPE, getOutputDirectory(project), getTestOutputDirectory(project));
-                        resultsBuilder.put("test", new SimpleImmutableEntry<ResultCollector, ClasspathDescriptor>(resultCollector, classpathDescriptor));
+                        classpathResultBuilder.put("test", new SimpleImmutableEntry<ResultCollector, ClasspathDescriptor>(resultCollector, classpathDescriptor));
                     }
 
-                    final ImmutableMap<String, Entry<ResultCollector, ClasspathDescriptor>> results = resultsBuilder.build();
+                    final ImmutableMap<String, Entry<ResultCollector, ClasspathDescriptor>> classpathResults = classpathResultBuilder.build();
 
                     if (useResultFile) {
                         checkState(resultFile != null, "resultFile must be set if useResultFile is true");
-                        writeResultFile(resultFile, results);
+                        writeResultFile(resultFile, classpathResults);
                     }
 
-                    ConflictState conflictState = NO_CONFLICT;
+                    boolean failed = false;
 
-                    for (Map.Entry<String, Entry<ResultCollector, ClasspathDescriptor>> entry : results.entrySet()) {
-                        String classpathName = entry.getKey();
-                        ResultCollector resultCollector = entry.getValue().getKey();
-                        switch (resultCollector.getConflictState()) {
-                            case CONFLICT_CONTENT_DIFFERENT:
-                                printConflicts(resultCollector);
-                                if (failBuildInCaseOfConflict || failBuildInCaseOfDifferentContentConflict || failBuildInCaseOfEqualContentConflict) {
-                                    conflictState = ConflictState.max(conflictState, resultCollector.getConflictState());
-                                    LOG.warn("Found duplicate classes/resources in %s classpath.", classpathName);
+                    for (Map.Entry<String, Entry<ResultCollector, ClasspathDescriptor>> classpathEntry : classpathResults.entrySet()) {
+                        String classpathName = classpathEntry.getKey();
+                        ResultCollector resultCollector = classpathEntry.getValue().getKey();
+                        ConflictState resultConflictState = resultCollector.getConflictState();
+
+                        for (final ConflictState state : printState) {
+                            for (final ConflictType type : ConflictType.values()) {
+                                if (resultCollector.hasConflictsFor(type, state)) {
+                                    final Map<String, Collection<ConflictResult>> results = resultCollector.getResults(type, state);
+                                    for (final Map.Entry<String, Collection<ConflictResult>> entry : results.entrySet()) {
+                                        final String artifactNames = entry.getKey();
+                                        final Collection<ConflictResult> conflictResults = entry.getValue();
+
+                                        LOG.warn("Found duplicate %s %s in [%s]:", state.getHint(), type.getType(), artifactNames);
+                                        for (final ConflictResult conflictResult : conflictResults) {
+                                            LOG.warn("  %s", conflictResult.getName());
+                                        }
+                                    }
                                 }
-                                break;
-                            case CONFLICT_CONTENT_EQUAL:
-                                printConflicts(resultCollector);
-                                if (failBuildInCaseOfConflict || failBuildInCaseOfEqualContentConflict) {
-                                    conflictState = ConflictState.max(conflictState, resultCollector.getConflictState());
-                                    LOG.warn("Found duplicate classes/resources in %s classpath.", classpathName);
-                                }
-                                break;
-                            default:
-                                break;
+                            }
+                        }
+
+                        failed |= resultCollector.isFailed();
+
+                        if (resultCollector.isFailed()) {
+                            LOG.warn("Found duplicate classes/resources in %s classpath.", classpathName);
                         }
                     }
 
-                    if (conflictState != NO_CONFLICT) {
+                    if (failed) {
                         throw new MojoExecutionException("Found duplicate classes/resources!");
                     }
                 }
@@ -383,31 +404,6 @@ public final class DuplicateFinderMojo extends AbstractMojo
             ConflictState conflictState = DuplicateFinderMojo.determineConflictState(type, name, elements);
 
             resultCollector.addConflict(type, name, conflictArtifactNames, excepted, conflictState);
-        }
-    }
-
-    public void printConflicts(ResultCollector collector)
-    {
-        // Only print equal files if the print flag is set.
-        EnumSet<ConflictState> conflictSet = printEqualFiles
-                        ? EnumSet.of(ConflictState.CONFLICT_CONTENT_EQUAL, ConflictState.CONFLICT_CONTENT_DIFFERENT)
-                        : EnumSet.of(ConflictState.CONFLICT_CONTENT_DIFFERENT);
-
-        for (ConflictState state : conflictSet) {
-            for (ConflictType type : ConflictType.values()) {
-                if (collector.hasConflictsFor(type, state)) {
-                    Map<String, Collection<ConflictResult>> results = collector.getResults(type, state);
-                    for (final Map.Entry<String, Collection<ConflictResult>> entry : results.entrySet()) {
-                        final String artifactNames = entry.getKey();
-                        final Collection<ConflictResult> conflictResults = entry.getValue();
-
-                        LOG.warn("Found duplicate %s %s in [%s] :", state.getHint(), type.getType(), artifactNames);
-                        for (final ConflictResult conflictResult : conflictResults) {
-                            LOG.warn("  %s", conflictResult.getName());
-                        }
-                    }
-                }
-            }
         }
     }
 
@@ -542,7 +538,6 @@ public final class DuplicateFinderMojo extends AbstractMojo
                 XMLWriterUtils.addResultCollector(resultElement, entry.getValue().getKey());
                 XMLWriterUtils.addClasspathDescriptor(resultElement, entry.getValue().getValue());
             }
-
 
             resultDocument.closeRootAndWriter();
         }

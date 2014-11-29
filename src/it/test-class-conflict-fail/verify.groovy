@@ -14,30 +14,12 @@
  * under the License.
  */
 
-import com.google.common.io.CharStreams
+import static com.ning.maven.plugins.duplicatefinder.groovy.ITools.*
 
-def buildFileReader = new FileReader(new File(basedir, "build.log").getCanonicalFile())
-def buildLogLines = CharStreams.readLines(buildFileReader)
+def result = loadTestXml(basedir)
 
-def linefilter = {line -> line.startsWith("[INFO]") || line.startsWith("[WARNING]") || line.startsWith("[ERROR]")}
-def relevantLogLines = buildLogLines.findAll(linefilter).reverse()
-
-def includeMessages = [
-  "[WARNING] Found duplicate and different classes in [testjar:first-class-jar:1.0.under-test, testjar:first-diff-jar:1.0.under-test]",
-  "[WARNING] Found duplicate (but equal) classes in [testjar:second-class-jar:1.0.under-test, testjar:second-equal-jar:1.0.under-test]"
-]
-
-def excludeMessages = [
-]
-
-includeMessages.each() { message ->
-    def found = relevantLogLines.find() { line -> return line.indexOf(message) >= 0 }
-    assert found != null, "Did not find '" + message + "' in the build output!"
-}
-
-excludeMessages.each() { message ->
-    def found = relevantLogLines.find() { line -> return line.indexOf(message) >= 0 }
-    assert found == null, "Found '" + message + "' in the build output!"
-}
+overallState(CONFLICT_DIFF, 2, FAILED, result)
+checkConflictResult("demo.Demo", TYPE_CLASS, CONFLICT_EQUAL, NOT_EXCEPTED, PRINTED, FAILED,  findConflictResult(result, SECOND_CLASS_JAR, SECOND_EQUAL_JAR))
+checkConflictResult("diff.Demo", TYPE_CLASS, CONFLICT_DIFF,  NOT_EXCEPTED, PRINTED, FAILED, findConflictResult(result, FIRST_CLASS_JAR, FIRST_DIFF_JAR))
 
 return true

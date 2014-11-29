@@ -24,13 +24,14 @@
         <version>1.0.under-test</version>
     </parent>
 
-    <artifactId>p2</artifactId>
+    <groupId>testjar</groupId>
+    <artifactId>test-class-conflict-ignore-multibuild-class-p2</artifactId>
     <packaging>jar</packaging>
 
     <dependencies>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>p1</artifactId>
+            <groupId>testjar</groupId>
+            <artifactId>test-class-conflict-ignore-multibuild-class-p1</artifactId>
         </dependency>
     </dependencies>
 </project>

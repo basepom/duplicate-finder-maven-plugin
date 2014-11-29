@@ -18,6 +18,6 @@ package diff;
 public class Demo
 {
     public static final void main(String ... args) throws Exception {
-        System.out.println("Hello, project-jar World!");
+        System.out.println("Hello, p2 World!");
     }
 }

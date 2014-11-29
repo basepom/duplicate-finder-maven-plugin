@@ -143,6 +143,7 @@ public final class XMLWriterUtils
         throws XMLStreamException, OverConstrainedVersionException
     {
         addAttribute(resultElement, "conflictState", resultCollector.getConflictState());
+        addAttribute(resultElement, "failed", resultCollector.isFailed());
         SMOutputElement conflictsElement = resultElement.addElement("conflicts");
 
         for (Map.Entry<String, Collection<ConflictResult>> entry : resultCollector.getAllResults().entrySet()) {
@@ -162,6 +163,8 @@ public final class XMLWriterUtils
         addAttribute(conflictResultElement, "name", conflictResult.getName());
         addAttribute(conflictResultElement, "type", conflictResult.getType());
         addAttribute(conflictResultElement, "excepted", conflictResult.isExcepted());
+        addAttribute(conflictResultElement, "failed", conflictResult.isFailed());
+        addAttribute(conflictResultElement, "printed", conflictResult.isPrinted());
         addAttribute(conflictResultElement, "conflictState", conflictResult.getConflictState());
         SMOutputElement conflictNames = conflictResultElement.addElement("conflictNames");
         for (Map.Entry<String, Optional<Artifact>> entry : conflictResult.getConflictArtifactNames().entrySet()) {

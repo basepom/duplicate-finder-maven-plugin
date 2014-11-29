@@ -22,20 +22,32 @@ package com.ning.maven.plugins.duplicatefinder.groovy
  */
 public final class ITools
 {
-  def static final CONFLICT_EQUAL = "CONFLICT_CONTENT_EQUAL"
-  def static final CONFLICT_DIFF = "CONFLICT_CONTENT_DIFFERENT"
-
   def static final TYPE_CLASS = "CLASS";
   def static final TYPE_RESOURCE = "RESOURCE";
 
-  def static jarName(String g, String a, String v) {
-    return g + ":" + a + ":" + v;
+  def static final NO_CONFLICT = "NO_CONFLICT"
+  def static final CONFLICT_EQUAL = "CONFLICT_CONTENT_EQUAL"
+  def static final CONFLICT_DIFF = "CONFLICT_CONTENT_DIFFERENT"
+
+  def static final NOT_EXCEPTED = false
+  def static final EXCEPTED = true
+
+  def static final NOT_PRINTED = false
+  def static final PRINTED = true
+
+  def static final NOT_FAILED = false
+  def static final FAILED = true
+
+  def static jarName(String a) {
+    return "testjar:" + a + ":1.0.under-test"
   }
 
-  def static final FIRST_CLASS_JAR = jarName("testjar", "first-class-jar", "1.0.under-test")
-  def static final FIRST_DIFF_JAR = jarName("testjar", "first-diff-jar", "1.0.under-test")
-  def static final SECOND_CLASS_JAR = jarName("testjar", "second-class-jar", "1.0.under-test")
-  def static final SECOND_EQUAL_JAR = jarName("testjar", "second-equal-jar", "1.0.under-test")
+  def static final FIRST_JAR        = jarName("first-jar")
+  def static final SECOND_JAR       = jarName("second-jar")
+  def static final FIRST_CLASS_JAR  = jarName("first-class-jar")
+  def static final FIRST_DIFF_JAR   = jarName("first-diff-jar")
+  def static final SECOND_CLASS_JAR = jarName("second-class-jar")
+  def static final SECOND_EQUAL_JAR = jarName("second-equal-jar")
 
   /**
    * Finds a conflict element in an XML result where the name field matches all of the elements given as matches.
@@ -55,46 +67,80 @@ public final class ITools
    * Ensures that only a single conflictResult elements from a single conflict exists. 
    */
   def static findConflictResult(result, String ... matches) {
+    return findConflictResult(result, 1, matches);
+  }
+
+  def static findConflictResult(result, int count, String ... matches) {
     def conflictResult = findSingleConflictResults(result, matches)
-    assert 1 == conflictResult.size()
-    return conflictResult[0]
+    assert conflictResult.size() == count
+    return conflictResult
   }
 
   /**
    * Checks whether a given conflict result matches in name, type and conflict state.
    */
-  def static checkConflictResult(String conflictName, String conflictType, String conflictState, result) {
-    assert null != result
+  def static checkConflictResult(String conflictName, String conflictType, String conflictState, boolean excepted, boolean printed, boolean failed, conflictResult) {
+    println("*** TEST: checkConflictResult(name:${conflictName}, type:${conflictType}, state:${conflictState}, excepted:${excepted}, printed:${printed}, failed:${failed}, result)...");
+
+    assert null != conflictResult
+
+    def result = conflictResult.findAll( { it.@name.text().equals(conflictName) } )
+    assert 1 == result.size()
 
     assert conflictName == result.@name.text()
     assert conflictType == result.@type.text()
     assert conflictState == result.@conflictState.text()
+    assert Boolean.toString(excepted) == result.@excepted.text()
+    assert Boolean.toString(printed) == result.@printed.text()
+    assert Boolean.toString(failed) == result.@failed.text()
+
+    println("*** TEST: checkConflictResult(name:${conflictName}, type:${conflictType}, state:${conflictState}, excepted:${excepted}, printed:${printed}, failed:${failed}, result) --> OK");
   }
 
   /**
    * Loads the full XML result file and returns the root node.
    */
-  def static loadXml(dir) {
+  def static loadXml(dir, String name) {
     def xml = new XmlSlurper().parse(new File(dir, "target/duplicate-finder-result.xml").getCanonicalFile())
     assert null != xml
-    return xml
+    def elements = xml.results.result.findAll( { it.@name.text().equals(name) } )
+    assert 1 == elements.size()
+    return elements[0]
   }
 
   /**
    * Finds the 'test' result in the XML node.
    */
   def static loadTestXml(dir) {
-    def xml = new XmlSlurper().parse(new File(dir, "target/duplicate-finder-result.xml").getCanonicalFile())
-    def result = xml.results.result[0]
-    assert "test" == result.@name.text()
-    return result
+    return loadXml(dir, "test")
+    // def xml = new XmlSlurper().parse(new File(dir, "target/duplicate-finder-result.xml").getCanonicalFile())
+    // def result = xml.results.result[0]
+    // assert "test" == result.@name.text()
+    // return result
+  }
+
+  /**
+   * Returns the location of the project target/classes folder.
+   */
+  def static projectTargetFolder(dir) {
+    return new File(dir, "target/classes").getAbsolutePath()
+  }
+
+  /**
+   * Returns the location of the project target/test-classes folder.
+   */
+  def static projectTargetTestFolder(dir) {
+    return new File(dir, "target/test-classes").getAbsolutePath()
   }
 
   /**
    * checks the basic state of a test result.
    */
-  def static overallState(String state, int conflictCount, result) {
+  def static overallState(String state, int conflictCount, boolean failed, result) {
+    println("*** TEST: overallState(state:${state}, count:${conflictCount}, failed:${failed}, result)...");
     assert state == result.@conflictState.text()
+    assert Boolean.toString(failed) == result.@failed.text()
     assert conflictCount == result.conflicts.conflict.size()
+    println("*** TEST: overallState(state:${state}, count:${conflictCount}, failed:${failed}, result) --> OK");
   }
 }

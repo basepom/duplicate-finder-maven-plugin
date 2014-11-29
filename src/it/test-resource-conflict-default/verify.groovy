@@ -14,30 +14,12 @@
  * under the License.
  */
 
-import com.google.common.io.CharStreams
+import static com.ning.maven.plugins.duplicatefinder.groovy.ITools.*
 
-def buildFileReader = new FileReader(new File(basedir, "build.log").getCanonicalFile())
-def buildLogLines = CharStreams.readLines(buildFileReader)
+def result = loadTestXml(basedir)
 
-def linefilter = {line -> line.startsWith("[INFO]") || line.startsWith("[WARNING]") || line.startsWith("[ERROR]")}
-def relevantLogLines = buildLogLines.findAll(linefilter).reverse()
-
-def includeMessages = [
-  "[WARNING] Found duplicate and different resources in [testjar:first-jar:1.0.under-test, testjar:second-jar:1.0.under-test]"
-]
-
-def excludeMessages = [
-  "Found duplicate (but equal) resources"
-]
-
-includeMessages.each() { message ->
-    def found = relevantLogLines.find() { line -> return line.indexOf(message) >= 0 }
-    assert found != null, "Did not find '" + message + "' in the build output!"
-}
-
-excludeMessages.each() { message ->
-    def found = relevantLogLines.find() { line -> return line.indexOf(message) >= 0 }
-    assert found == null, "Found '" + message + "' in the build output!"
-}
+overallState(CONFLICT_DIFF, 1, NOT_FAILED, result) // This is "1" because both conflictResults are in the same conflict.
+checkConflictResult("conflict-same-content",      TYPE_RESOURCE, CONFLICT_EQUAL, NOT_EXCEPTED, NOT_PRINTED, NOT_FAILED, findConflictResult(result, 2, FIRST_JAR, SECOND_JAR))
+checkConflictResult("conflict-different-content", TYPE_RESOURCE, CONFLICT_DIFF,  NOT_EXCEPTED, PRINTED,     NOT_FAILED, findConflictResult(result, 2, FIRST_JAR, SECOND_JAR))
 
 return true

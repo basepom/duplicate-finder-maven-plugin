@@ -14,30 +14,10 @@
  * under the License.
  */
 
-import com.google.common.io.CharStreams
+import static com.ning.maven.plugins.duplicatefinder.groovy.ITools.*
 
-def buildFileReader = new FileReader(new File(basedir, "build.log").getCanonicalFile())
-def buildLogLines = CharStreams.readLines(buildFileReader)
+def result = loadTestXml(basedir)
 
-def linefilter = {line -> line.startsWith("[INFO]") || line.startsWith("[WARNING]") || line.startsWith("[ERROR]")}
-def relevantLogLines = buildLogLines.findAll(linefilter).reverse()
-
-def includeMessages = [
-]
-
-def excludeMessages = [
-  "Found duplicate (but equal) resources",
-  "Found duplicate and different resources"
-]
-
-includeMessages.each() { message ->
-    def found = relevantLogLines.find() { line -> return line.indexOf(message) >= 0 }
-    assert found != null, "Did not find '" + message + "' in the build output!"
-}
-
-excludeMessages.each() { message ->
-    def found = relevantLogLines.find() { line -> return line.indexOf(message) >= 0 }
-    assert found == null, "Found '" + message + "' in the build output!"
-}
+overallState(NO_CONFLICT, 0, NOT_FAILED, result)
 
 return true

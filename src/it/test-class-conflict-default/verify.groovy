@@ -18,8 +18,8 @@ import static com.ning.maven.plugins.duplicatefinder.groovy.ITools.*
 
 def result = loadTestXml(basedir)
 
-overallState(CONFLICT_DIFF, 2, result)
-checkConflictResult("demo.Demo", TYPE_CLASS, CONFLICT_EQUAL, findConflictResult(result, SECOND_CLASS_JAR, SECOND_EQUAL_JAR))
-checkConflictResult("diff.Demo", TYPE_CLASS, CONFLICT_DIFF,  findConflictResult(result, FIRST_CLASS_JAR, FIRST_DIFF_JAR))
+overallState(CONFLICT_DIFF, 2, NOT_FAILED, result)
+checkConflictResult("demo.Demo", TYPE_CLASS, CONFLICT_EQUAL, NOT_EXCEPTED, NOT_PRINTED, NOT_FAILED, findConflictResult(result, SECOND_CLASS_JAR, SECOND_EQUAL_JAR))
+checkConflictResult("diff.Demo", TYPE_CLASS, CONFLICT_DIFF,  NOT_EXCEPTED, PRINTED,     NOT_FAILED, findConflictResult(result, FIRST_CLASS_JAR, FIRST_DIFF_JAR))
 
 return true

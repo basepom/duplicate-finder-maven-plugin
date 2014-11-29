@@ -14,30 +14,13 @@
  * under the License.
  */
 
-import com.google.common.io.CharStreams
+import static com.ning.maven.plugins.duplicatefinder.groovy.ITools.*
 
-def buildFileReader = new FileReader(new File(basedir, "build.log").getCanonicalFile())
-def buildLogLines = CharStreams.readLines(buildFileReader)
+def rootdir = new File(basedir, "p2")
+def p1Jar = jarName("test-class-conflict-ignore-multibuild-class-p1")
+def result = loadTestXml(rootdir)
 
-def linefilter = {line -> line.startsWith("[INFO]") || line.startsWith("[WARNING]") || line.startsWith("[ERROR]")}
-def relevantLogLines = buildLogLines.findAll(linefilter).reverse()
-
-def includeMessages = [
-]
-
-def excludeMessages = [
-  "Found duplicate (but equal) classes",
-  "Found duplicate and different resources"
-]
-
-includeMessages.each() { message ->
-    def found = relevantLogLines.find() { line -> return line.indexOf(message) >= 0 }
-    assert found != null, "Did not find '" + message + "' in the build output!"
-}
-
-excludeMessages.each() { message ->
-    def found = relevantLogLines.find() { line -> return line.indexOf(message) >= 0 }
-    assert found == null, "Found '" + message + "' in the build output!"
-}
+overallState(NO_CONFLICT, 1, NOT_FAILED, result)
+checkConflictResult("diff.Demo", TYPE_CLASS, CONFLICT_DIFF, EXCEPTED, NOT_PRINTED, NOT_FAILED, findConflictResult(result, p1Jar, projectTargetFolder(rootdir)))
 
 return true
