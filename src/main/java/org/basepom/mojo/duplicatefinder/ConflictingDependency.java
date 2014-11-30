@@ -162,7 +162,8 @@ public class ConflictingDependency
         }
         else {
             for (final String packageName : packages) {
-                if (className.startsWith(packageName)) { // TODO - bug here. foo.bar matches foo.barbaz
+                String pkgName = packageName.endsWith(".") ? packageName : packageName + ".";
+                if (className.startsWith(pkgName)) {
                     return true;
                 }
             }
