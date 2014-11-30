@@ -1,0 +1,7 @@
+duplicate-finder maven plugin
+(C) 2010-2014 by the authors
+
+This product is based on the Maven Duplicate Finder Plugin
+(C) 2010 Ning, Inc.
+
+Licensed under the Apache License Version 2.0
