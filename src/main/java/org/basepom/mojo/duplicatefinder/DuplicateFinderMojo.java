@@ -215,7 +215,7 @@ public final class DuplicateFinderMojo extends AbstractMojo
      * @since 1.1.0
      */
     @Parameter(defaultValue = "true")
-    protected boolean useResultFile = false;
+    protected boolean useResultFile = true;
 
     private final EnumSet<ConflictState> printState = EnumSet.of(CONFLICT_CONTENT_DIFFERENT);
     private final EnumSet<ConflictState> failState = EnumSet.noneOf(ConflictState.class);
