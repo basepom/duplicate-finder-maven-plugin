@@ -174,7 +174,7 @@ public final class XMLWriterUtils
         }
     }
 
-    public static void addClasspathDescriptor(SMOutputElement resultElement, ClasspathDescriptor classpathDescriptor)
+    public static void addClasspathDescriptor(SMOutputElement resultElement, int resultFileMinClasspathCount, ClasspathDescriptor classpathDescriptor)
         throws XMLStreamException
     {
         SMOutputElement resourceExclusionPatternsElement = resultElement.addElement("excludedResourcePatterns");
@@ -191,10 +191,12 @@ public final class XMLWriterUtils
             SMOutputElement classpathElementsElement = resultElement.addElement("classpathElements");
             addAttribute(classpathElementsElement, "type", type);
             for (Map.Entry<String, Collection<File>> entry : classpathDescriptor.getClasspathElementLocations(type).entrySet()) {
-                SMOutputElement classpathElementElement = classpathElementsElement.addElement("classpathElement");
-                addAttribute(classpathElementElement, "name", entry.getKey());
-                for (File file : entry.getValue()) {
-                    addElement(classpathElementElement, "file", file.getPath());
+                if (entry.getValue().size() >= resultFileMinClasspathCount) {
+                    SMOutputElement classpathElementElement = classpathElementsElement.addElement("classpathElement");
+                    addAttribute(classpathElementElement, "name", entry.getKey());
+                    for (File file : entry.getValue()) {
+                        addElement(classpathElementElement, "file", file.getPath());
+                    }
                 }
             }
         }

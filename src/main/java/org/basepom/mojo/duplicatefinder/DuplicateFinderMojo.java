@@ -217,6 +217,14 @@ public final class DuplicateFinderMojo extends AbstractMojo
     @Parameter(defaultValue = "true")
     protected boolean useResultFile = true;
 
+    /**
+     * Minimum occurences on the class path to be listed in the result file.
+     *
+     * @since 1.1.0
+     */
+    @Parameter(defaultValue="2")
+    protected int resultFileMinClasspathCount = 2;
+
     private final EnumSet<ConflictState> printState = EnumSet.of(CONFLICT_CONTENT_DIFFERENT);
     private final EnumSet<ConflictState> failState = EnumSet.noneOf(ConflictState.class);
 
@@ -534,7 +542,7 @@ public final class DuplicateFinderMojo extends AbstractMojo
                 SMOutputElement resultElement = resultsElement.addElement("result");
                 XMLWriterUtils.addAttribute(resultElement, "name", entry.getKey());
                 XMLWriterUtils.addResultCollector(resultElement, entry.getValue().getKey());
-                XMLWriterUtils.addClasspathDescriptor(resultElement, entry.getValue().getValue());
+                XMLWriterUtils.addClasspathDescriptor(resultElement, resultFileMinClasspathCount, entry.getValue().getValue());
             }
 
             resultDocument.closeRootAndWriter();
@@ -558,6 +566,7 @@ public final class DuplicateFinderMojo extends AbstractMojo
         XMLWriterUtils.addAttribute(prefs, "checkTestClasspath", checkTestClasspath);
         XMLWriterUtils.addAttribute(prefs, "quiet", quiet);
         XMLWriterUtils.addAttribute(prefs, "preferLocal", preferLocal);
+        XMLWriterUtils.addAttribute(prefs, "resultFileMinClasspathCount", resultFileMinClasspathCount);
 
         SMOutputElement ignoredResourcesElement = prefs.addElement("ignoredResources");
         for (String ignoredResource : ignoredResources) {

@@ -95,14 +95,25 @@ public final class ITools
   }
 
   /**
-   * Loads the full XML result file and returns the root node.
+   * Loads the full XML result file and returns the root result node for the named result.
    */
   def static loadXml(dir, String name) {
+    return loadXmlAndResult(dir, name)[0]
+  }
+
+  /**
+   * Loads the full XML result and return the root result node and the full XML as an array.
+   */
+  def static loadXmlAndResult(dir, String name) {
     def xml = new XmlSlurper().parse(new File(dir, "target/duplicate-finder-result.xml").getCanonicalFile())
     assert null != xml
+
+    // Version sanity check
+    assert "1" == xml.@version.text()
+
     def elements = xml.results.result.findAll( { it.@name.text().equals(name) } )
     assert 1 == elements.size()
-    return elements[0]
+    return [ elements[0], xml ]
   }
 
   /**
@@ -110,10 +121,6 @@ public final class ITools
    */
   def static loadTestXml(dir) {
     return loadXml(dir, "test")
-    // def xml = new XmlSlurper().parse(new File(dir, "target/duplicate-finder-result.xml").getCanonicalFile())
-    // def result = xml.results.result[0]
-    // assert "test" == result.@name.text()
-    // return result
   }
 
   /**
