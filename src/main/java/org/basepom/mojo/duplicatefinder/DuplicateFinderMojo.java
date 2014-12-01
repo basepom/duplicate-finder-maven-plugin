@@ -15,6 +15,7 @@ package org.basepom.mojo.duplicatefinder;
 
 import static java.lang.String.format;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
@@ -76,6 +77,7 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 import org.basepom.mojo.duplicatefinder.ResultCollector.ConflictResult;
 import org.basepom.mojo.duplicatefinder.artifact.ArtifactFileResolver;
+import org.basepom.mojo.duplicatefinder.artifact.MavenCoordinates;
 import org.basepom.mojo.duplicatefinder.classpath.ClasspathDescriptor;
 import org.codehaus.stax2.XMLOutputFactory2;
 import org.codehaus.staxmate.SMOutputFactory;
@@ -158,8 +160,8 @@ public final class DuplicateFinderMojo extends AbstractMojo
     /**
      * Dependencies that should not be checked at all.
      */
-    @Parameter(property = "ignoredDependencies")
-    protected Dependency[] ignoredDependencies = new Dependency[0];
+    @Parameter(alias = "ignoredDependencies", property = "ignoredDependencies")
+    protected MavenCoordinates[] ignoredDependencies = new MavenCoordinates[0];
 
     /**
      * Check resources and classes on the compile class path.
@@ -233,6 +235,17 @@ public final class DuplicateFinderMojo extends AbstractMojo
     {
         super.setLog(log);
         MavenLogAppender.startPluginLog(this);
+    }
+
+    // called by maven
+    public void setIgnoredDependencies(final Dependency [] dependencies) throws InvalidVersionSpecificationException
+    {
+        checkArgument(dependencies != null);
+
+        this.ignoredDependencies = new MavenCoordinates[dependencies.length];
+        for (int idx = 0; idx < dependencies.length; idx++) {
+            this.ignoredDependencies[idx] = new MavenCoordinates(dependencies[idx]);
+        }
     }
 
     @Override
@@ -579,8 +592,8 @@ public final class DuplicateFinderMojo extends AbstractMojo
         }
 
         SMOutputElement ignoredDependenciesElement = prefs.addElement("ignoredDependencies");
-        for (Dependency ignoredDependency : ignoredDependencies) {
-            XMLWriterUtils.addDependency(ignoredDependenciesElement, "ignoredDependency", ignoredDependency);
+        for (MavenCoordinates ignoredDependency : ignoredDependencies) {
+            XMLWriterUtils.addMavenCoordinate(ignoredDependenciesElement, "ignoredDependency", ignoredDependency);
         }
     }
 }

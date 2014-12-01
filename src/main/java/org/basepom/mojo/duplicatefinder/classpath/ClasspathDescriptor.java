@@ -46,11 +46,11 @@ import com.google.common.io.Files;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
-import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
 import org.basepom.mojo.duplicatefinder.ConflictType;
 import org.basepom.mojo.duplicatefinder.PluginLog;
+import org.basepom.mojo.duplicatefinder.artifact.MavenCoordinates;
 
 public class ClasspathDescriptor
 {
@@ -96,7 +96,7 @@ public class ClasspathDescriptor
     public static ClasspathDescriptor createClasspathDescriptor(final MavenProject project,
                                                                 final Map<File, Artifact> fileToArtifactMap,
                                                                 final Collection<String> ignoredResources,
-                                                                final Collection<Dependency> ignoredDependencies,
+                                                                final Collection<MavenCoordinates> ignoredDependencies,
                                                                 final boolean useDefaultResourceIgnoreList,
                                                                 final File[] projectFolders) throws MojoExecutionException, InvalidVersionSpecificationException
     {

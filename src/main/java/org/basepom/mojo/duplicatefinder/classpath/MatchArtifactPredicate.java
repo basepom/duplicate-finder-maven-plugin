@@ -26,7 +26,6 @@ import com.google.common.collect.ImmutableList;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.OverConstrainedVersionException;
-import org.apache.maven.model.Dependency;
 import org.basepom.mojo.duplicatefinder.PluginLog;
 import org.basepom.mojo.duplicatefinder.artifact.MavenCoordinates;
 
@@ -36,14 +35,9 @@ public class MatchArtifactPredicate implements Predicate<Artifact>
 
     private final List<MavenCoordinates> mavenCoordinates;
 
-    MatchArtifactPredicate(final Collection<Dependency> dependencies) throws InvalidVersionSpecificationException
+    MatchArtifactPredicate(final Collection<MavenCoordinates> dependencies) throws InvalidVersionSpecificationException
     {
-        checkNotNull(dependencies, "dependencies is null");
-        final ImmutableList.Builder<MavenCoordinates> builder = ImmutableList.builder();
-        for (final Dependency dependency : dependencies) {
-            builder.add(new MavenCoordinates(dependency));
-        }
-        this.mavenCoordinates = builder.build();
+        this.mavenCoordinates = ImmutableList.copyOf(checkNotNull(dependencies, "dependencies is null"));
     }
 
     @Override

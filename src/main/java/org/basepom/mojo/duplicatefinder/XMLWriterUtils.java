@@ -23,9 +23,7 @@ import javax.xml.stream.XMLStreamException;
 import com.google.common.base.Optional;
 
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.OverConstrainedVersionException;
-import org.apache.maven.model.Dependency;
 import org.apache.maven.project.MavenProject;
 import org.basepom.mojo.duplicatefinder.ResultCollector.ConflictResult;
 import org.basepom.mojo.duplicatefinder.artifact.MavenCoordinates;
@@ -99,7 +97,7 @@ public final class XMLWriterUtils
         }
     }
 
-    private static void addMavenCoordinate(SMOutputElement dependenciesElement, String name, MavenCoordinates dependency)
+    public static void addMavenCoordinate(SMOutputElement dependenciesElement, String name, MavenCoordinates dependency)
         throws XMLStreamException
     {
         SMOutputElement dependencyElement = dependenciesElement.addElement(name);
@@ -119,14 +117,6 @@ public final class XMLWriterUtils
         }
 
         addAttribute(dependencyElement, "type", dependency.getType());
-    }
-
-    public static void addDependency(SMOutputElement dependenciesElement, String name, Dependency dependency)
-        throws XMLStreamException, InvalidVersionSpecificationException
-    {
-        // lazy. Replace with a real dependency writer if that somehow loses or mangles information.
-        MavenCoordinates coordinates = new MavenCoordinates(dependency);
-        addMavenCoordinate(dependenciesElement, name, coordinates);
     }
 
     public static void addArtifact(SMOutputElement artifactElement, String name, Artifact artifact)
