@@ -143,16 +143,14 @@ public class ConflictingDependency
         return false;
     }
 
-    private boolean currentProjectDependencyMatches(final Artifact artifact, final Artifact projectArtifact) throws OverConstrainedVersionException
+    private boolean isWildcard()
     {
-        final MavenCoordinates projectCoordinates = new MavenCoordinates(projectArtifact);
-
-        return projectCoordinates.matches(artifact);
+        return classes.isEmpty() && packages.isEmpty() && resources.isEmpty() && matchingResources.length == 0;
     }
 
     public boolean containsClass(final String className)
     {
-        if (classes.isEmpty() && packages.isEmpty()) {
+        if (isWildcard()) {
             // Nothing given --> match everything.
             return true;
         }
@@ -173,6 +171,11 @@ public class ConflictingDependency
 
     public boolean containsResource(final String resource)
     {
+        if (isWildcard()) {
+           // Nothing given --> match everything
+           return true;
+       }
+
         final String resourceAsRelative = resource.startsWith("/") || resource.startsWith("\\") ? resource.substring(1) : resource;
 
         if (resources.contains(resourceAsRelative) ||
