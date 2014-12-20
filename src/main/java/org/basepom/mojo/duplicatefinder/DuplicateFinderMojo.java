@@ -275,6 +275,13 @@ public final class DuplicateFinderMojo extends AbstractMojo
                 }
 
                 try {
+                    // Prep conflicting dependencies
+                    MavenCoordinates projectCoordinates = new MavenCoordinates(project.getArtifact());
+
+                    for (ConflictingDependency conflictingDependency : conflictingDependencies) {
+                        conflictingDependency.addProjectMavenCoordinates(projectCoordinates);
+                    }
+
                     final ArtifactFileResolver artifactFileResolver = new ArtifactFileResolver(project, preferLocal);
                     final ImmutableMap.Builder<String, Entry<ResultCollector, ClasspathDescriptor>> classpathResultBuilder = ImmutableMap.builder();
 

@@ -13,17 +13,16 @@
  */
 package org.basepom.mojo.duplicatefinder;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import org.apache.maven.artifact.Artifact;
@@ -37,20 +36,18 @@ import org.basepom.mojo.duplicatefinder.artifact.MavenCoordinates;
  */
 public class ConflictingDependency
 {
-    private MavenCoordinates[] conflictingDependencies = new MavenCoordinates[0];
+    private final Set<MavenCoordinates> conflictingDependencies = Sets.newLinkedHashSet();
     private final Set<String> classes = Sets.newHashSet();
     private final Set<String> packages = Sets.newHashSet();
     private final Set<String> resources = Sets.newHashSet();
     private Pattern[] matchingResources = new Pattern[0];
+    private boolean currentProject = false;
 
     // Called by maven
     public void setConflictingDependencies(final Dependency[] conflictingDependencies) throws InvalidVersionSpecificationException
     {
-        checkArgument(conflictingDependencies != null && conflictingDependencies.length > 1, "For an exception, at least two dependencies must be given!");
-
-        this.conflictingDependencies = new MavenCoordinates[conflictingDependencies.length];
         for (int idx = 0; idx < conflictingDependencies.length; idx++) {
-            this.conflictingDependencies[idx] = new MavenCoordinates(conflictingDependencies[idx]);
+            this.conflictingDependencies.add(new MavenCoordinates(conflictingDependencies[idx]));
         }
     }
 
@@ -59,7 +56,7 @@ public class ConflictingDependency
     {
         this.matchingResources = new Pattern[resourcePatterns.length];
         for (int i = 0; i < resourcePatterns.length; i++) {
-            this.matchingResources[i] = Pattern.compile(resourcePatterns[i], Pattern.CASE_INSENSITIVE|Pattern.UNICODE_CASE);
+            this.matchingResources[i] = Pattern.compile(resourcePatterns[i], Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
         }
     }
 
@@ -96,23 +93,37 @@ public class ConflictingDependency
         this.resources.addAll(Arrays.asList(resources));
     }
 
-    MavenCoordinates [] getDependencies()
+    // Called by maven
+    public void setCurrentProject(final boolean currentProject)
     {
-        return conflictingDependencies;
+        this.currentProject = currentProject;
     }
 
-    Pattern [] getResourcePatterns()
+    void addProjectMavenCoordinates(final MavenCoordinates projectMavenCoordinates)
+    {
+        if (currentProject) {
+            // The exclusion should also look at the current project, add the project
+            // coordinates to the list of exclusions.
+            conflictingDependencies.add(projectMavenCoordinates);
+        }
+    }
+
+    List<MavenCoordinates> getDependencies()
+    {
+        return ImmutableList.copyOf(conflictingDependencies);
+    }
+
+    Pattern[] getResourcePatterns()
     {
         return matchingResources;
     }
 
     public List<String> getDependencyNames()
     {
-        final List<String> result = new ArrayList<String>();
+        final List<String> result = Lists.newArrayListWithCapacity(conflictingDependencies.size());
 
-        checkState(conflictingDependencies != null, "conflictingDependencies is null");
-        for (int idx = 0; idx < conflictingDependencies.length; idx++) {
-            result.add(conflictingDependencies[idx].toString());
+        for (final MavenCoordinates conflictingDependency : conflictingDependencies) {
+            result.add(conflictingDependency.toString());
         }
 
         Collections.sort(result);
@@ -122,18 +133,20 @@ public class ConflictingDependency
     public boolean isForArtifacts(final Set<Artifact> artifacts) throws OverConstrainedVersionException
     {
         checkNotNull(artifacts, "artifacts is null");
-        checkState(conflictingDependencies != null, "conflictingDependencies is null");
-        checkState(conflictingDependencies.length > 1, "conflictingDependencies has not at least two dependencies");
 
-        if (artifacts.size() != conflictingDependencies.length) {
+        if (conflictingDependencies.size() < 2) {
             return false;
         }
 
-        int numMatches = conflictingDependencies.length;
+        if (artifacts.size() != conflictingDependencies.size()) {
+            return false;
+        }
+
+        int numMatches = conflictingDependencies.size();
 
         for (final Artifact artifact : artifacts) {
-            for (int idx = 0; idx < conflictingDependencies.length; idx++) {
-                if (conflictingDependencies[idx].matches(artifact)) {
+            for (final MavenCoordinates conflictingDependency : conflictingDependencies) {
+                if (conflictingDependency.matches(artifact)) {
                     if (--numMatches == 0) {
                         return true;
                     }
@@ -160,7 +173,7 @@ public class ConflictingDependency
         }
         else {
             for (final String packageName : packages) {
-                String pkgName = packageName.endsWith(".") ? packageName : packageName + ".";
+                final String pkgName = packageName.endsWith(".") ? packageName : packageName + ".";
                 if (className.startsWith(pkgName)) {
                     return true;
                 }
@@ -172,9 +185,9 @@ public class ConflictingDependency
     public boolean containsResource(final String resource)
     {
         if (isWildcard()) {
-           // Nothing given --> match everything
-           return true;
-       }
+            // Nothing given --> match everything
+            return true;
+        }
 
         final String resourceAsRelative = resource.startsWith("/") || resource.startsWith("\\") ? resource.substring(1) : resource;
 
