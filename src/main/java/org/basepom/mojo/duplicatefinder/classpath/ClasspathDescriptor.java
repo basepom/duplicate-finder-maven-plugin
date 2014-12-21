@@ -95,20 +95,20 @@ public class ClasspathDescriptor
 
     public static ClasspathDescriptor createClasspathDescriptor(final MavenProject project,
                                                                 final Map<File, Artifact> fileToArtifactMap,
-                                                                final Collection<String> ignoredResources,
+                                                                final Collection<String> ignoredResourcePatterns,
                                                                 final Collection<MavenCoordinates> ignoredDependencies,
                                                                 final boolean useDefaultResourceIgnoreList,
                                                                 final File[] projectFolders) throws MojoExecutionException, InvalidVersionSpecificationException
     {
         checkNotNull(project, "project is null");
         checkNotNull(fileToArtifactMap, "fileToArtifactMap is null");
-        checkNotNull(ignoredResources, "ignoredResources is null");
+        checkNotNull(ignoredResourcePatterns, "ignoredResourcePatterns is null");
         checkNotNull(ignoredDependencies, "ignoredDependencies is null");
         checkNotNull(projectFolders, "projectFolders is null");
 
         final Artifact projectArtifact = project.getArtifact();
 
-        final ClasspathDescriptor classpathDescriptor = new ClasspathDescriptor(useDefaultResourceIgnoreList, ignoredResources);
+        final ClasspathDescriptor classpathDescriptor = new ClasspathDescriptor(useDefaultResourceIgnoreList, ignoredResourcePatterns);
         final MatchArtifactPredicate matchArtifactPredicate = new MatchArtifactPredicate(ignoredDependencies);
 
         Artifact artifact = null;
@@ -163,7 +163,7 @@ public class ClasspathDescriptor
     }
 
     private ClasspathDescriptor(final boolean useDefaultResourceIgnoreList,
-                                final Collection<String> ignoredResources)
+                                final Collection<String> ignoredResourcePatterns)
                     throws MojoExecutionException
     {
         // Class predicate simply ignores inner and nested classes.
@@ -180,10 +180,10 @@ public class ClasspathDescriptor
             resourceExclusionPatternBuilder.addAll(DEFAULT_IGNORED_RESOURCES_PREDICATE.getPatterns());
         }
 
-        if (!ignoredResources.isEmpty()) {
+        if (!ignoredResourcePatterns.isEmpty()) {
             try {
                 // predicate matching the user ignores
-                MatchPatternPredicate ignoredResourcesPredicate = new MatchPatternPredicate(ignoredResources);
+                MatchPatternPredicate ignoredResourcesPredicate = new MatchPatternPredicate(ignoredResourcePatterns);
                 resourcesPredicate = Predicates.or(resourcesPredicate, ignoredResourcesPredicate);
                 resourceExclusionPatternBuilder.addAll(ignoredResourcesPredicate.getPatterns());
             }

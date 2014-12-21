@@ -45,9 +45,9 @@
                 <configuration>
                     <printEqualFiles>true</printEqualFiles>
                     <failBuildInCaseOfEqualContentConflict>true</failBuildInCaseOfEqualContentConflict>
-                    <ignoredResources>
-                        <ignoredResource>conflict-different-content</ignoredResource>
-                    </ignoredResources>
+                    <ignoredResourcePatterns>
+                        <ignoredResourcePattern>conflict-different-content</ignoredResourcePattern>
+                    </ignoredResourcePatterns>
                 </configuration>
             </plugin>
         </plugins>

@@ -147,9 +147,18 @@ public final class DuplicateFinderMojo extends AbstractMojo
 
     /**
      * Ignored resources, which are not checked for multiple occurences.
+     *
+     * @deprecated Use ignoredResourcePatterns.
      */
+    @Deprecated
     @Parameter
     protected String[] ignoredResources = new String[0];
+
+    /**
+     * Ignored resources, which are not checked for multiple occurences.
+     */
+    @Parameter
+    protected String[] ignoredResourcePatterns = new String[0];
 
     /**
      * Artifacts with expected and resolved versions that are checked.
@@ -274,6 +283,12 @@ public final class DuplicateFinderMojo extends AbstractMojo
                     failState.add(CONFLICT_CONTENT_DIFFERENT);
                 }
 
+                // Deprecation warning for configuration values
+
+                if (ignoredResources.length > 0) {
+                    LOG.warn("<ignoreResources> has been deprecated and replaced with <ignoreResourcePatterns>. It will go away in version 1.2.0. Please update your POM accordingly!");
+                }
+
                 try {
                     // Prep conflicting dependencies
                     MavenCoordinates projectCoordinates = new MavenCoordinates(project.getArtifact());
@@ -364,6 +379,15 @@ public final class DuplicateFinderMojo extends AbstractMojo
         }
     }
 
+    private ImmutableSet<String> getIgnoredResourcePatterns()
+    {
+        ImmutableSet.Builder<String> builder = ImmutableSet.builder();
+        builder.add(ignoredResourcePatterns);
+        builder.add(ignoredResources);
+
+        return builder.build();
+    }
+
     /**
      * Checks the maven classpath for a given set of scopes whether it contains duplicates. In addition to the
      * artifacts on the classpath, one or more additional project folders are added.
@@ -381,7 +405,7 @@ public final class DuplicateFinderMojo extends AbstractMojo
 
         final ClasspathDescriptor classpathDescriptor = ClasspathDescriptor.createClasspathDescriptor(project,
             fileToArtifactMap,
-            Arrays.asList(ignoredResources),
+            getIgnoredResourcePatterns(),
             Arrays.asList(ignoredDependencies),
             useDefaultResourceIgnoreList,
             projectFolders);
@@ -588,9 +612,9 @@ public final class DuplicateFinderMojo extends AbstractMojo
         XMLWriterUtils.addAttribute(prefs, "preferLocal", preferLocal);
         XMLWriterUtils.addAttribute(prefs, "resultFileMinClasspathCount", resultFileMinClasspathCount);
 
-        SMOutputElement ignoredResourcesElement = prefs.addElement("ignoredResources");
-        for (String ignoredResource : ignoredResources) {
-            XMLWriterUtils.addElement(ignoredResourcesElement, "ignoredResource", ignoredResource);
+        SMOutputElement ignoredResourcesElement = prefs.addElement("ignoredResourcePatterns");
+        for (String ignoredResource : getIgnoredResourcePatterns()) {
+            XMLWriterUtils.addElement(ignoredResourcesElement, "ignoredResourcePattern", ignoredResource);
         }
 
         SMOutputElement conflictingDependenciesElement = prefs.addElement("conflictingDependencies");

@@ -22,7 +22,7 @@
         <version>1.0.under-test</version>
     </parent>
 
-    <artifactId>test-resource-conflict-diff-fail-diff-content</artifactId>
+    <artifactId>test-resource-conflict-diff-fail-deprecated</artifactId>
 
     <dependencies>
         <dependency>
@@ -44,10 +44,10 @@
                 <artifactId>@project.artifactId@</artifactId>
                 <configuration>
                     <printEqualFiles>true</printEqualFiles>
-                    <failBuildInCaseOfDifferentContentConflict>true</failBuildInCaseOfDifferentContentConflict>
-                    <ignoredResourcePatterns>
-                        <ignoredResourcePattern>conflict-same-content</ignoredResourcePattern>
-                    </ignoredResourcePatterns>
+                    <failBuildInCaseOfConflict>true</failBuildInCaseOfConflict>
+                    <ignoredResources>
+                        <ignoredResource>conflict-same-content</ignoredResource>
+                    </ignoredResources>
                 </configuration>
             </plugin>
         </plugins>
