@@ -42,6 +42,7 @@ public class ConflictingDependency
     private final Set<String> resources = Sets.newHashSet();
     private Pattern[] matchingResources = new Pattern[0];
     private boolean currentProject = false;
+    private boolean currentProjectIncluded = false;
 
     // Called by maven
     public void setConflictingDependencies(final Dependency[] conflictingDependencies) throws InvalidVersionSpecificationException
@@ -99,12 +100,22 @@ public class ConflictingDependency
         this.currentProject = currentProject;
     }
 
+    boolean hasCurrentProject()
+    {
+        return currentProject;
+    }
+
+    boolean isCurrentProjectIncluded()
+    {
+        return currentProjectIncluded;
+    }
+
     void addProjectMavenCoordinates(final MavenCoordinates projectMavenCoordinates)
     {
-        if (currentProject) {
+        if (this.currentProject) {
             // The exclusion should also look at the current project, add the project
             // coordinates to the list of exclusions.
-            conflictingDependencies.add(projectMavenCoordinates);
+            this.currentProjectIncluded = conflictingDependencies.add(projectMavenCoordinates);
         }
     }
 

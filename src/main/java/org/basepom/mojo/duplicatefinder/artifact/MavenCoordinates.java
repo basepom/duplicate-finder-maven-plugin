@@ -178,6 +178,30 @@ public class MavenCoordinates
     }
 
     @Override
+    public int hashCode()
+    {
+        return Objects.hashCode(groupId, artifactId, classifier, type);
+    }
+
+    @Override
+    public boolean equals(final Object other)
+    {
+        if (other == null || other.getClass() != this.getClass()) {
+            return false;
+        }
+        if (other == this) {
+            return true;
+        }
+
+        MavenCoordinates that = (MavenCoordinates) other;
+
+        return Objects.equal(this.groupId, that.groupId)
+                        && Objects.equal(this.artifactId, that.artifactId)
+                        && Objects.equal(this.classifier, that.classifier)
+                        && Objects.equal(this.type, that.type);
+    }
+
+    @Override
     public String toString()
     {
         final ImmutableList.Builder<String> builder = ImmutableList.builder();
