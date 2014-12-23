@@ -112,10 +112,11 @@ public class ConflictingDependency
 
     void addProjectMavenCoordinates(final MavenCoordinates projectMavenCoordinates)
     {
+        this.currentProjectIncluded = conflictingDependencies.contains(projectMavenCoordinates);
         if (this.currentProject) {
             // The exclusion should also look at the current project, add the project
             // coordinates to the list of exclusions.
-            this.currentProjectIncluded = conflictingDependencies.add(projectMavenCoordinates);
+            conflictingDependencies.add(projectMavenCoordinates);
         }
     }
 

@@ -20,9 +20,9 @@ overallState(NO_CONFLICT, 0, NOT_FAILED, result)
 def conflictingDependencies = xml.configuration.conflictingDependencies
 assert 1 == conflictingDependencies.size()
 
-// True because we want to include the current project
-assert "true" == conflictingDependencies[0].conflictingDependency.@currentProject.text()
-// True because the project was included
+// False because we do not want to include the current project
+assert "false" == conflictingDependencies[0].conflictingDependency.@currentProject.text()
+// True because the project was included by a dependency
 assert "true" == conflictingDependencies[0].conflictingDependency.@currentProjectIncluded.text()
 
 return true
