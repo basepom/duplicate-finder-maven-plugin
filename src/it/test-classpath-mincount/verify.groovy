@@ -14,7 +14,7 @@
 import static org.basepom.mojo.duplicatefinder.groovy.ITools.*
 
 def (result, xml) = loadXmlAndResult(basedir, "test")
-assert "3" == xml.preferences.@resultFileMinClasspathCount.text()
+assert "3" == xml.configuration.@resultFileMinClasspathCount.text()
 
 overallState(CONFLICT_DIFF, 2, NOT_FAILED, result)
 checkConflictResult("diff.Demo",                  TYPE_CLASS,    CONFLICT_DIFF,  NOT_EXCEPTED, PRINTED,     NOT_FAILED, findConflictResult(result, 1, FIRST_CLASS_JAR, FIRST_DIFF_JAR))

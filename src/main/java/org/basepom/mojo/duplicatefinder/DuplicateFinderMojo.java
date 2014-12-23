@@ -579,7 +579,7 @@ public final class DuplicateFinderMojo extends AbstractMojo
 
             XMLWriterUtils.addProjectInformation(rootElement, project);
 
-            addPreferences(rootElement);
+            addConfiguration(rootElement);
 
             SMOutputElement resultsElement = rootElement.addElement("results");
             for (Map.Entry<String, Entry<ResultCollector, ClasspathDescriptor>> entry : results.entrySet()) {
@@ -596,20 +596,23 @@ public final class DuplicateFinderMojo extends AbstractMojo
         }
     }
 
-    private void addPreferences(SMOutputElement rootElement)
+    private void addConfiguration(SMOutputElement rootElement)
         throws XMLStreamException, InvalidVersionSpecificationException
     {
-        SMOutputElement prefs = XMLWriterUtils.addElement(rootElement, "preferences", null);
-        XMLWriterUtils.addAttribute(prefs, "printEqualFiles", printEqualFiles);
-        XMLWriterUtils.addAttribute(prefs, "failBuildInCaseOfDifferentContentConflict", failBuildInCaseOfDifferentContentConflict);
-        XMLWriterUtils.addAttribute(prefs, "failBuildInCaseOfEqualContentConflict", failBuildInCaseOfEqualContentConflict);
-        XMLWriterUtils.addAttribute(prefs, "failBuildInCaseOfConflict", failBuildInCaseOfConflict);
-        XMLWriterUtils.addAttribute(prefs, "useDefaultResourceIgnoreList", useDefaultResourceIgnoreList);
+        SMOutputElement prefs = XMLWriterUtils.addElement(rootElement, "configuration", null);
+        // Simple configuration options
+        XMLWriterUtils.addAttribute(prefs, "quiet", quiet);
         XMLWriterUtils.addAttribute(prefs, "checkCompileClasspath", checkCompileClasspath);
         XMLWriterUtils.addAttribute(prefs, "checkRuntimeClasspath", checkRuntimeClasspath);
         XMLWriterUtils.addAttribute(prefs, "checkTestClasspath", checkTestClasspath);
-        XMLWriterUtils.addAttribute(prefs, "quiet", quiet);
+        XMLWriterUtils.addAttribute(prefs, "failBuildInCaseOfDifferentContentConflict", failBuildInCaseOfDifferentContentConflict);
+        XMLWriterUtils.addAttribute(prefs, "failBuildInCaseOfEqualContentConflict", failBuildInCaseOfEqualContentConflict);
+        XMLWriterUtils.addAttribute(prefs, "failBuildInCaseOfConflict", failBuildInCaseOfConflict);
+        XMLWriterUtils.addAttribute(prefs, "printEqualFiles", printEqualFiles);
         XMLWriterUtils.addAttribute(prefs, "preferLocal", preferLocal);
+        // Ignoring Dependencies and resources
+        XMLWriterUtils.addAttribute(prefs, "useDefaultResourceIgnoreList", useDefaultResourceIgnoreList);
+        // Result file options
         XMLWriterUtils.addAttribute(prefs, "resultFileMinClasspathCount", resultFileMinClasspathCount);
 
         SMOutputElement ignoredResourcesElement = prefs.addElement("ignoredResourcePatterns");

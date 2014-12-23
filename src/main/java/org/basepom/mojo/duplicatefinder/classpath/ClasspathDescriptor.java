@@ -91,7 +91,7 @@ public class ClasspathDescriptor
     private final Predicate<String> resourcesPredicate;
     private final Predicate<String> classPredicate;
 
-    private final ImmutableList<Pattern> resourceExclusionPatterns;
+    private final ImmutableList<Pattern> ignoredResourcePatterns;
 
     public static ClasspathDescriptor createClasspathDescriptor(final MavenProject project,
                                                                 final Map<File, Artifact> fileToArtifactMap,
@@ -169,7 +169,7 @@ public class ClasspathDescriptor
         // Class predicate simply ignores inner and nested classes.
         this.classPredicate = new MatchInnerClassesPredicate();
 
-        final ImmutableList.Builder<Pattern> resourceExclusionPatternBuilder = ImmutableList.builder();
+        final ImmutableList.Builder<Pattern> ignoredResourcePatternsBuilder = ImmutableList.builder();
 
         // ResourcePredicate is a bit more complicated...
         Predicate<String> resourcesPredicate = Predicates.alwaysFalse();
@@ -177,7 +177,7 @@ public class ClasspathDescriptor
         // predicate matching the default ignores
         if (useDefaultResourceIgnoreList) {
             resourcesPredicate = Predicates.or(resourcesPredicate, DEFAULT_IGNORED_RESOURCES_PREDICATE);
-            resourceExclusionPatternBuilder.addAll(DEFAULT_IGNORED_RESOURCES_PREDICATE.getPatterns());
+            ignoredResourcePatternsBuilder.addAll(DEFAULT_IGNORED_RESOURCES_PREDICATE.getPatterns());
         }
 
         if (!ignoredResourcePatterns.isEmpty()) {
@@ -185,7 +185,7 @@ public class ClasspathDescriptor
                 // predicate matching the user ignores
                 MatchPatternPredicate ignoredResourcesPredicate = new MatchPatternPredicate(ignoredResourcePatterns);
                 resourcesPredicate = Predicates.or(resourcesPredicate, ignoredResourcesPredicate);
-                resourceExclusionPatternBuilder.addAll(ignoredResourcesPredicate.getPatterns());
+                ignoredResourcePatternsBuilder.addAll(ignoredResourcesPredicate.getPatterns());
             }
             catch (final PatternSyntaxException pse) {
                 throw new MojoExecutionException("Error compiling resourceIgnore pattern: " + pse.getMessage());
@@ -193,7 +193,7 @@ public class ClasspathDescriptor
         }
 
         this.resourcesPredicate = resourcesPredicate;
-        this.resourceExclusionPatterns = resourceExclusionPatternBuilder.build();
+        this.ignoredResourcePatterns = ignoredResourcePatternsBuilder.build();
     }
 
     public ImmutableMap<String, Collection<File>> getClasspathElementLocations(final ConflictType type)
@@ -209,12 +209,12 @@ public class ClasspathDescriptor
         }
     }
 
-    public ImmutableList<Pattern> getResourceExclusionPatterns()
+    public ImmutableList<Pattern> getIgnoredResourcePatterns()
     {
-        return resourceExclusionPatterns;
+        return ignoredResourcePatterns;
     }
 
-    public ImmutableList<Pattern> getIgnoredDirectoriesPatterns()
+    public ImmutableList<Pattern> getIgnoredDirectoryPatterns()
     {
         return DEFAULT_IGNORED_LOCAL_DIRECTORIES.getPatterns();
     }

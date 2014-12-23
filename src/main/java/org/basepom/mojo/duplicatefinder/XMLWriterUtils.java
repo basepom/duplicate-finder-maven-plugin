@@ -170,13 +170,13 @@ public final class XMLWriterUtils
     public static void addClasspathDescriptor(SMOutputElement resultElement, int resultFileMinClasspathCount, ClasspathDescriptor classpathDescriptor)
         throws XMLStreamException
     {
-        SMOutputElement resourceExclusionPatternsElement = resultElement.addElement("excludedResourcePatterns");
-        for (Pattern resourceExclusionPattern : classpathDescriptor.getResourceExclusionPatterns()) {
-            addElement(resourceExclusionPatternsElement, "excludedResourcePattern", resourceExclusionPattern.toString());
+        SMOutputElement resourceExclusionPatternsElement = resultElement.addElement("ignoredResourcePatterns");
+        for (Pattern resourceExclusionPattern : classpathDescriptor.getIgnoredResourcePatterns()) {
+            addElement(resourceExclusionPatternsElement, "ignoredResourcePattern", resourceExclusionPattern.toString());
         }
 
-        SMOutputElement ignoredDirectoriesPatternsElement = resultElement.addElement("ignoredDirectoriesPatterns");
-        for (Pattern ignoredDirectoriesPattern : classpathDescriptor.getIgnoredDirectoriesPatterns()) {
+        SMOutputElement ignoredDirectoriesPatternsElement = resultElement.addElement("ignoredDirectoryPatterns");
+        for (Pattern ignoredDirectoriesPattern : classpathDescriptor.getIgnoredDirectoryPatterns()) {
             addElement(ignoredDirectoriesPatternsElement, "ignoredDirectoryPattern", ignoredDirectoriesPattern.toString());
         }
 
