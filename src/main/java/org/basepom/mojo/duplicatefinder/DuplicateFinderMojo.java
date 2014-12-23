@@ -630,7 +630,7 @@ public final class DuplicateFinderMojo extends AbstractMojo
 
         SMOutputElement ignoredDependenciesElement = prefs.addElement("ignoredDependencies");
         for (MavenCoordinates ignoredDependency : ignoredDependencies) {
-            XMLWriterUtils.addMavenCoordinate(ignoredDependenciesElement, "ignoredDependency", ignoredDependency);
+            XMLWriterUtils.addMavenCoordinate(ignoredDependenciesElement, "dependency", ignoredDependency);
         }
     }
 }
