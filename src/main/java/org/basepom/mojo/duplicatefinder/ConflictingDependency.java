@@ -168,7 +168,7 @@ public class ConflictingDependency
         return false;
     }
 
-    private boolean isWildcard()
+    boolean isWildcard()
     {
         return classes.isEmpty() && packages.isEmpty() && resources.isEmpty() && matchingResources.length == 0;
     }

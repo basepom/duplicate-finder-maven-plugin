@@ -73,6 +73,7 @@ public final class XMLWriterUtils
 
         addAttribute(conflictingDependencyElement, "currentProject", conflictingDependency.hasCurrentProject());
         addAttribute(conflictingDependencyElement, "currentProjectIncluded", conflictingDependency.isCurrentProjectIncluded());
+        addAttribute(conflictingDependencyElement, "wildcard", conflictingDependency.isWildcard());
 
         SMOutputElement dependenciesElement = conflictingDependencyElement.addElement("dependencies");
         for (MavenCoordinates dependency : conflictingDependency.getDependencies()) {

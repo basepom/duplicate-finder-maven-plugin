@@ -13,9 +13,15 @@
  */
 import static org.basepom.mojo.duplicatefinder.groovy.ITools.*
 
-def result = loadTestXml(basedir)
+def (result, xml) = loadXmlAndResult(basedir, "test")
 
 overallState(NO_CONFLICT, 1, NOT_FAILED, result)
 checkConflictResult("diff.Demo", TYPE_CLASS, CONFLICT_DIFF, EXCEPTED, NOT_PRINTED, NOT_FAILED, findConflictResult(result, FIRST_CLASS_JAR, projectTargetFolder(basedir)))
+
+def conflictingDependencies = xml.configuration.conflictingDependencies
+assert 1 == conflictingDependencies.size()
+
+// False because it is an explicit class match
+assert "false" == conflictingDependencies[0].conflictingDependency.@wildcard.text()
 
 return true
