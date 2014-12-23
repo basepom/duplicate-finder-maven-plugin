@@ -601,6 +601,7 @@ public final class DuplicateFinderMojo extends AbstractMojo
     {
         SMOutputElement prefs = XMLWriterUtils.addElement(rootElement, "configuration", null);
         // Simple configuration options
+        XMLWriterUtils.addAttribute(prefs, "skip", skip);
         XMLWriterUtils.addAttribute(prefs, "quiet", quiet);
         XMLWriterUtils.addAttribute(prefs, "checkCompileClasspath", checkCompileClasspath);
         XMLWriterUtils.addAttribute(prefs, "checkRuntimeClasspath", checkRuntimeClasspath);
@@ -613,7 +614,9 @@ public final class DuplicateFinderMojo extends AbstractMojo
         // Ignoring Dependencies and resources
         XMLWriterUtils.addAttribute(prefs, "useDefaultResourceIgnoreList", useDefaultResourceIgnoreList);
         // Result file options
+        XMLWriterUtils.addAttribute(prefs, "useResultFile", useResultFile);
         XMLWriterUtils.addAttribute(prefs, "resultFileMinClasspathCount", resultFileMinClasspathCount);
+        XMLWriterUtils.addAttribute(prefs, "resultFile", resultFile.getAbsolutePath());
 
         SMOutputElement ignoredResourcesElement = prefs.addElement("ignoredResourcePatterns");
         for (String ignoredResource : getIgnoredResourcePatterns()) {
