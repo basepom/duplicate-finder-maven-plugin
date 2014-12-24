@@ -19,12 +19,12 @@ package org.basepom.mojo.duplicatefinder.groovy
  */
 public final class ITools
 {
-  def static final TYPE_CLASS = "CLASS";
-  def static final TYPE_RESOURCE = "RESOURCE";
+  def static final TYPE_CLASS = "classes"
+  def static final TYPE_RESOURCE = "resources"
 
-  def static final NO_CONFLICT = "NO_CONFLICT"
-  def static final CONFLICT_EQUAL = "CONFLICT_CONTENT_EQUAL"
-  def static final CONFLICT_DIFF = "CONFLICT_CONTENT_DIFFERENT"
+  def static final NO_CONFLICT = "no-conflict"
+  def static final CONFLICT_EQUAL = "content-equal"
+  def static final CONFLICT_DIFF = "content-different"
 
   def static final NOT_EXCEPTED = false
   def static final EXCEPTED = true

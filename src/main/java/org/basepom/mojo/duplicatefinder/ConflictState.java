@@ -18,14 +18,16 @@ import static com.google.common.base.Preconditions.checkState;
 public enum ConflictState
 {
     // Conflict states in order from low to high.
-    NO_CONFLICT(""),
-    CONFLICT_CONTENT_EQUAL("(but equal)"),
-    CONFLICT_CONTENT_DIFFERENT("and different");
+    NO_CONFLICT("no-conflict", ""),
+    CONFLICT_CONTENT_EQUAL("content-equal", "(but equal)"),
+    CONFLICT_CONTENT_DIFFERENT("content-different", "and different");
 
+    private final String value;
     private final String hint;
 
-    private ConflictState(String hint)
+    private ConflictState(String value, String hint)
     {
+        this.value = value;
         this.hint = hint;
     }
 
@@ -46,5 +48,11 @@ public enum ConflictState
         }
 
         return result;
+    }
+
+    @Override
+    public String toString()
+    {
+        return value;
     }
 }
