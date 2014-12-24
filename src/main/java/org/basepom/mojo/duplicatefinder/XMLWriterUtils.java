@@ -165,6 +165,9 @@ public final class XMLWriterUtils
             if (entry.getValue().isPresent()) {
                 addArtifact(conflictName, "artifact", entry.getValue().get());
             }
+            else {
+                addElement(conflictName, "directory", entry.getKey());
+            }
         }
     }
 
