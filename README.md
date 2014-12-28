@@ -10,7 +10,7 @@ This plugin is a friendly fork (same main authors) of the [Ning maven-duplicate-
 
 ## Requirements
 
-The plugins requires Maven 3.x.x and Java 6 or better.
+The plugins requires Apache Maven 3.x.x and Java 6 or better.
 
 ## Goals
 
@@ -19,80 +19,8 @@ The plugin has two goals:
 * `duplicate-finder:check` - the main goal of the plugin. Runs duplicate check on the maven classpaths.
 * `duplicate-finder:help` - displays standard maven plugin help information.
 
-## Usage
+## Documentation
 
-```xml
-<build>
-    <plugins>
-        <plugin>
-            <groupId>org.basepom.maven</groupId>
-            <artifactId>duplicate-finder-maven-plugin</artifactId>
-            <version>1.1.0</version>
-            <executions>
-                <execution>
-                    <id>default</id>
-                    <phase>verify</phase>
-                    <goals>
-                        <goal>check</goal>
-                    </goals>
-                </execution>
-            </executions>
-            <configuration>
-                <printEqualFiles>false</printEqualFiles>
-                <failBuildInCaseOfDifferentContentConflict>false</failBuildInCaseOfDifferentContentConflict>
-                <failBuildInCaseOfEqualContentConflict>false</failBuildInCaseOfEqualContentConflict>
-                <failBuildInCaseOfConflict>false</failBuildInCaseOfConflict>
-                <useDefaultResourceIgnoreList>true</useDefaultResourceIgnoreList>
-                <checkCompileClasspath>true</checkCompileClasspath>
-                <checkRuntimeClasspath>true</checkRuntimeClasspath>
-                <checkTestClasspath>true</checkTestClasspath>
-                <skip>false</skip>
-                <quiet>false</quiet>
-                <preferLocal>true</preferLocal>
-                <useResultFile>true</useResultFile>
-                <resultFileMinClasspathCount>2</resultFileMinClasspathCount>
-                <resultFile>${project.build.directory}/duplicate-finder-result.xml</resultFile>
-                <ignoredResources>
-                    <ignoredResource>...</ignoredResource>
-                </ignoredResources>
-                <exceptions>
-                    <exception>
-                        <conflictingDependencies>
-                            <dependency>
-                                <artifactId>...</artifactId>
-                                <groupId>...</groupId>
-                                <version>...</version>
-                                <versionRange>...</versionRange>
-                                <type>...</type>
-                                <classifier>...</classifier>
-                            </dependency>
-                            ...
-                        <conflictingDependencies>
-                        <resourcePatterns>
-                            <resourcePattern>...</resourcePattern>
-                        </resourcePatterns>
-                        <classes>
-                            <class>...</class>
-                        </classes>
-                        <packages>
-                            <package>...</package>
-                        </packages>
-                        <resources>
-                            <resource>...</resource>
-                        </resources>
-                </conflictingDependencies>
-                <ignoredDependencies>
-                    <dependency>
-                        <artifactId>...</artifactId>
-                        <groupId>...</groupId>
-                        <version>...</version>
-                        <versionRange>...</versionRange>
-                        <type>...</type>
-                        <classifier>...</classifier>
-                    </dependency>
-                </ignoredDependencies>
-            </configuration>
-        </plugin>
-    </plugins>
-</build>
-```
+Up-to-date documentation is available from the [duplicate finder plugin Wiki](https://github.com/basepom/duplicate-finder-maven-plugin/wiki). A snapshot from the last release of the plugin is available in the `docs` folder in this repository.
+
+
