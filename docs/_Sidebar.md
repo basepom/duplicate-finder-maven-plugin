@@ -15,3 +15,4 @@
 * [Contributing Documentation](Contributing Documentation)
 * [Source Code](https://github.com/basepom/duplicate-finder-maven-plugin)
 * [README](https://github.com/basepom/duplicate-finder-maven-plugin/blob/master/README.md)
+* [CHANGES](https://github.com/basepom/duplicate-finder-maven-plugin/blob/master/CHANGES.md)
