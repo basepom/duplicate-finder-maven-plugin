@@ -24,7 +24,7 @@
     <artifactId>duplicate-finder-maven-plugin</artifactId>
     <packaging>maven-plugin</packaging>
 
-    <version>1.1.0-SNAPSHOT</version>
+    <version>1.1.0</version>
     <name>duplicate-finder-maven-plugin Maven Mojo</name>
 
     <description>
@@ -45,7 +45,8 @@
         <connection>scm:git:git://github.com/basepom/duplicate-finder-maven-plugin.git</connection>
         <developerConnection>scm:git:git://github.com/basepom/duplicate-finder-maven-plugin.git</developerConnection>
         <url>https://github.com/basepom/duplicate-finder-maven-plugin</url>
-    </scm>
+      <tag>duplicate-finder-maven-plugin-1.1.0</tag>
+  </scm>
 
     <issueManagement>
         <system>Github</system>
@@ -288,7 +289,7 @@
                                         </goals>
                                     </pluginExecutionFilter>
                                     <action>
-                                        <ignore/>
+                                        <ignore />
                                     </action>
                                 </pluginExecution>
                                 <pluginExecution>
@@ -302,7 +303,7 @@
                                         </goals>
                                     </pluginExecutionFilter>
                                     <action>
-                                        <ignore/>
+                                        <ignore />
                                     </action>
                                 </pluginExecution>
                             </pluginExecutions>
