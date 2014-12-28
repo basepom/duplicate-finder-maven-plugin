@@ -56,17 +56,20 @@ public final class ITools
   def static findSingleConflictResults(result, String ... matches) {
     def elements = result.conflicts.conflict.findAll( { def found = true; matches.each() { match -> found &= it.@name.text().contains(match) }; return found } )
     assert 1 == elements.size()
-    assert null != elements[0].conflictResults 
+    assert null != elements[0].conflictResults
     return elements[0].conflictResults.conflictResult
   }
 
   /**
-   * Ensures that only a single conflictResult elements from a single conflict exists. 
+   * Ensures that only a single conflictResult elements from a single conflict exists.
    */
   def static findConflictResult(result, String ... matches) {
     return findConflictResult(result, 1, matches);
   }
 
+  /**
+   * Ensures that exactly 'count' conflictResult elements from a single conflict exists.
+   */
   def static findConflictResult(result, int count, String ... matches) {
     def conflictResult = findSingleConflictResults(result, matches)
     assert conflictResult.size() == count
