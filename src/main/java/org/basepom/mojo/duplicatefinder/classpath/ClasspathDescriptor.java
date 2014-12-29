@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -98,6 +99,7 @@ public class ClasspathDescriptor
                                                                 final Collection<String> ignoredResourcePatterns,
                                                                 final Collection<MavenCoordinates> ignoredDependencies,
                                                                 final boolean useDefaultResourceIgnoreList,
+                                                                final Set<File> bootClasspath,
                                                                 final File[] projectFolders) throws MojoExecutionException, InvalidVersionSpecificationException
     {
         checkNotNull(project, "project is null");
@@ -106,13 +108,29 @@ public class ClasspathDescriptor
         checkNotNull(ignoredDependencies, "ignoredDependencies is null");
         checkNotNull(projectFolders, "projectFolders is null");
 
-        final Artifact projectArtifact = project.getArtifact();
-
         final ClasspathDescriptor classpathDescriptor = new ClasspathDescriptor(useDefaultResourceIgnoreList, ignoredResourcePatterns);
+
+        File file = null;
+
+        try {
+            for (File bootClasspathElement : bootClasspath) {
+                file = bootClasspathElement;
+                if (file.exists()) {
+                    LOG.debug("Adding '%s' as a boot classpath element", file);
+                    classpathDescriptor.addClasspathElement(file);
+                }
+                else {
+                    LOG.debug("Ignoring '%s', does not exist.", file);
+                }
+            }
+        }
+        catch (final IOException ex) {
+            throw new MojoExecutionException(format("Error trying to access file '%s' from boot classpath", file), ex);
+        }
+
         final MatchArtifactPredicate matchArtifactPredicate = new MatchArtifactPredicate(ignoredDependencies);
 
         Artifact artifact = null;
-        File file = null;
 
         try {
             // any entry is either a jar in the repo or a folder in the target folder of a referenced
@@ -125,7 +143,7 @@ public class ClasspathDescriptor
                 if (file.exists()) {
                     // Add to the classpath if the artifact predicate does not apply (then it is not in the ignoredDependencies list).
                     if (!matchArtifactPredicate.apply(artifact)) {
-                        classpathDescriptor.addClasspathElement(file, artifact);
+                        classpathDescriptor.addClasspathElement(file);
                     }
                 }
                 else {
@@ -147,7 +165,7 @@ public class ClasspathDescriptor
             for (final File projectFile : projectFolders) {
                 file = projectFile;
                 if (projectFile.exists()) {
-                    classpathDescriptor.addClasspathElement(file, projectArtifact);
+                    classpathDescriptor.addClasspathElement(file);
                 }
                 else {
                     // See above. This may happen in the project has been cleaned before running the goal directly.
@@ -220,7 +238,7 @@ public class ClasspathDescriptor
     }
 
 
-    private void addClasspathElement(final File element, final Artifact artifact) throws IOException
+    private void addClasspathElement(final File element) throws IOException
     {
         checkState(element.exists(), "Path '%s' does not exist!", element.getAbsolutePath());
 

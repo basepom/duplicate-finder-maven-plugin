@@ -15,11 +15,9 @@ package org.basepom.mojo.duplicatefinder.artifact;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.base.Strings.nullToEmpty;
 
 import static org.basepom.mojo.duplicatefinder.artifact.ArtifactHelper.getOutputDirectory;
 import static org.basepom.mojo.duplicatefinder.artifact.ArtifactHelper.getTestOutputDirectory;
-import static org.basepom.mojo.duplicatefinder.artifact.ArtifactHelper.isJarArtifact;
 import static org.basepom.mojo.duplicatefinder.artifact.ArtifactHelper.isTestArtifact;
 
 import java.io.File;
@@ -27,19 +25,15 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
-import javax.annotation.Nonnull;
-
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
-import com.google.common.base.Optional;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableSortedMap;
+import com.google.common.collect.ImmutableSortedSet;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DefaultArtifact;
@@ -47,7 +41,11 @@ import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.project.MavenProject;
+import org.basepom.mojo.duplicatefinder.ClasspathElement;
 import org.basepom.mojo.duplicatefinder.PluginLog;
+import org.basepom.mojo.duplicatefinder.ClasspathElement.ClasspathArtifact;
+import org.basepom.mojo.duplicatefinder.ClasspathElement.ClasspathBootClasspathElement;
+import org.basepom.mojo.duplicatefinder.ClasspathElement.ClasspathLocalFolder;
 
 /**
  * Resolves artifact references from the project into local and repository files and folders.
@@ -61,16 +59,20 @@ public class ArtifactFileResolver
 
     private final BiMap<Artifact, File> localArtifactCache;
     private final BiMap<Artifact, File> repoArtifactCache;
+    private final ImmutableSet<File> bootClasspath;
 
     private final boolean preferLocal;
 
-    public ArtifactFileResolver(final MavenProject project, final boolean preferLocal) throws DependencyResolutionRequiredException
+    public ArtifactFileResolver(final MavenProject project,
+                                final ImmutableSet<File> bootClasspath,
+                                final boolean preferLocal) throws DependencyResolutionRequiredException
     {
         checkNotNull(project, "project is null");
         this.preferLocal = preferLocal;
 
         this.localArtifactCache = HashBiMap.create(project.getArtifacts().size());
         this.repoArtifactCache = HashBiMap.create(project.getArtifacts().size());
+        this.bootClasspath = bootClasspath;
 
         for (final Artifact artifact : project.getArtifacts()) {
             final File repoPath = artifact.getFile();
@@ -123,35 +125,37 @@ public class ArtifactFileResolver
         return inScopeBuilder.build();
     }
 
-    public ImmutableMap<String, Optional<Artifact>> getArtifactNamesForElements(final Collection<File> elements)
+    public ImmutableSortedSet<ClasspathElement> getClasspathElementsForElements(final Collection<File> elements)
     {
-        final ImmutableSortedMap.Builder<String, Optional<Artifact>> builder = ImmutableSortedMap.naturalOrder();
+        final ImmutableSortedSet.Builder<ClasspathElement> builder = ImmutableSortedSet.naturalOrder();
 
         for (final File element : elements) {
-            final Artifact artifact = resolveArtifactForFile(element);
-            if (artifact != null) {
-                builder.put(getArtifactNameFunction().apply(artifact), Optional.of(artifact));
-            }
-            else {
-                builder.put(element.toString(), Optional.<Artifact>absent());
-            }
+            builder.add(resolveClasspathElementForFile(element));
         }
         return builder.build();
     }
 
-    private Artifact resolveArtifactForFile(final File file)
+    private ClasspathElement resolveClasspathElementForFile(final File file)
     {
         checkNotNull(file, "file is null");
 
         if (preferLocal && localArtifactCache.inverse().containsKey(file)) {
-            return localArtifactCache.inverse().get(file);
+            return new ClasspathArtifact(localArtifactCache.inverse().get(file));
         }
 
         if (repoArtifactCache.inverse().containsKey(file)) {
-            return repoArtifactCache.inverse().get(file);
+            return new ClasspathArtifact(repoArtifactCache.inverse().get(file));
         }
 
-        return localArtifactCache.inverse().get(file);
+        if (bootClasspath.contains(file)) {
+            return new ClasspathBootClasspathElement(file);
+        }
+
+        if (localArtifactCache.inverse().containsKey(file)) {
+            return new ClasspathArtifact(localArtifactCache.inverse().get(file));
+        }
+
+        return new ClasspathLocalFolder(file);
     }
 
     private File resolveFileForArtifact(final Artifact artifact)
@@ -226,45 +230,5 @@ public class ArtifactFileResolver
         }
 
         return null;
-    }
-
-    private static Function<Artifact, String> getArtifactNameFunction()
-    {
-        return new Function<Artifact, String>() {
-            @Override
-            public String apply(@Nonnull final Artifact artifact)
-            {
-                return Joiner.on(':').skipNulls().join(
-                    artifact.getGroupId(),
-                    artifact.getArtifactId(),
-                    artifact.getVersion(),
-                    getType(artifact),
-                    getClassifier(artifact));
-            }
-
-            private String getType(final Artifact artifact)
-            {
-                if (isJarArtifact(artifact)) {
-                    // when the classifier is null but the type is jar, return null
-                    // so that in the Joiner expression both the type and classifier
-                    // are null and none is printed.
-                    return nullToEmpty(artifact.getClassifier()).isEmpty() ? null : "jar";
-                }
-
-                return artifact.getType();
-            }
-
-            private String getClassifier(final Artifact artifact)
-            {
-                if (nullToEmpty(artifact.getClassifier()).isEmpty()) {
-                    return null;
-                }
-                else if (isTestArtifact(artifact)) {
-                    return "tests";
-                }
-
-                return artifact.getClassifier();
-            }
-        };
     }
 }

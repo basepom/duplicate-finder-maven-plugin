@@ -12,6 +12,11 @@ These options control aspects of the plugin execution.
     <failBuildInCaseOfConflict>false</failBuildInCaseOfConflict>
     <printEqualFiles>false</printEqualFiles>
     <preferLocal>true</preferLocal>
+
+    <!-- Version 1.1.1+ -->
+    <includeBootClasspath>false</includeBootClasspath>
+    <bootClasspathProperty>sun.boot.class.path</bootClasspathProperty>
+    <!-- Version 1.1.1+ -->
 </configuration>
 ```
 
@@ -120,4 +125,29 @@ installing the resulting artifacts into the local repository.
 Maven command line property: `duplicate-finder.preferLocal` (**Plugin version 1.1.1+**)
 
 Default: **true**
+
+### `includeBootClasspath`
+
+** Available in plugin version 1.1.1 and later **
+
+Activate duplicate check against all classes from the boot
+classpath. This usually includes the JDK class library (rt.jar) and
+any additional jars that the JDK provides to an application.
+
+Maven command line property: `duplicate-finder.includeBootClasspath` (**Plugin version 1.1.1+**)
+
+Default: **false**
+
+### `bootClasspathProperty`
+
+** Available in plugin version 1.1.1 and later **
+
+The system property which holds the JDK boot classpath. For most JDKs,
+this will be `sun.boot.class.path` but it is possible that some Third
+Party JDKs use a different system property.
+
+Maven command line property: `duplicate-finder.bootClasspathProperty` (**Plugin version 1.1.1+**)
+
+Default: **sun.boot.class.path**
+
 

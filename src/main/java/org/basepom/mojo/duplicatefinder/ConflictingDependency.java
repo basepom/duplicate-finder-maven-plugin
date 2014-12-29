@@ -43,6 +43,7 @@ public class ConflictingDependency
     private Pattern[] matchingResources = new Pattern[0];
     private boolean currentProject = false;
     private boolean currentProjectIncluded = false;
+    private boolean bootClasspath = false;
 
     // Called by maven
     public void setConflictingDependencies(final Dependency[] conflictingDependencies) throws InvalidVersionSpecificationException
@@ -105,6 +106,17 @@ public class ConflictingDependency
         return currentProject;
     }
 
+    // Called by maven
+    public void setBootClasspath(final boolean bootClasspath)
+    {
+        this.bootClasspath = bootClasspath;
+    }
+
+    boolean hasBootClasspath()
+    {
+        return bootClasspath;
+    }
+
     boolean isCurrentProjectIncluded()
     {
         return currentProjectIncluded;
@@ -142,11 +154,13 @@ public class ConflictingDependency
         return result;
     }
 
-    public boolean isForArtifacts(final Set<Artifact> artifacts) throws OverConstrainedVersionException
+    public boolean isForArtifacts(final boolean bootClasspathConflict, final Set<Artifact> artifacts) throws OverConstrainedVersionException
     {
         checkNotNull(artifacts, "artifacts is null");
 
-        if (conflictingDependencies.size() < 2) {
+        // If the conflict matches the boot classpath but this exception does not cover it, return false
+        // immediately.
+        if (bootClasspathConflict && !bootClasspath) {
             return false;
         }
 
