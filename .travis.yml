@@ -5,3 +5,7 @@ jdk:
   - oraclejdk8
 install: mvn -DskipTests=true -Dbasepom.check.skip-all=true -Dbasepom.it.skip=true -B install
 script: mvn -B verify
+addons:
+  artifacts:
+    bucket: travis-b1b9305c-8fb0-11e4-8ebe-bcaec5228081
+    debug: true
