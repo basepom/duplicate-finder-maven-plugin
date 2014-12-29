@@ -98,13 +98,6 @@ public class ArtifactFileResolver
         }
     }
 
-    /**
-     * Creates a list of
-     * @param scopes
-     * @return
-     * @throws InvalidVersionSpecificationException
-     * @throws DependencyResolutionRequiredException
-     */
     public ImmutableMap<File, Artifact> resolveArtifactsForScopes(final Set<String> scopes) throws InvalidVersionSpecificationException, DependencyResolutionRequiredException
     {
         checkNotNull(scopes, "scopes is null");
