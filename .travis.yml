@@ -5,3 +5,11 @@ jdk:
   - oraclejdk8
 install: mvn -DskipTests=true -Dbasepom.check.skip-all=true -Dbasepom.it.skip=true -B install
 script: mvn -B verify
+addons:
+  artifacts:
+    debug: true
+    bucket: travis-b1b9305c-8fb0-11e4-8ebe-bcaec5228081
+    key:
+      secure: egFMS8s4a/W4ts0q2J2E/wFdMAT+VzWAQ85TVN8dopVJGsrTJKHKdAym2+SyAku/dkNtdxM8j6/ss3KKMe39/4aBtNB5x+rRehPVdrUCiL/zGUvmg0h9QFM0V1es6iXNEpq80CbItWIXtAgVgG4//+keC3AHZvTbG8seOe2EQgk=
+    secret:
+      secure: cVZS/vOdXfiuBDZZqPxeImkNMRnXWKryvlc6nHY/Jpz95ZBNM8XExTYTdYftXRCgWBB1t46pBo/fpKNaD2T7Rre73vhyru271b+dknQYy7NsbqVuJYA5oxV/tTpLLfAxhtlUInCOwK5uTUTOdLvjHrigAl1Yu8J8FNCAdCetYrw=
