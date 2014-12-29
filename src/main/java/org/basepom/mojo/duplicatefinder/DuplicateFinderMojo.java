@@ -262,10 +262,10 @@ public final class DuplicateFinderMojo extends AbstractMojo
     {
         try {
             if (skip) {
-                LOG.debug("Skipping execution!");
+                LOG.report(quiet, "Skipping duplicate-finder execution!");
             }
             else if ("pom".equals(project.getArtifact().getType())) {
-                LOG.debug("Ignoring POM project");
+                LOG.report(quiet, "Ignoring POM project!");
             }
             else {
                 if (printEqualFiles) {
