@@ -1,0 +1,145 @@
+<!--
+~   Licensed under the Apache License, Version 2.0 (the "License");
+~   you may not use this file except in compliance with the License.
+~   You may obtain a copy of the License at
+~
+~   http://www.apache.org/licenses/LICENSE-2.0
+~
+~   Unless required by applicable law or agreed to in writing, software
+~   distributed under the License is distributed on an "AS IS" BASIS,
+~   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~   See the License for the specific language governing permissions and
+~   limitations under the License.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>@project.groupId@.@project.artifactId@</groupId>
+        <artifactId>basepom</artifactId>
+        <version>1.0.under-test</version>
+    </parent>
+
+    <artifactId>test-pull-24</artifactId>
+    <description>Integration test to verify that https://github.com/ning/maven-duplicate-finder-plugin/pull/24 is fixed.</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-rt-bindings-soap</artifactId>
+            <version>2.6.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-rt-bindings-xml</artifactId>
+            <version>2.6.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-rt-core</artifactId>
+            <version>2.6.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-rt-frontend-jaxws</artifactId>
+            <version>2.6.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-rt-transports-http</artifactId>
+            <version>2.6.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-rt-ws-addr</artifactId>
+            <version>2.6.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-rt-ws-policy</artifactId>
+            <version>2.6.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-rt-ws-security</artifactId>
+            <version>2.6.2</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>@project.groupId@</groupId>
+                <artifactId>@project.artifactId@</artifactId>
+                <configuration>
+                    <failBuildInCaseOfConflict>true</failBuildInCaseOfConflict>
+                    <!-- test conflict is in META-INF -->
+                    <useDefaultResourceIgnoreList>false</useDefaultResourceIgnoreList>
+                    <exceptions>
+                        <exception>
+                            <conflictingDependencies>
+                                <dependency>
+                                    <groupId>org.apache.cxf</groupId>
+                                    <artifactId>cxf-rt-bindings-soap</artifactId>
+                                    <version>2.6.2</version>
+                                </dependency>
+                                <dependency>
+                                    <groupId>org.apache.cxf</groupId>
+                                    <artifactId>cxf-rt-bindings-xml</artifactId>
+                                    <version>2.6.2</version>
+                                </dependency>
+                                <dependency>
+                                    <groupId>org.apache.cxf</groupId>
+                                    <artifactId>cxf-rt-core</artifactId>
+                                    <version>2.6.2</version>
+                                </dependency>
+                                <dependency>
+                                    <groupId>org.apache.cxf</groupId>
+                                    <artifactId>cxf-rt-frontend-jaxws</artifactId>
+                                    <version>2.6.2</version>
+                                </dependency>
+                                <dependency>
+                                    <groupId>org.apache.cxf</groupId>
+                                    <artifactId>cxf-rt-transports-http</artifactId>
+                                    <version>2.6.2</version>
+                                </dependency>
+                                <dependency>
+                                    <groupId>org.apache.cxf</groupId>
+                                    <artifactId>cxf-rt-ws-addr</artifactId>
+                                    <version>2.6.2</version>
+                                </dependency>
+                                <dependency>
+                                    <groupId>org.apache.cxf</groupId>
+                                    <artifactId>cxf-rt-ws-policy</artifactId>
+                                    <version>2.6.2</version>
+                                </dependency>
+                                <dependency>
+                                    <groupId>org.apache.cxf</groupId>
+                                    <artifactId>cxf-rt-ws-security</artifactId>
+                                    <version>2.6.2</version>
+                                </dependency>
+                            </conflictingDependencies>
+                            <!-- NPE reason is here -->
+                            <resources>
+                                <resource>META-INF/cxf/bus-extensions.txt</resource>
+                            </resources>
+                        </exception>
+
+                    </exceptions>
+                    <ignoredResourcePatterns>
+                        <ignoredResourcePattern>^META-INF/DEPENDENCIES</ignoredResourcePattern>
+                        <ignoredResourcePattern>^META-INF/INDEX.LIST</ignoredResourcePattern>
+                        <ignoredResourcePattern>^META-INF/LICENSE</ignoredResourcePattern>
+                        <ignoredResourcePattern>^META-INF/MANIFEST.MF</ignoredResourcePattern>
+                        <ignoredResourcePattern>^META-INF/NOTICE</ignoredResourcePattern>
+                        <ignoredResourcePattern>^META-INF/spring.handlers</ignoredResourcePattern>
+                        <ignoredResourcePattern>^META-INF/spring.schemas</ignoredResourcePattern>
+                        <ignoredResourcePattern>^META-INF/wsdl.plugin.xml</ignoredResourcePattern>
+                    </ignoredResourcePatterns>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
