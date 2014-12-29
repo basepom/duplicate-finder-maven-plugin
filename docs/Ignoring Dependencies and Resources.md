@@ -42,6 +42,7 @@ These resources are specified as standard Java regular expressions. All patterns
 
 The default resource ignore list [is documented here](Default ignored elements).
 
+Maven command line property: ``duplicate-finder.useDefaultResourceIgnoreList`
 Default: **true**
 
 **Warning!** Setting this element to `false` will result in a significant number of false positives.

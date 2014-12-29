@@ -115,7 +115,7 @@ public final class DuplicateFinderMojo extends AbstractMojo
      *
      * @since 1.0.6
      */
-    @Parameter(defaultValue = "false")
+    @Parameter(defaultValue = "false", property = "duplicate-finder.printEqualFiles")
     protected boolean printEqualFiles = false;
 
     /**
@@ -123,26 +123,26 @@ public final class DuplicateFinderMojo extends AbstractMojo
      *
      * @since 1.0.3
      */
-    @Parameter(defaultValue = "false")
+    @Parameter(defaultValue = "false", property = "duplicate-finder.failBuildInCaseOfDifferentContentConflict")
     protected boolean failBuildInCaseOfDifferentContentConflict = false;
 
     /**
      * Fail the build if files with the same name and the same content are detected.
      * @since 1.0.3
      */
-    @Parameter(defaultValue = "false")
+    @Parameter(defaultValue = "false", property = "duplicate-finder.failBuildInCaseOfEqualContentConflict")
     protected boolean failBuildInCaseOfEqualContentConflict = false;
 
     /**
      * Fail the build if any files with the same name are found.
      */
-    @Parameter(defaultValue = "false")
+    @Parameter(defaultValue = "false", property = "duplicate-finder.failBuildInCaseOfConflict")
     protected boolean failBuildInCaseOfConflict = false;
 
     /**
      * Use the default resource ignore list.
      */
-    @Parameter(defaultValue = "true")
+    @Parameter(defaultValue = "true", property = "duplicate-finder.useDefaultResourceIgnoreList")
     protected boolean useDefaultResourceIgnoreList = true;
 
     /**
@@ -163,37 +163,37 @@ public final class DuplicateFinderMojo extends AbstractMojo
     /**
      * Artifacts with expected and resolved versions that are checked.
      */
-    @Parameter(alias = "exceptions", property = "exceptions")
+    @Parameter(alias = "exceptions")
     protected ConflictingDependency[] conflictingDependencies = new ConflictingDependency[0];
 
     /**
      * Dependencies that should not be checked at all.
      */
-    @Parameter(alias = "ignoredDependencies", property = "ignoredDependencies")
+    @Parameter(alias = "ignoredDependencies")
     protected MavenCoordinates[] ignoredDependencies = new MavenCoordinates[0];
 
     /**
      * Check resources and classes on the compile class path.
      */
-    @Parameter(defaultValue = "true")
+    @Parameter(defaultValue = "true", property = "duplicate-finder.checkCompileClasspath")
     protected boolean checkCompileClasspath = true;
 
     /**
      * Check resources and classes on the runtime class path.
      */
-    @Parameter(defaultValue = "true")
+    @Parameter(defaultValue = "true", property = "duplicate-finder.checkRuntimeClasspath")
     protected boolean checkRuntimeClasspath = true;
 
     /**
      * Check resources and classes on the test class path.
      */
-    @Parameter(defaultValue = "true")
+    @Parameter(defaultValue = "true", property = "duplicate-finder.checkTestClasspath")
     protected boolean checkTestClasspath = true;
 
     /**
      * Skips the plugin execution.
      */
-    @Parameter(defaultValue = "false")
+    @Parameter(defaultValue = "false", property = "duplicate-finder.skip")
     protected boolean skip = false;
 
     /**
@@ -201,7 +201,7 @@ public final class DuplicateFinderMojo extends AbstractMojo
      *
      * @since 1.1.0
      */
-    @Parameter(defaultValue = "false")
+    @Parameter(defaultValue = "false", property = "duplicate-finder.quiet")
     protected boolean quiet = false;
 
     /**
@@ -209,7 +209,7 @@ public final class DuplicateFinderMojo extends AbstractMojo
      *
      * @since 1.1.0
      */
-    @Parameter(defaultValue = "true")
+    @Parameter(defaultValue = "true", property = "duplicate-finder.preferLocal")
     protected boolean preferLocal = true;
 
     /**
@@ -217,7 +217,7 @@ public final class DuplicateFinderMojo extends AbstractMojo
      *
      * @since 1.1.0
      */
-    @Parameter(defaultValue = "${project.build.directory}/duplicate-finder-result.xml")
+    @Parameter(defaultValue = "${project.build.directory}/duplicate-finder-result.xml", property = "duplicate-finder.resultFile")
     protected File resultFile;
 
     /**
@@ -225,7 +225,7 @@ public final class DuplicateFinderMojo extends AbstractMojo
      *
      * @since 1.1.0
      */
-    @Parameter(defaultValue = "true")
+    @Parameter(defaultValue = "true", property = "duplicate-finder.useResultFile")
     protected boolean useResultFile = true;
 
     /**
@@ -233,7 +233,7 @@ public final class DuplicateFinderMojo extends AbstractMojo
      *
      * @since 1.1.0
      */
-    @Parameter(defaultValue="2")
+    @Parameter(defaultValue="2", property = "duplicate-finder.resultFileMinClasspathCount")
     protected int resultFileMinClasspathCount = 2;
 
     private final EnumSet<ConflictState> printState = EnumSet.of(CONFLICT_CONTENT_DIFFERENT);
