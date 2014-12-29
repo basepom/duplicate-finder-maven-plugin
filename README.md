@@ -1,6 +1,3 @@
-![Build Status](https://travis-ci.org/basepom/duplicate-finder-maven-plugin.svg?branch=master)](https://travis-ci.org/basepom/duplicate-finder-maven-plugin)
-
-
 # duplicate-finder Maven plugin
 
 A maven plugin to find and flag duplicate classes and resources on the java classpath.
@@ -26,4 +23,4 @@ The plugin has two goals:
 
 Up-to-date documentation is available from the [duplicate finder plugin Wiki](https://github.com/basepom/duplicate-finder-maven-plugin/wiki). A snapshot from the last release of the plugin is available in the `docs` folder in this repository.
 
-
+[![Build Status](https://travis-ci.org/basepom/duplicate-finder-maven-plugin.svg?branch=master)](https://travis-ci.org/basepom/duplicate-finder-maven-plugin)
