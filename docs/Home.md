@@ -51,9 +51,20 @@ The duplicate-finder plugins supports a number of configuration settings:
                 <useResultFile>true</useResultFile>
                 <resultFileMinClasspathCount>2</resultFileMinClasspathCount>
                 <resultFile>${project.build.directory}/duplicate-finder-result.xml</resultFile>
+
+                <!-- Version 1.1.1+ -->
+                <includeBootClasspath>false</includeBootClasspath>
+                <bootClasspathProperty>sun.boot.class.path</bootClasspathProperty>
+                <!-- Version 1.1.1+ -->
+
                 <exceptions>
                     <exception>
                         <currentProject>false</currentProject>
+
+                        <!-- Version 1.1.1+ -->
+                        <bootClasspath>false</bootClasspath>
+                        <!-- Version 1.1.1+ -->
+
                         <conflictingDependencies>
                             <dependency>
                                 <artifactId>...</artifactId>

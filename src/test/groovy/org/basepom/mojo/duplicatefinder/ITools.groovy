@@ -61,6 +61,15 @@ public final class ITools
   }
 
   /**
+   * Returns a list of all 'conflictResult' nodes from any matching conflict. This allows "underdefining" a conflict and returning the results for multiple
+   * matches at once. Mostly useful if one or more names are not known (e.g. because they are installation specific (classpath matches)).
+   */
+  def static findAllConflictResults(result, String ... matches) {
+    def elements = result.conflicts.conflict.findAll( { def found = true; matches.each() { match -> found &= it.@name.text().contains(match) }; return found } )
+    return elements.conflictResults.conflictResult.collect()
+  }
+
+  /**
    * Ensures that only a single conflictResult elements from a single conflict exists.
    */
   def static findConflictResult(result, String ... matches) {
@@ -84,8 +93,10 @@ public final class ITools
 
     assert null != conflictResult
 
-    def result = conflictResult.findAll( { it.@name.text().equals(conflictName) } )
-    assert 1 == result.size()
+    def results = conflictResult.findAll( { it.@name.text().equals(conflictName) } )
+    assert 1 == results.size()
+
+    def result = results[0]
 
     assert conflictName == result.@name.text()
     assert conflictType == result.@type.text()
@@ -95,6 +106,15 @@ public final class ITools
     assert Boolean.toString(failed) == result.@failed.text()
 
     println("*** TEST: checkConflictResult(name:${conflictName}, type:${conflictType}, state:${conflictState}, excepted:${excepted}, printed:${printed}, failed:${failed}, result) --> OK");
+
+    return result
+  }
+
+  /**
+   * Checks whether a given conflictResult is also a bootClasspath element match.
+   */
+  def static isBootClasspathMatch(conflictResult) {
+    assert 1 == conflictResult.conflictNames.conflictName.grep{it.@bootClasspathElement.text() == "true" }.size()
   }
 
   /**

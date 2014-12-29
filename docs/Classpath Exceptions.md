@@ -21,6 +21,11 @@ conflicts.
                 ...
             </conflictingDependencies>
             <currentProject>false</currentProject>
+
+            <!-- Version 1.1.1+ -->
+            <bootClasspath>false</bootClasspath>
+            <!-- Version 1.1.1+ -->
+
             <resourcePatterns>
                 <resourcePattern>...</resourcePattern>
             </resourcePatterns>
@@ -224,6 +229,26 @@ Now, `sub-project-a` will have its conflicts with
 `commons-lang:commons-lang` excluded and `sub-project-b` will have its
 conflicts with `commons-collections:commons-collections` excluded
 while any other conflict will still be flagged correctly.
+
+#### The `bootClasspath` flag
+
+** Available in plugin version 1.1.1 and later! **
+
+The `bootClasspath` flag signals that an exception to elements on the
+boot classpath is defined. Any match between classes or resources in
+the listed artifacts and the boot classpath elements is ignored.
+
+This flag can be combined with the `currentProject` flag.
+
+```xml
+<exception>
+    <currentProject>false</currentProject>
+    <bootClasspath>false</bootClasspath>
+</exception>
+```
+
+will ignore any conflict between classes and resources in the current
+project and the boot classpath.
 
 #### Managing class exceptions with  `classes` and `packages`
 

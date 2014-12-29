@@ -20,8 +20,6 @@ import java.util.regex.Pattern;
 
 import javax.xml.stream.XMLStreamException;
 
-import com.google.common.base.Optional;
-
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.versioning.OverConstrainedVersionException;
 import org.apache.maven.project.MavenProject;
@@ -74,6 +72,7 @@ public final class XMLWriterUtils
         addAttribute(conflictingDependencyElement, "currentProject", conflictingDependency.hasCurrentProject());
         addAttribute(conflictingDependencyElement, "currentProjectIncluded", conflictingDependency.isCurrentProjectIncluded());
         addAttribute(conflictingDependencyElement, "wildcard", conflictingDependency.isWildcard());
+        addAttribute(conflictingDependencyElement, "bootClasspath", conflictingDependency.hasBootClasspath());
 
         SMOutputElement dependenciesElement = conflictingDependencyElement.addElement("dependencies");
         for (MavenCoordinates dependency : conflictingDependency.getDependencies()) {
@@ -159,14 +158,22 @@ public final class XMLWriterUtils
         addAttribute(conflictResultElement, "printed", conflictResult.isPrinted());
         addAttribute(conflictResultElement, "conflictState", conflictResult.getConflictState());
         SMOutputElement conflictNames = conflictResultElement.addElement("conflictNames");
-        for (Map.Entry<String, Optional<Artifact>> entry : conflictResult.getConflictArtifactNames().entrySet()) {
+        for (ClasspathElement entry : conflictResult.getClasspathElements()) {
             SMOutputElement conflictName = conflictNames.addElement("conflictName");
-            addAttribute(conflictName, "name", entry.getKey());
-            if (entry.getValue().isPresent()) {
-                addArtifact(conflictName, "artifact", entry.getValue().get());
+            addAttribute(conflictName, "name", entry.getName());
+            addAttribute(conflictName, "artifact", entry.hasArtifact());
+            addAttribute(conflictName, "localFolder", entry.isLocalFolder());
+            addAttribute(conflictName, "bootClasspathElement", entry.isBootClasspathElement());
+            if (entry.hasArtifact()) {
+                addArtifact(conflictName, "artifact", entry.getArtifact());
             }
             else {
-                addElement(conflictName, "directory", entry.getKey());
+                final File file = entry.getFile();
+                if (file.isDirectory()) {
+                    addElement(conflictName, "directory", file);
+                } else {
+                    addElement(conflictName, "file", file);
+                }
             }
         }
     }

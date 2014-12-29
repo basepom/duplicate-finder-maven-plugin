@@ -19,20 +19,19 @@ import java.util.Collection;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.Map;
+import java.util.SortedSet;
 
 import javax.annotation.Nonnull;
 
 import com.google.common.base.Joiner;
-import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
+import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder.SetMultimapBuilder;
 import com.google.common.collect.Multimaps;
-
-import org.apache.maven.artifact.Artifact;
 
 public class ResultCollector
 {
@@ -70,7 +69,7 @@ public class ResultCollector
         return seenResults.get(type).contains(state);
     }
 
-    public void addConflict(ConflictType type, String name, Map<String, Optional<Artifact>> conflictArtifactNames, boolean excepted, final ConflictState state)
+    public void addConflict(ConflictType type, String name, SortedSet<ClasspathElement> conflictingClasspathElements, boolean excepted, final ConflictState state)
     {
         if (!excepted) {
             this.conflictState = ConflictState.max(this.conflictState, state);
@@ -79,9 +78,9 @@ public class ResultCollector
             seenResults.get(type).add(state);
         }
 
-        ConflictResult conflictResult = new ConflictResult(type, name, conflictArtifactNames, excepted, state);
+        ConflictResult conflictResult = new ConflictResult(type, name, conflictingClasspathElements, excepted, state);
 
-        results.put(conflictResult.getConflictArtifactsName(), conflictResult);
+        results.put(conflictResult.getConflictName(), conflictResult);
     }
 
     public Map<String, Collection<ConflictResult>> getResults(final ConflictType type, final ConflictState state)
@@ -106,32 +105,32 @@ public class ResultCollector
         return ImmutableMap.copyOf(results.asMap());
     }
 
-    private static String buildConflictArtifactsName(final Map<String, Optional<Artifact>> conflictArtifactNames)
+    private static String buildConflictName(final SortedSet<ClasspathElement> conflictArtifactNames)
     {
-        return Joiner.on(", ").join(conflictArtifactNames.keySet());
+        return Joiner.on(", ").join(Collections2.transform(conflictArtifactNames, ClasspathElement.getNameFunction()));
     }
 
     public class ConflictResult
     {
         private final ConflictType type;
         private final String name;
-        private final Map<String, Optional<Artifact>> conflictArtifactNames;
+        private final SortedSet<ClasspathElement> classpathElements;
         private final boolean excepted;
         private final ConflictState conflictState;
-        private final String conflictArtifactsName;
+        private final String conflictName;
 
         ConflictResult(final ConflictType type,
                        final String name,
-                       final Map<String, Optional<Artifact>> conflictArtifactNames,
+                       final SortedSet<ClasspathElement> classpathElements,
                        final boolean excepted,
                        final ConflictState conflictState)
         {
             this.type = type;
             this.name = name;
-            this.conflictArtifactNames = conflictArtifactNames;
+            this.classpathElements = classpathElements;
             this.excepted = excepted;
             this.conflictState = conflictState;
-            this.conflictArtifactsName = ResultCollector.buildConflictArtifactsName(conflictArtifactNames);
+            this.conflictName = ResultCollector.buildConflictName(classpathElements);
         }
 
         public String getName()
@@ -144,9 +143,9 @@ public class ResultCollector
             return type;
         }
 
-        public Map<String, Optional<Artifact>> getConflictArtifactNames()
+        public SortedSet<ClasspathElement> getClasspathElements()
         {
-            return conflictArtifactNames;
+            return classpathElements;
         }
 
         public boolean isExcepted()
@@ -169,9 +168,9 @@ public class ResultCollector
             return conflictState;
         }
 
-        private String getConflictArtifactsName()
+        private String getConflictName()
         {
-            return conflictArtifactsName;
+            return conflictName;
         }
     }
 }
