@@ -413,6 +413,20 @@
             <properties>
                 <project.jdk6.home>${env.JAVA_HOME}</project.jdk6.home>
             </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-invoker-plugin</artifactId>
+                        <configuration>
+                            <!-- test must be turned off in travis due to MINVOKER-172 and travis setting .mavenrc -->
+                            <pomExcludes>
+                                <pomExclude>test-skip-property/pom.xml</pomExclude>
+                            </pomExcludes>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
         <profile>
             <id>findbugs-jdk6</id>
