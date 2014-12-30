@@ -3,6 +3,10 @@ jdk:
   - openjdk6
   - oraclejdk7
   - oraclejdk8
+sudo: false
+env:
+  global:
+  - MAVEN_OPTS="-Dduplicate-finder.skip=true"
 install: mvn -DskipTests=true -Dbasepom.check.skip-all=true -Dbasepom.it.skip=true -B install
 script: mvn -B verify
 addons:
