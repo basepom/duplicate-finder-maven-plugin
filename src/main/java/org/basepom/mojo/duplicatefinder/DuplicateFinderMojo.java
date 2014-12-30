@@ -43,14 +43,15 @@ import java.util.EnumSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import javax.annotation.Nonnull;
 import javax.xml.stream.XMLStreamException;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
+import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -236,6 +237,23 @@ public final class DuplicateFinderMojo extends AbstractMojo
     @Parameter(defaultValue="2", property = "duplicate-finder.resultFileMinClasspathCount")
     protected int resultFileMinClasspathCount = 2;
 
+    /**
+     * Include the boot class path in duplicate detection. This will find duplicates with the JDK
+     * internal classes (e.g. the classes in rt.jar).
+     *
+     * @since 1.1.1
+     */
+    @Parameter(defaultValue="false", property = "duplicate-finder.includeBootClasspath")
+    protected boolean includeBootClasspath = false;
+
+    /**
+     * System property that contains the boot class path.
+     *
+     * @since 1.1.1
+     */
+    @Parameter(defaultValue="sun.boot.class.path", property = "duplicate-finder.bootClasspathProperty")
+    protected String bootClasspathProperty = "sun.boot.class.path";
+
     private final EnumSet<ConflictState> printState = EnumSet.of(CONFLICT_CONTENT_DIFFERENT);
     private final EnumSet<ConflictState> failState = EnumSet.noneOf(ConflictState.class);
 
@@ -297,27 +315,49 @@ public final class DuplicateFinderMojo extends AbstractMojo
                         conflictingDependency.addProjectMavenCoordinates(projectCoordinates);
                     }
 
-                    final ArtifactFileResolver artifactFileResolver = new ArtifactFileResolver(project, preferLocal);
+                    // Find boot classpath information
+
+                    ImmutableSet.Builder<File> bootClasspathBuilder = ImmutableSet.builder();
+
+                    if (includeBootClasspath) {
+                        String value = System.getProperty(bootClasspathProperty);
+                        if (value != null) {
+                            for (String entry : Splitter.on(':').split(value)) {
+                                File file = new File(entry);
+                                if (file.exists()) {
+                                    LOG.debug("Adding '%s' as a boot classpath element", entry);
+                                    bootClasspathBuilder.add(file);
+                                }
+                                else {
+                                    LOG.debug("Ignoring '%s', does not exist.", entry);
+                                }
+                            }
+                        }
+                    }
+
+                    final ImmutableSet<File> bootClasspath = bootClasspathBuilder.build();
+
+                    final ArtifactFileResolver artifactFileResolver = new ArtifactFileResolver(project, bootClasspath, preferLocal);
                     final ImmutableMap.Builder<String, Entry<ResultCollector, ClasspathDescriptor>> classpathResultBuilder = ImmutableMap.builder();
 
                     if (checkCompileClasspath) {
                         LOG.report(quiet, "Checking compile classpath");
                         final ResultCollector resultCollector = new ResultCollector(printState, failState);
-                        final ClasspathDescriptor classpathDescriptor = checkClasspath(resultCollector, artifactFileResolver, COMPILE_SCOPE, getOutputDirectory(project));
+                        final ClasspathDescriptor classpathDescriptor = checkClasspath(resultCollector, artifactFileResolver, COMPILE_SCOPE, bootClasspath, getOutputDirectory(project));
                         classpathResultBuilder.put("compile", new SimpleImmutableEntry<ResultCollector, ClasspathDescriptor>(resultCollector, classpathDescriptor));
                     }
 
                     if (checkRuntimeClasspath) {
                         LOG.report(quiet, "Checking runtime classpath");
                         final ResultCollector resultCollector = new ResultCollector(printState, failState);
-                        final ClasspathDescriptor classpathDescriptor = checkClasspath(resultCollector, artifactFileResolver, RUNTIME_SCOPE, getOutputDirectory(project));
+                        final ClasspathDescriptor classpathDescriptor = checkClasspath(resultCollector, artifactFileResolver, RUNTIME_SCOPE, bootClasspath, getOutputDirectory(project));
                         classpathResultBuilder.put("runtime", new SimpleImmutableEntry<ResultCollector, ClasspathDescriptor>(resultCollector, classpathDescriptor));
                     }
 
                     if (checkTestClasspath) {
                         LOG.report(quiet, "Checking test classpath");
                         final ResultCollector resultCollector = new ResultCollector(printState, failState);
-                        final ClasspathDescriptor classpathDescriptor = checkClasspath(resultCollector, artifactFileResolver, TEST_SCOPE, getOutputDirectory(project), getTestOutputDirectory(project));
+                        final ClasspathDescriptor classpathDescriptor = checkClasspath(resultCollector, artifactFileResolver, TEST_SCOPE, bootClasspath, getOutputDirectory(project), getTestOutputDirectory(project));
                         classpathResultBuilder.put("test", new SimpleImmutableEntry<ResultCollector, ClasspathDescriptor>(resultCollector, classpathDescriptor));
                     }
 
@@ -392,7 +432,11 @@ public final class DuplicateFinderMojo extends AbstractMojo
      * Checks the maven classpath for a given set of scopes whether it contains duplicates. In addition to the
      * artifacts on the classpath, one or more additional project folders are added.
      */
-    private ClasspathDescriptor checkClasspath(final ResultCollector resultCollector, final ArtifactFileResolver artifactFileResolver, final Set<String> scopes, final File ... projectFolders)
+    private ClasspathDescriptor checkClasspath(final ResultCollector resultCollector,
+                                               final ArtifactFileResolver artifactFileResolver,
+                                               final Set<String> scopes,
+                                               final Set<File> bootClasspath,
+                                               final File ... projectFolders)
         throws MojoExecutionException,
         InvalidVersionSpecificationException,
         OverConstrainedVersionException,
@@ -408,6 +452,7 @@ public final class DuplicateFinderMojo extends AbstractMojo
             getIgnoredResourcePatterns(),
             Arrays.asList(ignoredDependencies),
             useDefaultResourceIgnoreList,
+            bootClasspath,
             projectFolders);
 
         // Now a scope specific classpath descriptor (scope relevant artifacts and project folders) and the global artifact resolver
@@ -438,22 +483,27 @@ public final class DuplicateFinderMojo extends AbstractMojo
             final Collection<File> elements = entry.getValue();
 
             // Map which contains a printable name for the conflicting entry (which is either the printable name for an artifact or
-            // a folder name for a project folder) as keys and an optional artifact as value.
-            final Map<String, Optional<Artifact>> conflictArtifactNames = artifactFileResolver.getArtifactNamesForElements(elements);
+            // a folder name for a project folder) as keys and a classpath element as value.
+            final SortedSet<ClasspathElement> conflictingClasspathElements = artifactFileResolver.getClasspathElementsForElements(elements);
 
-            ImmutableSet.Builder<Artifact> artifactBuilder = ImmutableSet.<Artifact>builder().addAll(Optional.presentInstances(conflictArtifactNames.values()));
+            ImmutableSet.Builder<Artifact> artifactBuilder = ImmutableSet.builder();
 
-            if (artifactBuilder.build().size() < conflictArtifactNames.size()) {
-                // One or more of the project folders are involved. Add the project artifact
-                artifactBuilder.add(project.getArtifact()).build();
+            boolean bootClasspathConflict = false;
+            for (ClasspathElement conflictingClasspathElement : conflictingClasspathElements) {
+                bootClasspathConflict |= conflictingClasspathElement.isBootClasspathElement();
+
+                if (conflictingClasspathElement.hasArtifact()) {
+                    artifactBuilder.add(conflictingClasspathElement.getArtifact());
+                }
+                else if (conflictingClasspathElement.isLocalFolder()) {
+                    artifactBuilder.add(project.getArtifact());
+                }
             }
 
-            Set<Artifact> artifacts = artifactBuilder.build();
+            final boolean excepted = isExcepted(type, name, bootClasspathConflict, artifactBuilder.build());
+            final ConflictState conflictState = DuplicateFinderMojo.determineConflictState(type, name, elements);
 
-            boolean excepted = isExcepted(type, name, artifacts);
-            ConflictState conflictState = DuplicateFinderMojo.determineConflictState(type, name, elements);
-
-            resultCollector.addConflict(type, name, conflictArtifactNames, excepted, conflictState);
+            resultCollector.addConflict(type, name, conflictingClasspathElements, excepted, conflictState);
         }
     }
 
@@ -535,16 +585,19 @@ public final class DuplicateFinderMojo extends AbstractMojo
         }
     }
 
-    private boolean isExcepted(final ConflictType type, final String name, final Set<Artifact> artifacts) throws OverConstrainedVersionException
+    private boolean isExcepted(final ConflictType type, final String name, final boolean bootClasspathConflict, final Set<Artifact> artifacts) throws OverConstrainedVersionException
     {
         final ImmutableSet.Builder<ConflictingDependency> conflictBuilder = ImmutableSet.builder();
         checkState(conflictingDependencies != null, "conflictingDependencies is null");
-        for (final ConflictingDependency conflictingDependency : Arrays.asList(conflictingDependencies)) {
-            if (conflictingDependency.isForArtifacts(artifacts)) {
+
+        // Find all exception definitions from the configuration that match these artifacts.
+        for (final ConflictingDependency conflictingDependency : conflictingDependencies) {
+            if (conflictingDependency.isForArtifacts(bootClasspathConflict, artifacts)) {
                 conflictBuilder.add(conflictingDependency);
             }
         }
 
+        // If any of the possible candidates covers this class or resource, then the conflict is excepted.
         for (final ConflictingDependency conflictingDependency : conflictBuilder.build()) {
             if (type == ConflictType.CLASS && conflictingDependency.containsClass(name)) {
                 return true;
@@ -611,6 +664,8 @@ public final class DuplicateFinderMojo extends AbstractMojo
         XMLWriterUtils.addAttribute(prefs, "failBuildInCaseOfConflict", failBuildInCaseOfConflict);
         XMLWriterUtils.addAttribute(prefs, "printEqualFiles", printEqualFiles);
         XMLWriterUtils.addAttribute(prefs, "preferLocal", preferLocal);
+        XMLWriterUtils.addAttribute(prefs, "includeBootClasspath", includeBootClasspath);
+        XMLWriterUtils.addAttribute(prefs, "bootClasspathProperty", bootClasspathProperty);
         // Ignoring Dependencies and resources
         XMLWriterUtils.addAttribute(prefs, "useDefaultResourceIgnoreList", useDefaultResourceIgnoreList);
         // Result file options

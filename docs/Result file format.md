@@ -25,7 +25,9 @@ The result file version will increment when there is a backwards incompatible ch
                    useDefaultResourceIgnoreList="..." 
                    useResultFile="..." 
                    resultFileMinClasspathCount="..." 
-                   resultFile="...">
+                   resultFile="..."
+                   includeBootClasspath="..."
+                   bootClasspathProperty="...>
         <ignoredResourcePatterns>
             <ignoredResourcePattern>...</ignoredResourcePattern>
             ...
@@ -222,6 +224,8 @@ Contains the plugin configuration as attributes. All available configuration opt
 | `useResultFile` | boolean | always `true` |
 | `resultFileMinClasspathCount` | integer | |
 | `resultFile` | string | |
+| `includeBootClasspath` | boolean | ** Plugin version 1.1.1 + ** |
+| `bootClasspathProperty` | string | ** Plugin version 1.1.1 + ** |
 
 | Child element name | Function |
 | ------------------ | -------- |
@@ -308,12 +312,15 @@ Full name: `duplicate-finder-result.results.result.conflicts.conflict.conflictRe
 | Attribute name | Type | Notes |
 | -------------- | -----| ----- |
 | `name` | string | An unique name for this specific `conflictName` element. |
+| `artifact` | boolean | ** Plugin version 1.1.1+ ** True if the element has a nested `artifact` element. |
+| `localFolder` | boolean | ** Plugin version 1.1.1+ ** True if the element represents a local project folder. It has either a nested `directory` or `file` element. |
+| `bootClasspathElement` | boolean | ** Plugin version 1.1.1+ ** True if the element represents an element from the boot classpath. It has either a nested `directory` or `file` element. |
 
-This element has either an `artifact` or a `directory` element as nested element.
+This element has one of the following elements nested:
 
-`artifact` describes a classpath artifact which contains the class or resource in conflict. Its attributes are identical to a `dependency` element.
-
-`directory` is an absolute directory path which contains the class or resource in conflict. This is an absolute path which generally is not portable.
+* `artifact` describes a classpath artifact which contains the class or resource in conflict. Its attributes are identical to a `dependency` element.
+* `directory` is an absolute directory path which contains the class or resource in conflict. This is an absolute path which generally is not portable.
+* `file` is an absolute file path which contains the class or resource in conflict. This is an absolute path which generally is not portable.
 
 ### `classpathElements` element
 
