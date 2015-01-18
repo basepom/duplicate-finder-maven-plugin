@@ -3,9 +3,9 @@
 ##### 1.1.1 - TBD
 
 * Add maven properties for all simple (boolean, int, string) configuration settings.
-* Allow duplicate checking against elements from the boot classpath
-  (this includes rt.jar). This resolves
-  https://github.com/ning/maven-duplicate-finder-plugin/issues/44
+* Ning Issue #44: Allow duplicate checking against elements from the boot classpath
+  (this includes rt.jar). 
+* Ning Issue #19: Report a defined message if plugin skips execution. 
 
 ##### 1.1.0 - 2014-12-27
 
