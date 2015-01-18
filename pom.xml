@@ -452,12 +452,13 @@
             <properties>
                 <dep.findbugs.version>2.0.3</dep.findbugs.version>
                 <dep.plugin.findbugs.version>2.5.4</dep.plugin.findbugs.version>
+                <dep.checkstyle.version>6.1</dep.checkstyle.version>
             </properties>
         </profile>
         <profile>
             <id>javadoc</id>
             <activation>
-                <jdk>1.7</jdk>
+                <jdk>[1.7,)</jdk>
             </activation>
             <build>
                 <pluginManagement>
