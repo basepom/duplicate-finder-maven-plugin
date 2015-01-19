@@ -79,7 +79,6 @@
         <project.jdk6.home>${env.JAVA6_HOME}</project.jdk6.home>
         <project.build.targetJdk>1.6</project.build.targetJdk>
 
-        <skip.it>false</skip.it>
         <dep.maven-api.version>3.0</dep.maven-api.version>
         <dep.plexus.version>1.5.5</dep.plexus.version>
         <dep.plugin.plugin.version>3.4</dep.plugin.plugin.version>
