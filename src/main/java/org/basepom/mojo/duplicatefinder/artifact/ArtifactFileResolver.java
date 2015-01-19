@@ -86,7 +86,13 @@ public class ArtifactFileResolver
         for (final MavenProject referencedProject : project.getProjectReferences().values()) {
             // referenced projects only have GAV coordinates but no scope.
             final Set<Artifact> repoArtifacts = findRepoArtifacts(referencedProject, repoArtifactCache);
-            checkState(!repoArtifacts.isEmpty(), "Found project reference to %s but no repo reference!", referencedProject.getArtifact());
+
+            // This can happen if another sub-project in the reactor is e.g. used as a compiler plugin dependency.
+            // In that case, the dependency will show up as a referenced project but not in the artifacts list from the project.
+            // Fix up straight from the referenced project.
+            if (repoArtifacts.isEmpty()) {
+                LOG.debug("Found project reference to %s but no repo reference, probably used in a plugin dependency.", referencedProject.getArtifact());
+            }
 
             for (final Artifact artifact : repoArtifacts) {
 
