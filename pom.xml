@@ -456,8 +456,9 @@
         </profile>
         <profile>
             <id>javadoc</id>
+            <!-- The javadoc profile is only required for 1.7; 1.6 and 1.8+ work just fine with their normal class path. -->
             <activation>
-                <jdk>[1.7,)</jdk>
+                <jdk>1.7</jdk>
             </activation>
             <build>
                 <pluginManagement>
