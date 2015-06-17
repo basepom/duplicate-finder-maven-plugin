@@ -164,17 +164,24 @@ public class ConflictingDependency
             return false;
         }
 
-        if (artifacts.size() != conflictingDependencies.size()) {
+        // An exception can contain more than the actually matching
+        // artifacts. In that case, we will check this exception if at least
+        // the number of artifacts are present.
+        if (artifacts.size() > conflictingDependencies.size()) {
             return false;
         }
 
-        int numMatches = conflictingDependencies.size();
+        // Every artifact must be matched.
+        int numMatches = artifacts.size();
 
         for (final Artifact artifact : artifacts) {
             for (final MavenCoordinates conflictingDependency : conflictingDependencies) {
                 if (conflictingDependency.matches(artifact)) {
                     if (--numMatches == 0) {
                         return true;
+                    }
+                    else {
+                        break; // for (final MavenCoordinates...
                     }
                 }
             }
