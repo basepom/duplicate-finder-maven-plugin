@@ -15,7 +15,6 @@ package org.basepom.mojo.duplicatefinder.artifact;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-
 import static org.basepom.mojo.duplicatefinder.artifact.ArtifactHelper.getOutputDirectory;
 import static org.basepom.mojo.duplicatefinder.artifact.ArtifactHelper.getTestOutputDirectory;
 import static org.basepom.mojo.duplicatefinder.artifact.ArtifactHelper.isTestArtifact;
@@ -31,8 +30,10 @@ import com.google.common.base.MoreObjects;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedSet;
+import com.google.common.collect.Multimap;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DefaultArtifact;
@@ -56,7 +57,10 @@ public class ArtifactFileResolver
 {
     private static final PluginLog LOG = new PluginLog(ArtifactFileResolver.class);
 
-    private final BiMap<Artifact, File> localArtifactCache;
+    // A BiMultimap would come in really handy here...
+    private final Multimap<File, Artifact> localFileArtifactCache;
+    private final Map<Artifact, File> localArtifactFileCache;
+
     private final BiMap<Artifact, File> repoArtifactCache;
     private final ImmutableSet<File> bootClasspath;
 
@@ -69,8 +73,14 @@ public class ArtifactFileResolver
         checkNotNull(project, "project is null");
         this.preferLocal = preferLocal;
 
-        this.localArtifactCache = HashBiMap.create(project.getArtifacts().size());
+        // This needs to be a multimap, because it is possible by jiggling with classifiers that a local project
+        // (with local folders) does map to multiple artifacts and therefore the file <-> artifact relation is not
+        // 1:1 but 1:n. As found in https://github.com/basepom/duplicate-finder-maven-plugin/issues/10
+        ImmutableMultimap.Builder<File, Artifact> localFileArtifactCacheBuilder = ImmutableMultimap.builder();
+
+        // This can not be an immutable map builder, because the map is used for looking up while it is built up.
         this.repoArtifactCache = HashBiMap.create(project.getArtifacts().size());
+
         this.bootClasspath = bootClasspath;
 
         for (final Artifact artifact : project.getArtifacts()) {
@@ -98,18 +108,29 @@ public class ArtifactFileResolver
                 final File outputDir = isTestArtifact(artifact) ? getTestOutputDirectory(referencedProject) : getOutputDirectory(referencedProject);
 
                 if (outputDir != null && outputDir.exists()) {
-                    final File oldFile = localArtifactCache.put(artifact, outputDir);
-                    checkState(oldFile == null || oldFile.equals(outputDir), "Already encountered a file for %s: %s", artifact, oldFile);
+                    localFileArtifactCacheBuilder.put(outputDir, artifact);
                 }
             }
         }
+
+        this.localFileArtifactCache = localFileArtifactCacheBuilder.build();
+
+        // Flip the File -> Artifact multimap. This also acts as a sanity check because no artifact
+        // must be present more than one and the Map.Builder will choke if a key is around more than
+        // once.
+        ImmutableMap.Builder<Artifact, File> localArtifactFileCacheBuilder = ImmutableMap.builder();
+        for (Map.Entry<File, Artifact> entry : localFileArtifactCache.entries()) {
+            localArtifactFileCacheBuilder.put(entry.getValue(), entry.getKey());
+        }
+
+        this.localArtifactFileCache = localArtifactFileCacheBuilder.build();
     }
 
-    public ImmutableMap<File, Artifact> resolveArtifactsForScopes(final Set<String> scopes) throws InvalidVersionSpecificationException, DependencyResolutionRequiredException
+    public ImmutableMultimap<File, Artifact> resolveArtifactsForScopes(final Set<String> scopes) throws InvalidVersionSpecificationException, DependencyResolutionRequiredException
     {
         checkNotNull(scopes, "scopes is null");
 
-        final ImmutableMap.Builder<File, Artifact> inScopeBuilder = ImmutableMap.builder();
+        final ImmutableMultimap.Builder<File, Artifact> inScopeBuilder = ImmutableMultimap.builder();
         for (final Artifact artifact : listArtifacts()) {
             if (artifact.getArtifactHandler().isAddedToClasspath()) {
                 if (scopes.isEmpty() || scopes.contains(artifact.getScope())) {
@@ -128,47 +149,55 @@ public class ArtifactFileResolver
         final ImmutableSortedSet.Builder<ClasspathElement> builder = ImmutableSortedSet.naturalOrder();
 
         for (final File element : elements) {
-            builder.add(resolveClasspathElementForFile(element));
+            resolveClasspathElementsForFile(element, builder);
         }
         return builder.build();
     }
 
-    private ClasspathElement resolveClasspathElementForFile(final File file)
+    private void resolveClasspathElementsForFile(final File file, ImmutableSet.Builder<ClasspathElement> builder)
     {
         checkNotNull(file, "file is null");
 
-        if (preferLocal && localArtifactCache.inverse().containsKey(file)) {
-            return new ClasspathArtifact(localArtifactCache.inverse().get(file));
+        if (preferLocal && localFileArtifactCache.containsKey(file)) {
+            for (Artifact artifact : localFileArtifactCache.get(file)) {
+                builder.add(new ClasspathArtifact(artifact));
+            }
+            return;
         }
 
         if (repoArtifactCache.inverse().containsKey(file)) {
-            return new ClasspathArtifact(repoArtifactCache.inverse().get(file));
+            builder.add(new ClasspathArtifact(repoArtifactCache.inverse().get(file)));
+            return;
         }
 
         if (bootClasspath.contains(file)) {
-            return new ClasspathBootClasspathElement(file);
+            builder.add(new ClasspathBootClasspathElement(file));
+            return;
         }
 
-        if (localArtifactCache.inverse().containsKey(file)) {
-            return new ClasspathArtifact(localArtifactCache.inverse().get(file));
+        if (localFileArtifactCache.containsKey(file)) {
+            for (Artifact artifact : localFileArtifactCache.get(file)) {
+                builder.add(new ClasspathArtifact(artifact));
+            }
+            return;
         }
 
-        return new ClasspathLocalFolder(file);
+        builder.add(new ClasspathLocalFolder(file));
     }
 
     private File resolveFileForArtifact(final Artifact artifact)
     {
         checkNotNull(artifact, "artifact is null");
 
-        if (preferLocal && localArtifactCache.containsKey(artifact)) {
-            return localArtifactCache.get(artifact);
+        if (preferLocal && localArtifactFileCache.containsKey(artifact)) {
+            return localArtifactFileCache.get(artifact);
         }
 
         if (repoArtifactCache.containsKey(artifact)) {
             return repoArtifactCache.get(artifact);
         }
 
-        return localArtifactCache.get(artifact);
+        return localArtifactFileCache.get(artifact);
     }
 
     @VisibleForTesting
@@ -197,7 +226,7 @@ public class ArtifactFileResolver
 
     private Set<Artifact> listArtifacts()
     {
-        return ImmutableSet.<Artifact>builder().addAll(localArtifactCache.keySet()).addAll(repoArtifactCache.keySet()).build();
+        return ImmutableSet.<Artifact>builder().addAll(localArtifactFileCache.keySet()).addAll(repoArtifactCache.keySet()).build();
     }
 
     private static Set<Artifact> findRepoArtifacts(final MavenProject project, final Map<Artifact, File> repoArtifactCache)

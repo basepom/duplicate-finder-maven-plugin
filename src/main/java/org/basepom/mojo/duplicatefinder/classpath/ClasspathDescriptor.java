@@ -95,7 +95,7 @@ public class ClasspathDescriptor
     private final ImmutableList<Pattern> ignoredResourcePatterns;
 
     public static ClasspathDescriptor createClasspathDescriptor(final MavenProject project,
-                                                                final Map<File, Artifact> fileToArtifactMap,
+                                                                final Multimap<File, Artifact> fileToArtifactMap,
                                                                 final Collection<String> ignoredResourcePatterns,
                                                                 final Collection<MavenCoordinates> ignoredDependencies,
                                                                 final boolean useDefaultResourceIgnoreList,
@@ -136,7 +136,7 @@ public class ClasspathDescriptor
             // any entry is either a jar in the repo or a folder in the target folder of a referenced
             // project. Add the elements that are not ignored by the ignoredDependencies predicate to
             // the classpath descriptor.
-            for (final Map.Entry<File, Artifact> entry : fileToArtifactMap.entrySet()) {
+            for (final Map.Entry<File, Artifact> entry : fileToArtifactMap.entries()) {
                 artifact = entry.getValue();
                 file = entry.getKey();
 

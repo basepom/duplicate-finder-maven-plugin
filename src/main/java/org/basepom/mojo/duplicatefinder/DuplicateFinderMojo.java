@@ -14,11 +14,9 @@
 package org.basepom.mojo.duplicatefinder;
 
 import static java.lang.String.format;
-
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-
 import static org.apache.maven.artifact.Artifact.SCOPE_COMPILE;
 import static org.apache.maven.artifact.Artifact.SCOPE_PROVIDED;
 import static org.apache.maven.artifact.Artifact.SCOPE_RUNTIME;
@@ -56,6 +54,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 import com.google.common.io.ByteStreams;
@@ -451,7 +450,7 @@ public final class DuplicateFinderMojo extends AbstractMojo
 
         // Map of files to artifacts. Depending on the type of build, referenced projects in a multi-module build
         // may be local folders in the project instead of repo jar references.
-        final Map<File, Artifact> fileToArtifactMap = artifactFileResolver.resolveArtifactsForScopes(scopes);
+        final Multimap<File, Artifact> fileToArtifactMap = artifactFileResolver.resolveArtifactsForScopes(scopes);
 
         final ClasspathDescriptor classpathDescriptor = ClasspathDescriptor.createClasspathDescriptor(project,
             fileToArtifactMap,
