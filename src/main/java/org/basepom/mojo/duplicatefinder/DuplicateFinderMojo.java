@@ -253,6 +253,14 @@ public final class DuplicateFinderMojo extends AbstractMojo
     @Parameter(defaultValue="sun.boot.class.path", property = "duplicate-finder.bootClasspathProperty")
     protected String bootClasspathProperty = "sun.boot.class.path";
 
+    /**
+     * Include POM projects in validation.
+     *
+     * @since 1.2.0
+     */
+    @Parameter(defaultValue="false", property = "duplicate-finder.includePomProjects")
+    protected boolean includePomProjects = false;
+
     private final EnumSet<ConflictState> printState = EnumSet.of(CONFLICT_CONTENT_DIFFERENT);
     private final EnumSet<ConflictState> failState = EnumSet.noneOf(ConflictState.class);
 
@@ -281,7 +289,7 @@ public final class DuplicateFinderMojo extends AbstractMojo
             if (skip) {
                 LOG.report(quiet, "Skipping duplicate-finder execution!");
             }
-            else if ("pom".equals(project.getArtifact().getType())) {
+            else if (!includePomProjects && "pom".equals(project.getArtifact().getType())) {
                 LOG.report(quiet, "Ignoring POM project!");
             }
             else {

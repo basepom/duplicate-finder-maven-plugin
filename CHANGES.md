@@ -1,5 +1,10 @@
 # Changes
 
+##### 1.2.0
+
+* Add `includePomProjects` configuration setting to allow projects with POM packaging to
+be checked. Suggested by #11. Thanks @camshoff.
+
 ##### 1.1.2 - 2015-06-16
 
 __1.1.2 will be the last release that works with JDK 6! With Maven having moved to JDK 7, there
