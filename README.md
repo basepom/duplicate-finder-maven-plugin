@@ -10,7 +10,9 @@ This plugin is a friendly fork (same main authors) of the [Ning maven-duplicate-
 
 ## Requirements
 
-The plugins requires Apache Maven 3.x.x and Java 6 or better.
+The plugins requires Apache Maven 3.x.x.
+
+Starting with release 1.2.0, Java 7 or better is required.
 
 ## Goals
 

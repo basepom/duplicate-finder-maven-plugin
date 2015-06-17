@@ -23,12 +23,12 @@ import static org.basepom.mojo.duplicatefinder.artifact.ArtifactHelper.isTestArt
 import java.io.File;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Objects;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableMap;
@@ -206,9 +206,9 @@ public class ArtifactFileResolver
         final ImmutableSet.Builder<Artifact> builder = ImmutableSet.builder();
 
         for (final Artifact artifact : repoArtifactCache.keySet()) {
-            if (Objects.equal(project.getArtifact().getGroupId(), artifact.getGroupId())
-                && Objects.equal(project.getArtifact().getArtifactId(), artifact.getArtifactId())
-                && Objects.equal(project.getArtifact().getBaseVersion(), artifact.getBaseVersion())) {
+            if (Objects.equals(project.getArtifact().getGroupId(), artifact.getGroupId())
+                && Objects.equals(project.getArtifact().getArtifactId(), artifact.getArtifactId())
+                && Objects.equals(project.getArtifact().getBaseVersion(), artifact.getBaseVersion())) {
                 builder.add(artifact);
             }
         }

@@ -24,7 +24,7 @@
     <artifactId>duplicate-finder-maven-plugin</artifactId>
     <packaging>maven-plugin</packaging>
 
-    <version>1.1.3-SNAPSHOT</version>
+    <version>1.2.0-SNAPSHOT</version>
     <name>duplicate-finder-maven-plugin Maven Mojo</name>
 
     <description>
@@ -76,8 +76,8 @@
     <properties>
         <dep.basepom-policy.version>4</dep.basepom-policy.version>
 
-        <project.jdk6.home>${env.JAVA6_HOME}</project.jdk6.home>
-        <project.build.targetJdk>1.6</project.build.targetJdk>
+        <project.jdk7.home>${env.JAVA7_HOME}</project.jdk7.home>
+        <project.build.targetJdk>1.7</project.build.targetJdk>
 
         <dep.maven-api.version>3.0</dep.maven-api.version>
         <dep.plexus.version>1.5.5</dep.plexus.version>
@@ -412,7 +412,7 @@
                 </property>
             </activation>
             <properties>
-                <project.jdk6.home>${env.JAVA_HOME}</project.jdk6.home>
+                <project.jdk7.home>${env.JAVA_HOME}</project.jdk7.home>
             </properties>
             <build>
                 <plugins>
@@ -444,36 +444,6 @@
             </build>
         </profile>
         <profile>
-            <id>findbugs-jdk6</id>
-            <activation>
-                <jdk>[,1.7)</jdk>
-            </activation>
-            <properties>
-                <dep.findbugs.version>2.0.3</dep.findbugs.version>
-                <dep.plugin.findbugs.version>2.5.4</dep.plugin.findbugs.version>
-                <dep.checkstyle.version>6.1</dep.checkstyle.version>
-            </properties>
-        </profile>
-        <profile>
-            <id>javadoc</id>
-            <!-- The javadoc profile is only required for 1.7; 1.6 and 1.8+ work just fine with their normal class path. -->
-            <activation>
-                <jdk>1.7</jdk>
-            </activation>
-            <build>
-                <pluginManagement>
-                    <plugins>
-                        <plugin>
-                            <artifactId>maven-javadoc-plugin</artifactId>
-                            <configuration>
-                                <bootclasspath>${project.jdk6.home}/jre/lib/rt.jar:${project.jdk6.home}/jre/lib/jce.jar:${project.jdk6.home}/../classes/classes.jar</bootclasspath>
-                            </configuration>
-                        </plugin>
-                    </plugins>
-                </pluginManagement>
-            </build>
-        </profile>
-        <profile>
             <id>doclint</id>
             <activation>
                 <jdk>[1.8,)</jdk>
@@ -495,7 +465,7 @@
         <profile>
             <id>cross-compile</id>
             <activation>
-                <jdk>(1.6,]</jdk>
+                <jdk>(1.7,]</jdk>
             </activation>
             <build>
                 <pluginManagement>
@@ -504,7 +474,7 @@
                             <artifactId>maven-compiler-plugin</artifactId>
                             <configuration>
                                 <compilerArguments children.combine="append">
-                                    <bootclasspath>${project.jdk6.home}/jre/lib/rt.jar:${project.jdk6.home}/jre/lib/jce.jar:${project.jdk6.home}/../classes/classes.jar</bootclasspath>
+                                    <bootclasspath>${project.jdk7.home}/jre/lib/rt.jar:${project.jdk7.home}/jre/lib/jce.jar:${project.jdk7.home}/../classes/classes.jar</bootclasspath>
                                 </compilerArguments>
                             </configuration>
                         </plugin>

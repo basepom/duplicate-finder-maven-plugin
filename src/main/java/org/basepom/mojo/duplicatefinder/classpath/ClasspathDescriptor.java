@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -39,7 +40,6 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import com.google.common.io.Closer;
@@ -84,7 +84,7 @@ public class ClasspathDescriptor
      * This is a global, static cache which can be reused through multiple runs of the plugin in the same VM,
      * e.g. for a multi-module build.
      */
-    private static final ConcurrentMap<File, ClasspathCacheElement> CACHED_BY_FILE = Maps.newConcurrentMap();
+    private static final ConcurrentMap<File, ClasspathCacheElement> CACHED_BY_FILE = new ConcurrentHashMap<>();
 
     private final Multimap<String, File> classesWithElements = MultimapBuilder.treeKeys().hashSetValues().build();
     private final Multimap<String, File> resourcesWithElements = MultimapBuilder.treeKeys().hashSetValues().build();

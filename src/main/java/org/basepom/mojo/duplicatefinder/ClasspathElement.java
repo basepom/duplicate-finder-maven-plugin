@@ -21,12 +21,12 @@ import static org.basepom.mojo.duplicatefinder.artifact.ArtifactHelper.isJarArti
 import static org.basepom.mojo.duplicatefinder.artifact.ArtifactHelper.isTestArtifact;
 
 import java.io.File;
+import java.util.Objects;
 
 import javax.annotation.Nonnull;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
-import com.google.common.base.Objects;
 import com.google.common.collect.Ordering;
 
 import org.apache.maven.artifact.Artifact;
@@ -129,7 +129,7 @@ public abstract class ClasspathElement implements Comparable<ClasspathElement>
         @Override
         public int hashCode()
         {
-            return Objects.hashCode(artifact);
+            return Objects.hash(artifact);
         }
 
         @Override
@@ -145,7 +145,7 @@ public abstract class ClasspathElement implements Comparable<ClasspathElement>
 
             ClasspathArtifact that = (ClasspathArtifact) o;
 
-            return Objects.equal(this.artifact, that.artifact);
+            return Objects.equals(this.artifact, that.artifact);
         }
     }
 
@@ -196,7 +196,7 @@ public abstract class ClasspathElement implements Comparable<ClasspathElement>
 
             ClasspathLocalFolder that = (ClasspathLocalFolder) o;
 
-            return Objects.equal(this.localFolder, that.localFolder);
+            return Objects.equals(this.localFolder, that.localFolder);
         }
     }
 
@@ -245,7 +245,7 @@ public abstract class ClasspathElement implements Comparable<ClasspathElement>
 
             ClasspathBootClasspathElement that = (ClasspathBootClasspathElement) o;
 
-            return Objects.equal(this.bootClasspathElement, that.bootClasspathElement);
+            return Objects.equals(this.bootClasspathElement, that.bootClasspathElement);
         }
 }
 

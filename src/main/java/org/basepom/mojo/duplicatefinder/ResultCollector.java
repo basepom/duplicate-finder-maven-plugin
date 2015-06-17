@@ -28,7 +28,6 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ListMultimap;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder.SetMultimapBuilder;
 import com.google.common.collect.Multimaps;
@@ -38,7 +37,7 @@ public class ResultCollector
     private final EnumSet<ConflictState> printState;
     private final EnumSet<ConflictState> failState;
 
-    private final EnumMap<ConflictType, EnumSet<ConflictState>> seenResults = Maps.newEnumMap(ConflictType.class);
+    private final EnumMap<ConflictType, EnumSet<ConflictState>> seenResults = new EnumMap<>(ConflictType.class);
 
     private final ListMultimap<String, ConflictResult> results = SetMultimapBuilder.linkedHashKeys().arrayListValues().build();
 

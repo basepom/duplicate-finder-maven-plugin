@@ -15,15 +15,16 @@ package org.basepom.mojo.duplicatefinder;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
@@ -36,10 +37,10 @@ import org.basepom.mojo.duplicatefinder.artifact.MavenCoordinates;
  */
 public class ConflictingDependency
 {
-    private final Set<MavenCoordinates> conflictingDependencies = Sets.newLinkedHashSet();
-    private final Set<String> classes = Sets.newHashSet();
-    private final Set<String> packages = Sets.newHashSet();
-    private final Set<String> resources = Sets.newHashSet();
+    private final Set<MavenCoordinates> conflictingDependencies = new LinkedHashSet<>();
+    private final Set<String> classes = new HashSet<>();
+    private final Set<String> packages = new HashSet<>();
+    private final Set<String> resources = new HashSet<>();
     private Pattern[] matchingResources = new Pattern[0];
     private boolean currentProject = false;
     private boolean currentProjectIncluded = false;
@@ -144,7 +145,7 @@ public class ConflictingDependency
 
     public List<String> getDependencyNames()
     {
-        final List<String> result = Lists.newArrayListWithCapacity(conflictingDependencies.size());
+        final List<String> result = new ArrayList<>(conflictingDependencies.size());
 
         for (final MavenCoordinates conflictingDependency : conflictingDependencies) {
             result.add(conflictingDependency.toString());

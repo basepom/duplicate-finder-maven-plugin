@@ -15,9 +15,10 @@ package org.basepom.mojo.duplicatefinder.artifact;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.Objects;
+
 import com.google.common.base.Joiner;
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 
@@ -132,16 +133,16 @@ public class MavenCoordinates
 
     public boolean matches(final MavenCoordinates other)
     {
-        if (!(Objects.equal(getGroupId(), other.getGroupId())
-            && Objects.equal(getArtifactId(), other.getArtifactId())
-            && Objects.equal(getType(), other.getType()))) {
+        if (!(Objects.equals(getGroupId(), other.getGroupId())
+            && Objects.equals(getArtifactId(), other.getArtifactId())
+            && Objects.equals(getType(), other.getType()))) {
             return false;
         }
 
         // If a classifier is present, try to match the other classifier,
         // otherwise, if no classifier is present, it matches all classifiers from the other MavenCoordinates.
         if (getClassifier().isPresent()) {
-            if (!Objects.equal(getClassifier().get(), other.getClassifier().orNull())) {
+            if (!Objects.equals(getClassifier().get(), other.getClassifier().orNull())) {
                 return false;
             }
         }
@@ -164,7 +165,7 @@ public class MavenCoordinates
             final ArtifactVersion recommendedVersion = getVersionRange().get().getRecommendedVersion();
             if (recommendedVersion != null) {
                 // Yes, then it must be matched.
-                return Objects.equal(recommendedVersion, other.getVersion().orNull());
+                return Objects.equals(recommendedVersion, other.getVersion().orNull());
             }
 
             // No, see if the other version is in the range
@@ -174,13 +175,13 @@ public class MavenCoordinates
         }
 
         // exact version match.
-        return Objects.equal(getVersion().orNull(), other.getVersion().orNull());
+        return Objects.equals(getVersion().orNull(), other.getVersion().orNull());
     }
 
     @Override
     public int hashCode()
     {
-        return Objects.hashCode(groupId, artifactId, classifier, type);
+        return Objects.hash(groupId, artifactId, classifier, type);
     }
 
     @Override
@@ -195,10 +196,10 @@ public class MavenCoordinates
 
         MavenCoordinates that = (MavenCoordinates) other;
 
-        return Objects.equal(this.groupId, that.groupId)
-                        && Objects.equal(this.artifactId, that.artifactId)
-                        && Objects.equal(this.classifier, that.classifier)
-                        && Objects.equal(this.type, that.type);
+        return Objects.equals(this.groupId, that.groupId)
+                        && Objects.equals(this.artifactId, that.artifactId)
+                        && Objects.equals(this.classifier, that.classifier)
+                        && Objects.equals(this.type, that.type);
     }
 
     @Override
