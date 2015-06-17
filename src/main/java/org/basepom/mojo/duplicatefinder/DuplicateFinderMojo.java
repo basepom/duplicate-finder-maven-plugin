@@ -372,7 +372,6 @@ public final class DuplicateFinderMojo extends AbstractMojo
                     for (Map.Entry<String, Entry<ResultCollector, ClasspathDescriptor>> classpathEntry : classpathResults.entrySet()) {
                         String classpathName = classpathEntry.getKey();
                         ResultCollector resultCollector = classpathEntry.getValue().getKey();
-                        ConflictState resultConflictState = resultCollector.getConflictState();
 
                         for (final ConflictState state : printState) {
                             for (final ConflictType type : ConflictType.values()) {

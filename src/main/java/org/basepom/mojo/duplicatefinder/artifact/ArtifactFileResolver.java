@@ -27,7 +27,6 @@ import java.util.Objects;
 import java.util.Set;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Joiner;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
@@ -213,21 +212,5 @@ public class ArtifactFileResolver
             }
         }
         return builder.build();
-    }
-
-    private static File getLocalProjectPath(final MavenProject project, final Artifact artifact) throws DependencyResolutionRequiredException
-    {
-        final String refId = Joiner.on(':').join(artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion());
-        final MavenProject owningProject = project.getProjectReferences().get(refId);
-
-        if (owningProject != null) {
-            final File outputDir = isTestArtifact(artifact) ? getTestOutputDirectory(owningProject) : getOutputDirectory(owningProject);
-
-            if (outputDir.exists()) {
-                return outputDir;
-            }
-        }
-
-        return null;
     }
 }
