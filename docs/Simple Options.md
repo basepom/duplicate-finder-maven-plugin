@@ -17,6 +17,11 @@ These options control aspects of the plugin execution.
     <includeBootClasspath>false</includeBootClasspath>
     <bootClasspathProperty>sun.boot.class.path</bootClasspathProperty>
     <!-- Version 1.1.1+ -->
+
+
+    <!-- Version 1.2.0+ -->
+    <includePomProjects>false</includePomProjects>
+    <!-- Version 1.2.0+ -->
 </configuration>
 ```
 
@@ -150,4 +155,10 @@ Maven command line property: `duplicate-finder.bootClasspathProperty` (**Plugin 
 
 Default: **sun.boot.class.path**
 
+### `includePomProjects`
 
+** Available in plugin version 1.2.0 and later **
+
+By default, any projects that uses `pom` packaging is skipped. When setting this configuration option to `true`, POM projects will also be checked.
+
+Maven command line property: `duplicate-finder.includePomProjects`.

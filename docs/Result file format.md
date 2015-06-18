@@ -7,24 +7,24 @@ The result file version will increment when there is a backwards incompatible ch
 ```xml
 <?xml version='1.0' encoding='UTF-8'?>
 <duplicate-finder-result version="1">
-    <project artifactId="..." 
-             groupId="..." 
-             version="..." 
+    <project artifactId="..."
+             groupId="..."
+             version="..."
              classifier="..."
              type="..."/>
-    <configuration skip="..." 
-                   quiet="..." 
-                   checkCompileClasspath="..." 
-                   checkRuntimeClasspath="..." 
-                   checkTestClasspath="..." 
-                   failBuildInCaseOfDifferentContentConflict="..." 
-                   failBuildInCaseOfEqualContentConflict="..." 
-                   failBuildInCaseOfConflict="..." 
-                   printEqualFiles="..." 
-                   preferLocal="..." 
-                   useDefaultResourceIgnoreList="..." 
-                   useResultFile="..." 
-                   resultFileMinClasspathCount="..." 
+    <configuration skip="..."
+                   quiet="..."
+                   checkCompileClasspath="..."
+                   checkRuntimeClasspath="..."
+                   checkTestClasspath="..."
+                   failBuildInCaseOfDifferentContentConflict="..."
+                   failBuildInCaseOfEqualContentConflict="..."
+                   failBuildInCaseOfConflict="..."
+                   printEqualFiles="..."
+                   preferLocal="..."
+                   useDefaultResourceIgnoreList="..."
+                   useResultFile="..."
+                   resultFileMinClasspathCount="..."
                    resultFile="..."
                    includeBootClasspath="..."
                    bootClasspathProperty="...>
@@ -33,12 +33,12 @@ The result file version will increment when there is a backwards incompatible ch
             ...
         </ignoredResourcePatterns>
         <conflictingDependencies>
-            <conflictingDependency currentProject="..." 
-                                   currentProjectIncluded="..." 
+            <conflictingDependency currentProject="..."
+                                   currentProjectIncluded="..."
                                    wildcard="...">
                 <dependencies>
-                    <dependency artifactId="..." 
-                                groupId="..." 
+                    <dependency artifactId="..."
+                                groupId="..."
                                 version="..."
                                 versionRange="..."
                                 classifier="..."
@@ -65,13 +65,13 @@ The result file version will increment when there is a backwards incompatible ch
             ...
         </conflictingDependencies>
         <ignoredDependencies>
-            <dependency artifactId="..." 
-                        groupId="..." 
+            <dependency artifactId="..."
+                        groupId="..."
                         version="..."
                         versionRange="..."
                         classifier="..."
                         type="..."/>
-            ... 
+            ...
         </ignoredDependencies>
     </configuration>
     <results>
@@ -81,17 +81,17 @@ The result file version will increment when there is a backwards incompatible ch
             <conflicts>
                 <conflict name="...">
                     <conflictResults>
-                        <conflictResult name="..." 
-                                        type="..." 
-                                        excepted="..." 
-                                        failed="..." 
-                                        printed="..." 
+                        <conflictResult name="..."
+                                        type="..."
+                                        excepted="..."
+                                        failed="..."
+                                        printed="..."
                                         conflictState="...">
                             <conflictNames>
                                 <conflictName name="...">
-                                    <artifact artifactId="..." 
+                                    <artifact artifactId="..."
                                               groupId="..."
-                                              version="..." 
+                                              version="..."
                                               versionRange="..."
                                               classifier="..."
                                               type="..."/>
@@ -303,7 +303,7 @@ A `conflictResult` element contains a single conflict between multiple class pat
 | `printed` | boolean | `true` if this conflict was reported as part of the plugin output. |
 | `conflictState` | string | The type of conflict. Can be `content-different` or `content-equal`. |
 
-The `conflictResult` element contains a list of `conflictName` elements. 
+The `conflictResult` element contains a list of `conflictName` elements.
 
 ### `conflictName` element
 

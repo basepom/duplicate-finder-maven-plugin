@@ -12,7 +12,7 @@ Any integration test directory **must** contain at least three files:
 * `invoker.properties` - The goals to invoke and the expected outcome.
 * `verify.groovy` - The result verification script. All integration tests use groovy.
 
-Tests that add code, compile classes etc. may have more files. 
+Tests that add code, compile classes etc. may have more files.
 
 #### The integration test POM
 

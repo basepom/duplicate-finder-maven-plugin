@@ -1,5 +1,5 @@
 The duplicate finder plugin allows global exclusion of dependencies
-and resources. Any matching dependency or resource will not be considered 
+and resources. Any matching dependency or resource will not be considered
 duplicate, no matter how often it appears on the classpath.
 
 This feature is very easy to abuse. Please use with care.
@@ -36,7 +36,7 @@ with the release of version **1.2.0** of the plugin.
 #### `useDefaultResourceIgnoreList` flag
 
 By default, the duplicate finder plugin ignores a set of resources on
-the classpath which tend to be duplicates all the time. 
+the classpath which tend to be duplicates all the time.
 
 These resources are specified as standard Java regular expressions. All patterns are case insensitive.
 

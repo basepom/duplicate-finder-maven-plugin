@@ -8,7 +8,9 @@ This plugin is a friendly fork (same [main authors](Authors)) of the [Ning maven
 
 ## Requirements
 
-The plugins requires Apache Maven 3.x.x and Java 6 or better.
+The plugins requires Apache Maven 3.x.x.
+
+Any version up to 1.2.0 will run with Java 6 or better. Starting with version 1.2.0, Java 7 or better is _required!_
 
 ## Goals
 
@@ -56,6 +58,10 @@ The duplicate-finder plugins supports a number of configuration settings:
                 <includeBootClasspath>false</includeBootClasspath>
                 <bootClasspathProperty>sun.boot.class.path</bootClasspathProperty>
                 <!-- Version 1.1.1+ -->
+
+                <!-- Version 1.2.0+ -->
+                <includePomProjects>false</includePomProjects>
+                <!-- Version 1.2.0+ -->
 
                 <exceptions>
                     <exception>
