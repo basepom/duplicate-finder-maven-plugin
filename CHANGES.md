@@ -1,5 +1,9 @@
 # Changes
 
+##### 1.2.1
+
+* Add `includePomProjects` attribute in result file.
+
 ##### 1.2.0 - 2015-06-18
 
 * Add `includePomProjects` configuration setting to allow projects

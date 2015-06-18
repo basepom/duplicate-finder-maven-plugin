@@ -671,6 +671,7 @@ public final class DuplicateFinderMojo extends AbstractMojo
         XMLWriterUtils.addAttribute(prefs, "preferLocal", preferLocal);
         XMLWriterUtils.addAttribute(prefs, "includeBootClasspath", includeBootClasspath);
         XMLWriterUtils.addAttribute(prefs, "bootClasspathProperty", bootClasspathProperty);
+        XMLWriterUtils.addAttribute(prefs, "includePomProjects", includePomProjects);
         // Ignoring Dependencies and resources
         XMLWriterUtils.addAttribute(prefs, "useDefaultResourceIgnoreList", useDefaultResourceIgnoreList);
         // Result file options
