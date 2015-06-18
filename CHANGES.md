@@ -1,9 +1,11 @@
 # Changes
 
-##### 1.2.0
+##### 1.2.0 - 2015-06-18
 
-* Add `includePomProjects` configuration setting to allow projects with POM packaging to
-be checked. Suggested by #11. Thanks @camshoff.
+* Add `includePomProjects` configuration setting to allow projects
+with POM packaging to be checked. Suggested by #11. Thanks @camshoff.
+* Allow inclusion of multiple artifacts that may map to the same local
+project. This fixes issue #10 (thanks @jakub-bochenski).
 
 ##### 1.1.2 - 2015-06-16
 
