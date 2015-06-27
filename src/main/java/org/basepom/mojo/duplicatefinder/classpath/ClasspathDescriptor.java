@@ -13,10 +13,24 @@
  */
 package org.basepom.mojo.duplicatefinder.classpath;
 
-import static java.lang.String.format;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
+import com.google.common.base.MoreObjects;
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
+import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder;
+import com.google.common.io.Closer;
+import com.google.common.io.Files;
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.project.MavenProject;
+import org.basepom.mojo.duplicatefinder.ConflictType;
+import org.basepom.mojo.duplicatefinder.PluginLog;
+import org.basepom.mojo.duplicatefinder.artifact.MavenCoordinates;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,25 +47,9 @@ import java.util.regex.PatternSyntaxException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import com.google.common.base.MoreObjects;
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
-import com.google.common.base.Splitter;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.MultimapBuilder;
-import com.google.common.io.Closer;
-import com.google.common.io.Files;
-
-import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.project.MavenProject;
-import org.basepom.mojo.duplicatefinder.ConflictType;
-import org.basepom.mojo.duplicatefinder.PluginLog;
-import org.basepom.mojo.duplicatefinder.artifact.MavenCoordinates;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+import static java.lang.String.format;
 
 public class ClasspathDescriptor
 {
@@ -73,6 +71,12 @@ public class ClasspathDescriptor
         ".*overview\\.html$"
         ));
 
+    private static final MatchPatternPredicate DEFAULT_IGNORED_CLASS_PREDICATE = new MatchPatternPredicate(Arrays.asList(
+        // this regex matches nothing at all, just need something as a place holder
+        "a^"
+        ));
+
+
     private static final MatchPatternPredicate DEFAULT_IGNORED_LOCAL_DIRECTORIES = new MatchPatternPredicate(Arrays.asList(
         "^.git$",
         "^.svn$",
@@ -93,22 +97,26 @@ public class ClasspathDescriptor
     private final Predicate<String> classPredicate;
 
     private final ImmutableList<Pattern> ignoredResourcePatterns;
+    private final ImmutableList<Pattern> ignoredClassPatterns;
 
     public static ClasspathDescriptor createClasspathDescriptor(final MavenProject project,
                                                                 final Multimap<File, Artifact> fileToArtifactMap,
                                                                 final Collection<String> ignoredResourcePatterns,
+                                                                final Collection<String> ignoredClassPatterns,
                                                                 final Collection<MavenCoordinates> ignoredDependencies,
                                                                 final boolean useDefaultResourceIgnoreList,
+                                                                final boolean useDefaultClassIgnoreList,
                                                                 final Set<File> bootClasspath,
                                                                 final File[] projectFolders) throws MojoExecutionException, InvalidVersionSpecificationException
     {
         checkNotNull(project, "project is null");
         checkNotNull(fileToArtifactMap, "fileToArtifactMap is null");
         checkNotNull(ignoredResourcePatterns, "ignoredResourcePatterns is null");
+        checkNotNull(ignoredClassPatterns, "ignoredClassPatterns is null");
         checkNotNull(ignoredDependencies, "ignoredDependencies is null");
         checkNotNull(projectFolders, "projectFolders is null");
 
-        final ClasspathDescriptor classpathDescriptor = new ClasspathDescriptor(useDefaultResourceIgnoreList, ignoredResourcePatterns);
+        final ClasspathDescriptor classpathDescriptor = new ClasspathDescriptor(useDefaultResourceIgnoreList, ignoredResourcePatterns, useDefaultClassIgnoreList, ignoredClassPatterns);
 
         File file = null;
 
@@ -181,13 +189,14 @@ public class ClasspathDescriptor
     }
 
     private ClasspathDescriptor(final boolean useDefaultResourceIgnoreList,
-                                final Collection<String> ignoredResourcePatterns)
+                                final Collection<String> ignoredResourcePatterns,
+                                final boolean useDefaultClassIgnoreList,
+                                final Collection<String> ignoredClassPatterns)
                     throws MojoExecutionException
     {
-        // Class predicate simply ignores inner and nested classes.
-        this.classPredicate = new MatchInnerClassesPredicate();
-
         final ImmutableList.Builder<Pattern> ignoredResourcePatternsBuilder = ImmutableList.builder();
+
+        final ImmutableList.Builder<Pattern> ignoredClassPatternsBuilder = ImmutableList.builder();
 
         // ResourcePredicate is a bit more complicated...
         Predicate<String> resourcesPredicate = Predicates.alwaysFalse();
@@ -212,6 +221,30 @@ public class ClasspathDescriptor
 
         this.resourcesPredicate = resourcesPredicate;
         this.ignoredResourcePatterns = ignoredResourcePatternsBuilder.build();
+
+        // PackagePredicate is a bit more complicated...
+        Predicate<String> classPredicate = new MatchInnerClassesPredicate();
+
+        // predicate matching the default ignores
+        if (useDefaultClassIgnoreList) {
+            classPredicate = Predicates.or(classPredicate, DEFAULT_IGNORED_CLASS_PREDICATE);
+            ignoredClassPatternsBuilder.addAll(DEFAULT_IGNORED_CLASS_PREDICATE.getPatterns());
+        }
+
+        if (!ignoredClassPatterns.isEmpty()) {
+            try {
+                // predicate matching the user ignores
+                MatchPatternPredicate ignoredPackagePredicate = new MatchPatternPredicate(ignoredClassPatterns);
+                classPredicate = Predicates.or(classPredicate, ignoredPackagePredicate);
+                ignoredClassPatternsBuilder.addAll(ignoredPackagePredicate.getPatterns());
+            }
+            catch (final PatternSyntaxException pse) {
+                throw new MojoExecutionException("Error compiling classIgnore pattern: " + pse.getMessage());
+            }
+        }
+
+        this.classPredicate = classPredicate;
+        this.ignoredClassPatterns = ignoredClassPatternsBuilder.build();
     }
 
     public ImmutableMap<String, Collection<File>> getClasspathElementLocations(final ConflictType type)
@@ -230,6 +263,11 @@ public class ClasspathDescriptor
     public ImmutableList<Pattern> getIgnoredResourcePatterns()
     {
         return ignoredResourcePatterns;
+    }
+
+    public ImmutableList<Pattern> getIgnoredClassPatterns()
+    {
+        return ignoredClassPatterns;
     }
 
     public ImmutableList<Pattern> getIgnoredDirectoryPatterns()

@@ -13,41 +13,6 @@
  */
 package org.basepom.mojo.duplicatefinder;
 
-import static java.lang.String.format;
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-import static org.apache.maven.artifact.Artifact.SCOPE_COMPILE;
-import static org.apache.maven.artifact.Artifact.SCOPE_PROVIDED;
-import static org.apache.maven.artifact.Artifact.SCOPE_RUNTIME;
-import static org.apache.maven.artifact.Artifact.SCOPE_SYSTEM;
-import static org.basepom.mojo.duplicatefinder.ConflictState.CONFLICT_CONTENT_DIFFERENT;
-import static org.basepom.mojo.duplicatefinder.ConflictState.CONFLICT_CONTENT_EQUAL;
-import static org.basepom.mojo.duplicatefinder.ConflictType.CLASS;
-import static org.basepom.mojo.duplicatefinder.ConflictType.RESOURCE;
-import static org.basepom.mojo.duplicatefinder.artifact.ArtifactHelper.getOutputDirectory;
-import static org.basepom.mojo.duplicatefinder.artifact.ArtifactHelper.getTestOutputDirectory;
-
-import java.io.BufferedInputStream;
-import java.io.Closeable;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.AbstractMap.SimpleImmutableEntry;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.EnumSet;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
-
-import javax.annotation.Nonnull;
-import javax.xml.stream.XMLStreamException;
-
 import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
@@ -60,7 +25,6 @@ import com.google.common.hash.Hashing;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.Closer;
 import com.pyx4j.log4j.MavenLogAppender;
-
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
@@ -82,6 +46,40 @@ import org.codehaus.stax2.XMLOutputFactory2;
 import org.codehaus.staxmate.SMOutputFactory;
 import org.codehaus.staxmate.out.SMOutputDocument;
 import org.codehaus.staxmate.out.SMOutputElement;
+
+import javax.annotation.Nonnull;
+import javax.xml.stream.XMLStreamException;
+import java.io.BufferedInputStream;
+import java.io.Closeable;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.EnumSet;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+import static java.lang.String.format;
+import static org.apache.maven.artifact.Artifact.SCOPE_COMPILE;
+import static org.apache.maven.artifact.Artifact.SCOPE_PROVIDED;
+import static org.apache.maven.artifact.Artifact.SCOPE_RUNTIME;
+import static org.apache.maven.artifact.Artifact.SCOPE_SYSTEM;
+import static org.basepom.mojo.duplicatefinder.ConflictState.CONFLICT_CONTENT_DIFFERENT;
+import static org.basepom.mojo.duplicatefinder.ConflictState.CONFLICT_CONTENT_EQUAL;
+import static org.basepom.mojo.duplicatefinder.ConflictType.CLASS;
+import static org.basepom.mojo.duplicatefinder.ConflictType.RESOURCE;
+import static org.basepom.mojo.duplicatefinder.artifact.ArtifactHelper.getOutputDirectory;
+import static org.basepom.mojo.duplicatefinder.artifact.ArtifactHelper.getTestOutputDirectory;
 
 /**
  * Finds duplicate classes/resources on the classpath.
@@ -145,6 +143,12 @@ public final class DuplicateFinderMojo extends AbstractMojo
     protected boolean useDefaultResourceIgnoreList = true;
 
     /**
+     * Use the default class ignore list.
+     */
+    @Parameter(defaultValue = "true", property = "duplicate-finder.useDefaultClassIgnoreList")
+    protected boolean useDefaultClassIgnoreList = true;
+
+    /**
      * Ignored resources, which are not checked for multiple occurences.
      *
      * @deprecated Use ignoredResourcePatterns.
@@ -158,6 +162,12 @@ public final class DuplicateFinderMojo extends AbstractMojo
      */
     @Parameter
     protected String[] ignoredResourcePatterns = new String[0];
+
+    /**
+     * Ignored classes, which are not checked for multiple occurences.
+     */
+    @Parameter
+    protected String[] ignoredClassPatterns = new String[0];
 
     /**
      * Artifacts with expected and resolved versions that are checked.
@@ -433,6 +443,14 @@ public final class DuplicateFinderMojo extends AbstractMojo
         return builder.build();
     }
 
+    private ImmutableSet<String> getIgnoredClassPatterns()
+    {
+        ImmutableSet.Builder<String> builder = ImmutableSet.builder();
+        builder.add(ignoredClassPatterns);
+
+        return builder.build();
+    }
+
     /**
      * Checks the maven classpath for a given set of scopes whether it contains duplicates. In addition to the
      * artifacts on the classpath, one or more additional project folders are added.
@@ -455,8 +473,10 @@ public final class DuplicateFinderMojo extends AbstractMojo
         final ClasspathDescriptor classpathDescriptor = ClasspathDescriptor.createClasspathDescriptor(project,
             fileToArtifactMap,
             getIgnoredResourcePatterns(),
+            getIgnoredClassPatterns(),
             Arrays.asList(ignoredDependencies),
             useDefaultResourceIgnoreList,
+            useDefaultClassIgnoreList,
             bootClasspath,
             projectFolders);
 
@@ -682,6 +702,11 @@ public final class DuplicateFinderMojo extends AbstractMojo
         SMOutputElement ignoredResourcesElement = prefs.addElement("ignoredResourcePatterns");
         for (String ignoredResource : getIgnoredResourcePatterns()) {
             XMLWriterUtils.addElement(ignoredResourcesElement, "ignoredResourcePattern", ignoredResource);
+        }
+
+        SMOutputElement ignoredClassElement = prefs.addElement("ignoredClassPatterns");
+        for (String ignoredClass : getIgnoredClassPatterns()) {
+            XMLWriterUtils.addElement(ignoredClassElement, "ignoredClassPattern", ignoredClass);
         }
 
         SMOutputElement conflictingDependenciesElement = prefs.addElement("conflictingDependencies");
