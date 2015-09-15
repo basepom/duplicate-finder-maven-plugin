@@ -14,6 +14,7 @@
 * Tim Williamson (@twilliamson)
 * @camshoff
 * @jakub-bochenski
+* Michael Bellomo (@mbellomo)
 
 ---
 

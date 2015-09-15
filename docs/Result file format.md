@@ -32,6 +32,10 @@ The result file version will increment when there is a backwards incompatible ch
             <ignoredResourcePattern>...</ignoredResourcePattern>
             ...
         </ignoredResourcePatterns>
+        <ignoredClassPatterns>
+            <ignoredClassPattern>...</ignoredClassPattern>
+            ...
+        </ignoredClassPatterns>
         <conflictingDependencies>
             <conflictingDependency currentProject="..."
                                    currentProjectIncluded="..."
@@ -111,6 +115,10 @@ The result file version will increment when there is a backwards incompatible ch
                 <ignoredResourcePattern>...</ignoredResourcePattern>
                 ...
             </ignoredResourcePatterns>
+            <ignoredClassPatterns>
+                <ignoredClassPattern>...</ignoredClassPattern>
+                ...
+            </ignoredClassPatterns>
             <ignoredDirectoryPatterns>
                 <ignoredDirectoryPattern>...</ignoredDirectoryPattern>
                 ...

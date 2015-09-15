@@ -74,10 +74,9 @@ public class ClasspathDescriptor
         ));
 
     private static final MatchPatternPredicate DEFAULT_IGNORED_CLASS_PREDICATE = new MatchPatternPredicate(Arrays.asList(
-        // this regex matches nothing at all, just need something as a place holder
-        "a^"
+        // this regex matches inner classes
+        ".*\\$.*"
         ));
-
 
     private static final MatchPatternPredicate DEFAULT_IGNORED_LOCAL_DIRECTORIES = new MatchPatternPredicate(Arrays.asList(
         "^.git$",
@@ -225,7 +224,7 @@ public class ClasspathDescriptor
         this.ignoredResourcePatterns = ignoredResourcePatternsBuilder.build();
 
         // PackagePredicate is a bit more complicated...
-        Predicate<String> classPredicate = new MatchInnerClassesPredicate();
+        Predicate<String> classPredicate = Predicates.alwaysFalse();
 
         // predicate matching the default ignores
         if (useDefaultClassIgnoreList) {
