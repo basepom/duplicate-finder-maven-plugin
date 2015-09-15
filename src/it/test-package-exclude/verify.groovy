@@ -11,17 +11,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.basepom.mojo.duplicatefinder.classpath;
+import static org.basepom.mojo.duplicatefinder.groovy.ITools.*
 
-import javax.annotation.Nonnull;
+def result = loadTestXml(basedir)
 
-import com.google.common.base.Predicate;
+overallState(NO_CONFLICT, 0, NOT_FAILED, result)
 
-class MatchInnerClassesPredicate implements Predicate<String>
-{
-    @Override
-    public boolean apply(@Nonnull final String className)
-    {
-        return className.indexOf('$') >= 0; // >= 0: inner class.
-    }
-}
+return true
