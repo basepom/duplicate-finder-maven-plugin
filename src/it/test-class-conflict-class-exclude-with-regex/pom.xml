@@ -22,7 +22,7 @@
         <version>1.0.under-test</version>
     </parent>
 
-    <artifactId>test-package-exclude</artifactId>
+    <artifactId>test-class-conflict-class-exclude-with-regex</artifactId>
 
     <dependencies>
         <dependency>
