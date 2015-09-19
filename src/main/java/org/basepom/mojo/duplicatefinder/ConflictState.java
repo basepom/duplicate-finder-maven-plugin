@@ -25,7 +25,7 @@ public enum ConflictState
     private final String value;
     private final String hint;
 
-    private ConflictState(String value, String hint)
+    ConflictState(String value, String hint)
     {
         this.value = value;
         this.hint = hint;

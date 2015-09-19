@@ -19,7 +19,7 @@ public enum ConflictType
 
     private final String type;
 
-    private ConflictType(String type)
+    ConflictType(String type)
     {
         this.type = type;
     }
