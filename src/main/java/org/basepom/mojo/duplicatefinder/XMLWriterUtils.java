@@ -191,6 +191,11 @@ public final class XMLWriterUtils
             addElement(ignoredDirectoriesPatternsElement, "ignoredDirectoryPattern", ignoredDirectoriesPattern.toString());
         }
 
+        SMOutputElement classExclusionPatternsElement = resultElement.addElement("ignoredClassPatterns");
+        for (Pattern classExclusionPattern : classpathDescriptor.getIgnoredClassPatterns()) {
+            addElement(classExclusionPatternsElement, "ignoredClassPattern", classExclusionPattern.toString());
+        }
+
         for (ConflictType type : ConflictType.values()) {
             SMOutputElement classpathElementsElement = resultElement.addElement("classpathElements");
             addAttribute(classpathElementsElement, "type", type);

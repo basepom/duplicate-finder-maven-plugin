@@ -12,10 +12,11 @@ The duplicate finder plugin ignores the following classpath elements by default 
 | `.*package\.html$` | matches any resource ending in `package.html`. The old name of `package-info.java` which tend to get sprinkled across jars and then clash if a package is populated from multiple jars. |
 | `.*overview\.html$` | matches any resource ending in `overview.html`. This is a common name for documentation which tend to get sprinkled all across dependencies. |
 
-The duplicate finder plugin ignores the following classpath classes by default unless the `useDefaultClassIgnoreList` flag is set to `false`.
+The duplicate finder plugin ignores the following classes by default unless the `useDefaultClassIgnoreList` flag is set to `false`.
+
 | Regular expression | Description |
 | ------------------ | ----------- |
-| `^.*\$/.*`     | matches Java Inner Classes |
+| `^.*\$/.*`     | matches Java inner and nested classes. Before plugin version 1.2.1, this match was implicit and could not be turned off. |
 
 The following local directory names will also always be ignored. Files in these directory are never checked or touched by the plugins:
 

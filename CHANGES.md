@@ -1,9 +1,10 @@
 # Changes
 
-##### 1.2.1
+##### 1.2.1 - 2015-09-18
 
+* Add support for ignoring classes by use of a regular expression, #16 (Thanks @mbellomo)
+* Allow turning off default class ignore list, #16 (Thanks @mbellomo)
 * Add `includePomProjects` attribute in result file.
-* Add support for ignoring classes by use of a regular expression.
 
 ##### 1.2.0 - 2015-06-18
 

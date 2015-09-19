@@ -57,11 +57,16 @@ The duplicate-finder plugins supports a number of configuration settings:
                 <!-- Version 1.1.1+ -->
                 <includeBootClasspath>false</includeBootClasspath>
                 <bootClasspathProperty>sun.boot.class.path</bootClasspathProperty>
+                <useDefaultResourceIgnoreList>true</useDefaultResourceIgnoreList>
                 <!-- Version 1.1.1+ -->
 
                 <!-- Version 1.2.0+ -->
                 <includePomProjects>false</includePomProjects>
                 <!-- Version 1.2.0+ -->
+
+                <!-- Version 1.2.1+ -->
+                <useDefaultResourceIgnoreList>true</useDefaultResourceIgnoreList>
+                <!-- Version 1.2.1+ -->
 
                 <exceptions>
                     <exception>
@@ -98,9 +103,13 @@ The duplicate-finder plugins supports a number of configuration settings:
                 <ignoredResourcePatterns>
                     <ignoredResourcePattern>...</ignoredResourcePattern>
                 </ignoredResourcePatterns>
+
+                <!-- Version 1.2.1+ -->
                 <ignoredClassPatterns>
                     <ignoredClassPattern>...</ignoredClassPattern>
                 </ignoredClassPatterns>
+                <!-- Version 1.2.1+ -->
+
                 <ignoredDependencies>
                     <dependency>
                         <artifactId>...</artifactId>

@@ -34,7 +34,7 @@ For backwards compatibility to the old Ning plugin, the
 `<ignoredResources>` element is equivalent to
 `<ignoredResourcePatterns>`. The plugin will print a warning if the
 old element is used. The `<ignoredResources>` element will be removed
-with the release of version **1.2.0** of the plugin.
+with the release of version **1.3.0** of the plugin.
 
 #### `useDefaultResourceIgnoreList` flag
 
@@ -53,18 +53,18 @@ Default: **true**
 
 #### `useDefaultClassIgnoreList` flag
 
+**Available in plugin version 1.2.1 and later.**
+
 By default, the duplicate finder plugin ignores a set of classes on
 the classpath which tend to be duplicates all the time.
 
 These resources are specified as standard Java regular expressions. All patterns are case insensitive.
 
-The default resource ignore list [is documented here](Default ignored elements).
+The default class ignore list [is documented here](Default ignored elements).
 
-Maven command line property: `duplicate-finder.useDefaultClassIgnoreList` (**Plugin version 1.2.1+**)
+Maven command line property: `duplicate-finder.useDefaultClassIgnoreList`
 
 Default: **true**
-
-**Warning!** Setting this element to `false` will result in a significant number of false positives.
 
 #### `ignoredResourcePatterns` for global resource exclusion
 
@@ -104,6 +104,8 @@ Ignore all log4j and logback configuration resources:
 
 
 #### `ignoredClassPatterns` for global resource exclusion
+
+**Available in plugin version 1.2.1 and later.**
 
 The `ignoredClassPatterns` element lists standard Java regular expression patterns that are excluded from the duplicate check. All patterns are treated as case insensitive.
 

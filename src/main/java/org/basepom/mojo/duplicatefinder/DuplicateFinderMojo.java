@@ -146,6 +146,8 @@ public final class DuplicateFinderMojo extends AbstractMojo
 
     /**
      * Use the default class ignore list.
+     *
+     * @since 1.2.1
      */
     @Parameter(defaultValue = "true", property = "duplicate-finder.useDefaultClassIgnoreList")
     protected boolean useDefaultClassIgnoreList = true;
@@ -167,6 +169,8 @@ public final class DuplicateFinderMojo extends AbstractMojo
 
     /**
      * Ignored classes, which are not checked for multiple occurences.
+     *
+     * @since 1.2.1
      */
     @Parameter
     protected String[] ignoredClassPatterns = new String[0];
@@ -696,6 +700,7 @@ public final class DuplicateFinderMojo extends AbstractMojo
         XMLWriterUtils.addAttribute(prefs, "includePomProjects", includePomProjects);
         // Ignoring Dependencies and resources
         XMLWriterUtils.addAttribute(prefs, "useDefaultResourceIgnoreList", useDefaultResourceIgnoreList);
+        XMLWriterUtils.addAttribute(prefs, "useDefaultClassIgnoreList", useDefaultClassIgnoreList);
         // Result file options
         XMLWriterUtils.addAttribute(prefs, "useResultFile", useResultFile);
         XMLWriterUtils.addAttribute(prefs, "resultFileMinClasspathCount", resultFileMinClasspathCount);

@@ -197,9 +197,7 @@ public class ClasspathDescriptor
     {
         final ImmutableList.Builder<Pattern> ignoredResourcePatternsBuilder = ImmutableList.builder();
 
-        final ImmutableList.Builder<Pattern> ignoredClassPatternsBuilder = ImmutableList.builder();
-
-        // ResourcePredicate is a bit more complicated...
+        // build resource predicate...
         Predicate<String> resourcesPredicate = Predicates.alwaysFalse();
 
         // predicate matching the default ignores
@@ -223,7 +221,9 @@ public class ClasspathDescriptor
         this.resourcesPredicate = resourcesPredicate;
         this.ignoredResourcePatterns = ignoredResourcePatternsBuilder.build();
 
-        // PackagePredicate is a bit more complicated...
+        final ImmutableList.Builder<Pattern> ignoredClassPatternsBuilder = ImmutableList.builder();
+
+        // build class predicate.
         Predicate<String> classPredicate = Predicates.alwaysFalse();
 
         // predicate matching the default ignores

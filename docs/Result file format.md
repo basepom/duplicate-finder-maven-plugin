@@ -23,6 +23,7 @@ The result file version will increment when there is a backwards incompatible ch
                    printEqualFiles="..."
                    preferLocal="..."
                    useDefaultResourceIgnoreList="..."
+                   useDefaultClassIgnoreList="..."
                    useResultFile="..."
                    resultFileMinClasspathCount="..."
                    resultFile="..."
@@ -229,17 +230,19 @@ Contains the plugin configuration as attributes. All available configuration opt
 | `printEqualFiles` | boolean | |
 | `preferLocal` | boolean | |
 | `useDefaultResourceIgnoreList` | boolean | |
+| `useDefaultClassIgnoreList` | boolean | ** Plugin version 1.2.1 + ** |
 | `useResultFile` | boolean | always `true` |
 | `resultFileMinClasspathCount` | integer | |
 | `resultFile` | string | |
 | `includeBootClasspath` | boolean | ** Plugin version 1.1.1 + ** |
 | `bootClasspathProperty` | string | ** Plugin version 1.1.1 + ** |
 
-| Child element name | Function |
-| ------------------ | -------- |
-| `ignoredResourcePatterns` | A list of `ignoredResourcePattern` elements from the plugin configuration |
-| `ignoredDependencies` | `ignoredDependencies` contains a list of `dependency` elements from the plugin configuration |
-| `conflictingDependencies` | Contains a list of `conflictingDependency` elements |
+| Child element name | Function | Notes |
+| ------------------ | -------- | ----- |
+| `ignoredResourcePatterns` | A list of `ignoredResourcePattern` elements from the plugin configuration | |
+| `ignoredClassPatterns` | A list of `ignoredClassPattern` elements from the plugin configuration  | ** Plugin version 1.2.1 + ** |
+| `ignoredDependencies` | `ignoredDependencies` contains a list of `dependency` elements from the plugin configuration | |
+| `conflictingDependencies` | Contains a list of `conflictingDependency` elements | |
 
 The `ignoredResourcePattern` list will also contain the deprecated `ignoredResource` elements if they are used in the configuration.
 
@@ -275,12 +278,13 @@ Contains a duplicate finder plugin result. As the plugin will evaluate different
 | `conflictState` | string | Overall state of this result. Can be `no-conflict`, `content-different` or `content-equal`. |
 | `failed` | boolean | `true` if this result failed the overall build, `false` if not. |
 
-| Child element name | Function |
-| ------------------ | -------- |
-| `conflicts` | A list of `conflict` elements describing the conflicts in this result. |
-| `ignoredResourcePatterns` | A list of `ignoredResourcePattern` elements which contain ignored resources for this result. |
-| `ignoredDirectoryPatterns` | A list of `ignoredDirectoryPattern` elements which contain local directory names that were ignored for this result. |
-| `classpathElements` | A list of `classpathElement` elements. |
+| Child element name | Function | Notes |
+| ------------------ | -------- | ----- |
+| `conflicts` | A list of `conflict` elements describing the conflicts in this result. | |
+| `ignoredResourcePatterns` | A list of `ignoredResourcePattern` elements which contain ignored resources for this result. | |
+| `ignoredClassPatterns` | A list of `ignoredClassPattern` elements which contain ignored classes for this result.  | ** Plugin version 1.2.1 + ** |
+| `ignoredDirectoryPatterns` | A list of `ignoredDirectoryPattern` elements which contain local directory names that were ignored for this result. | |
+| `classpathElements` | A list of `classpathElement` elements. | |
 
 The `classpathElements` element can occur multiple times.
 
