@@ -142,3 +142,13 @@ As the duplicate finder plugin deals with a classpath elements, there are a numb
 | `testjar:first-jar:1.0.under-test` | `conflict-same-content` and `conflict-different-content` resources | `FIRST_JAR` | Use with `second-jar` to find classpath resource duplicates with the same or different SHA values. |
 | `testjar:second-jar:1.0.under-test` |`conflict-same-content` with the same SHA and `conflict-different-content` with a different SHA from `first-jar` | `SECOND_JAR` | |
 
+### Debugging an integration test
+
+As integration tests are intended to highlight an aspect of the plugin functionality, they are extremely useful for debugging / isolating of problems. To debug the plugin while executing an integration test, use the following steps:
+
+* build and install the plugin locally, prepare the integration tests: `mvn -Dinvoker.test='setup*' clean install`. This step is required only once until the next time `mvn clean` is executed.
+* now build and run the integration test to debug: `mvn -Dinvoker.mavenOpts='-Xdebug -Xnoagent -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=8000' -Dinvoker.test='<testname>' invoker:integration-test`. This will execute the integration test and suspend the VM. A debugger can now attach to port 8000 to debug the plugin execution.
+
+If wildcards are given for the tests to run, a new JDK will be spawned for each integration test and the debugger must be attached multiple times.
+If the plugin code has changed, either combine the `test` goal with `invoker:integration-test` or use the proper `integration-test` lifecycle goal.
+

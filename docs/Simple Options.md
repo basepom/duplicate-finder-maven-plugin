@@ -116,15 +116,15 @@ Default: **false**
 
 ### `preferLocal`
 
-This element is only relevant for multi-module builds. If it is set to **true**, 
+This element is only relevant for multi-module builds. If it is set to **true**,
 the plugin will prefer the local sub-modules (using their `target/classes` and
-`target/test-classes` folders) in the current build over matching artifacts 
+`target/test-classes` folders) in the current build over matching artifacts
 from the local or remote artifact repository.
 
 This is almost always the preferred setting because it ensures that
 the latest (current) build of other sub-modules is checked. The only
 real use case for setting this flag to `false` is when building each
-sub-module separately (not using the full multi-module build) and 
+sub-module separately (not using the full multi-module build) and
 installing the resulting artifacts into the local repository.
 
 Maven command line property: `duplicate-finder.preferLocal` (**Plugin version 1.1.1+**)
@@ -133,32 +133,34 @@ Default: **true**
 
 ### `includeBootClasspath`
 
-** Available in plugin version 1.1.1 and later **
+**Available in plugin version 1.1.1 and later.**
 
 Activate duplicate check against all classes from the boot
 classpath. This usually includes the JDK class library (rt.jar) and
 any additional jars that the JDK provides to an application.
 
-Maven command line property: `duplicate-finder.includeBootClasspath` (**Plugin version 1.1.1+**)
+Maven command line property: `duplicate-finder.includeBootClasspath`
 
 Default: **false**
 
 ### `bootClasspathProperty`
 
-** Available in plugin version 1.1.1 and later **
+**Available in plugin version 1.1.1 and later.**
 
 The system property which holds the JDK boot classpath. For most JDKs,
 this will be `sun.boot.class.path` but it is possible that some Third
 Party JDKs use a different system property.
 
-Maven command line property: `duplicate-finder.bootClasspathProperty` (**Plugin version 1.1.1+**)
+Maven command line property: `duplicate-finder.bootClasspathProperty`
 
 Default: **sun.boot.class.path**
 
 ### `includePomProjects`
 
-** Available in plugin version 1.2.0 and later **
+**Available in plugin version 1.2.0 and later.**
 
 By default, any projects that uses `pom` packaging is skipped. When setting this configuration option to `true`, POM projects will also be checked.
 
-Maven command line property: `duplicate-finder.includePomProjects`.
+Default: **false**
+
+Maven command line property: `duplicate-finder.includePomProjects`
