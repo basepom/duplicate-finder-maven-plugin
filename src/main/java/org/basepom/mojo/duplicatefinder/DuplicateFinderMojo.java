@@ -145,6 +145,12 @@ public final class DuplicateFinderMojo extends AbstractMojo
     protected boolean useDefaultResourceIgnoreList = true;
 
     /**
+     * Use the default class ignore list.
+     */
+    @Parameter(defaultValue = "true", property = "duplicate-finder.useDefaultClassIgnoreList")
+    protected boolean useDefaultClassIgnoreList = true;
+
+    /**
      * Ignored resources, which are not checked for multiple occurences.
      *
      * @deprecated Use ignoredResourcePatterns.
@@ -158,6 +164,12 @@ public final class DuplicateFinderMojo extends AbstractMojo
      */
     @Parameter
     protected String[] ignoredResourcePatterns = new String[0];
+
+    /**
+     * Ignored classes, which are not checked for multiple occurences.
+     */
+    @Parameter
+    protected String[] ignoredClassPatterns = new String[0];
 
     /**
      * Artifacts with expected and resolved versions that are checked.
@@ -433,6 +445,14 @@ public final class DuplicateFinderMojo extends AbstractMojo
         return builder.build();
     }
 
+    private ImmutableSet<String> getIgnoredClassPatterns()
+    {
+        ImmutableSet.Builder<String> builder = ImmutableSet.builder();
+        builder.add(ignoredClassPatterns);
+
+        return builder.build();
+    }
+
     /**
      * Checks the maven classpath for a given set of scopes whether it contains duplicates. In addition to the
      * artifacts on the classpath, one or more additional project folders are added.
@@ -455,8 +475,10 @@ public final class DuplicateFinderMojo extends AbstractMojo
         final ClasspathDescriptor classpathDescriptor = ClasspathDescriptor.createClasspathDescriptor(project,
             fileToArtifactMap,
             getIgnoredResourcePatterns(),
+            getIgnoredClassPatterns(),
             Arrays.asList(ignoredDependencies),
             useDefaultResourceIgnoreList,
+            useDefaultClassIgnoreList,
             bootClasspath,
             projectFolders);
 
@@ -682,6 +704,11 @@ public final class DuplicateFinderMojo extends AbstractMojo
         SMOutputElement ignoredResourcesElement = prefs.addElement("ignoredResourcePatterns");
         for (String ignoredResource : getIgnoredResourcePatterns()) {
             XMLWriterUtils.addElement(ignoredResourcesElement, "ignoredResourcePattern", ignoredResource);
+        }
+
+        SMOutputElement ignoredClassElement = prefs.addElement("ignoredClassPatterns");
+        for (String ignoredClass : getIgnoredClassPatterns()) {
+            XMLWriterUtils.addElement(ignoredClassElement, "ignoredClassPattern", ignoredClass);
         }
 
         SMOutputElement conflictingDependenciesElement = prefs.addElement("conflictingDependencies");

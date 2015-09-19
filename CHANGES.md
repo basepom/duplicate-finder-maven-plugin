@@ -3,6 +3,7 @@
 ##### 1.2.1
 
 * Add `includePomProjects` attribute in result file.
+* Add support for ignoring classes by use of a regular expression.
 
 ##### 1.2.0 - 2015-06-18
 

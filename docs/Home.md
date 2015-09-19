@@ -98,6 +98,9 @@ The duplicate-finder plugins supports a number of configuration settings:
                 <ignoredResourcePatterns>
                     <ignoredResourcePattern>...</ignoredResourcePattern>
                 </ignoredResourcePatterns>
+                <ignoredClassPatterns>
+                    <ignoredClassPattern>...</ignoredClassPattern>
+                </ignoredClassPatterns>
                 <ignoredDependencies>
                     <dependency>
                         <artifactId>...</artifactId>

@@ -1,4 +1,4 @@
-The duplicate finder plugin allows global exclusion of dependencies
+The duplicate finder plugin allows global exclusion of dependencies, classes
 and resources. Any matching dependency or resource will not be considered
 duplicate, no matter how often it appears on the classpath.
 
@@ -7,6 +7,9 @@ This feature is very easy to abuse. Please use with care.
 ```xml
 <configuration>
     <useDefaultResourceIgnoreList>true</useDefaultResourceIgnoreList>
+    <ignoredClassPatterns>
+        <ignoredClassPattern>...</ignoredClassPattern>
+    </ignoredClassPatterns>
     <ignoredResourcePatterns>
         <ignoredResourcePattern>...</ignoredResourcePattern>
     </ignoredResourcePatterns>
@@ -48,6 +51,21 @@ Default: **true**
 
 **Warning!** Setting this element to `false` will result in a significant number of false positives.
 
+#### `useDefaultClassIgnoreList` flag
+
+By default, the duplicate finder plugin ignores a set of classes on
+the classpath which tend to be duplicates all the time.
+
+These resources are specified as standard Java regular expressions. All patterns are case insensitive.
+
+The default resource ignore list [is documented here](Default ignored elements).
+
+Maven command line property: `duplicate-finder.useDefaultClassIgnoreList` (**Plugin version 1.2.1+**)
+
+Default: **true**
+
+**Warning!** Setting this element to `false` will result in a significant number of false positives.
+
 #### `ignoredResourcePatterns` for global resource exclusion
 
 The `ignoredResourcePatterns` element lists standard Java regular expression patterns that are excluded from the duplicate check. All patterns are treated as case insensitive.
@@ -84,6 +102,39 @@ Ignore all log4j and logback configuration resources:
 </configuration>
 ```
 
+
+#### `ignoredClassPatterns` for global resource exclusion
+
+The `ignoredClassPatterns` element lists standard Java regular expression patterns that are excluded from the duplicate check. All patterns are treated as case insensitive.
+
+Any pattern added here is treated similar to the patterns on the default resource ignore list.
+
+**Note**. Any pattern here is applied to the whole resource path, not
+  to sub-components. It is therefore important to anchor a pattern to
+  the beginning, the end or a separator (`/`). It is recommended to
+  test any regular expression with a
+  [regular expression tester](http://www.regexplanet.com/advanced/java/index.html).
+
+##### Examples
+
+Ignore all resources starting with `javax`:
+
+```xml
+<configuration>
+    <ignoredClassPatterns>
+        <ignoredClassPattern>javax.*$</ignoredClassPattern>
+    </ignoredClassPatterns>
+</configuration>
+```
+Ignore all classes that aren't from my company:
+
+```xml
+<configuration>
+    <ignoredClassPatterns>
+        <ignoredClassPattern>^((?!com[/.]mycompany).*)$</ignoredClassPattern>
+    </ignoredClassPatterns>
+</configuration>
+```
 
 #### `ignoreDependencies` for global dependency exclusion
 

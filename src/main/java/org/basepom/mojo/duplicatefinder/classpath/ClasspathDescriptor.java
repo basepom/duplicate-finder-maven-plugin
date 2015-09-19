@@ -73,6 +73,11 @@ public class ClasspathDescriptor
         ".*overview\\.html$"
         ));
 
+    private static final MatchPatternPredicate DEFAULT_IGNORED_CLASS_PREDICATE = new MatchPatternPredicate(Arrays.asList(
+        // this regex matches inner classes
+        ".*\\$.*"
+        ));
+
     private static final MatchPatternPredicate DEFAULT_IGNORED_LOCAL_DIRECTORIES = new MatchPatternPredicate(Arrays.asList(
         "^.git$",
         "^.svn$",
@@ -93,22 +98,26 @@ public class ClasspathDescriptor
     private final Predicate<String> classPredicate;
 
     private final ImmutableList<Pattern> ignoredResourcePatterns;
+    private final ImmutableList<Pattern> ignoredClassPatterns;
 
     public static ClasspathDescriptor createClasspathDescriptor(final MavenProject project,
                                                                 final Multimap<File, Artifact> fileToArtifactMap,
                                                                 final Collection<String> ignoredResourcePatterns,
+                                                                final Collection<String> ignoredClassPatterns,
                                                                 final Collection<MavenCoordinates> ignoredDependencies,
                                                                 final boolean useDefaultResourceIgnoreList,
+                                                                final boolean useDefaultClassIgnoreList,
                                                                 final Set<File> bootClasspath,
                                                                 final File[] projectFolders) throws MojoExecutionException, InvalidVersionSpecificationException
     {
         checkNotNull(project, "project is null");
         checkNotNull(fileToArtifactMap, "fileToArtifactMap is null");
         checkNotNull(ignoredResourcePatterns, "ignoredResourcePatterns is null");
+        checkNotNull(ignoredClassPatterns, "ignoredClassPatterns is null");
         checkNotNull(ignoredDependencies, "ignoredDependencies is null");
         checkNotNull(projectFolders, "projectFolders is null");
 
-        final ClasspathDescriptor classpathDescriptor = new ClasspathDescriptor(useDefaultResourceIgnoreList, ignoredResourcePatterns);
+        final ClasspathDescriptor classpathDescriptor = new ClasspathDescriptor(useDefaultResourceIgnoreList, ignoredResourcePatterns, useDefaultClassIgnoreList, ignoredClassPatterns);
 
         File file = null;
 
@@ -181,13 +190,14 @@ public class ClasspathDescriptor
     }
 
     private ClasspathDescriptor(final boolean useDefaultResourceIgnoreList,
-                                final Collection<String> ignoredResourcePatterns)
+                                final Collection<String> ignoredResourcePatterns,
+                                final boolean useDefaultClassIgnoreList,
+                                final Collection<String> ignoredClassPatterns)
                     throws MojoExecutionException
     {
-        // Class predicate simply ignores inner and nested classes.
-        this.classPredicate = new MatchInnerClassesPredicate();
-
         final ImmutableList.Builder<Pattern> ignoredResourcePatternsBuilder = ImmutableList.builder();
+
+        final ImmutableList.Builder<Pattern> ignoredClassPatternsBuilder = ImmutableList.builder();
 
         // ResourcePredicate is a bit more complicated...
         Predicate<String> resourcesPredicate = Predicates.alwaysFalse();
@@ -212,6 +222,30 @@ public class ClasspathDescriptor
 
         this.resourcesPredicate = resourcesPredicate;
         this.ignoredResourcePatterns = ignoredResourcePatternsBuilder.build();
+
+        // PackagePredicate is a bit more complicated...
+        Predicate<String> classPredicate = Predicates.alwaysFalse();
+
+        // predicate matching the default ignores
+        if (useDefaultClassIgnoreList) {
+            classPredicate = Predicates.or(classPredicate, DEFAULT_IGNORED_CLASS_PREDICATE);
+            ignoredClassPatternsBuilder.addAll(DEFAULT_IGNORED_CLASS_PREDICATE.getPatterns());
+        }
+
+        if (!ignoredClassPatterns.isEmpty()) {
+            try {
+                // predicate matching the user ignores
+                MatchPatternPredicate ignoredPackagePredicate = new MatchPatternPredicate(ignoredClassPatterns);
+                classPredicate = Predicates.or(classPredicate, ignoredPackagePredicate);
+                ignoredClassPatternsBuilder.addAll(ignoredPackagePredicate.getPatterns());
+            }
+            catch (final PatternSyntaxException pse) {
+                throw new MojoExecutionException("Error compiling classIgnore pattern: " + pse.getMessage());
+            }
+        }
+
+        this.classPredicate = classPredicate;
+        this.ignoredClassPatterns = ignoredClassPatternsBuilder.build();
     }
 
     public ImmutableMap<String, Collection<File>> getClasspathElementLocations(final ConflictType type)
@@ -230,6 +264,11 @@ public class ClasspathDescriptor
     public ImmutableList<Pattern> getIgnoredResourcePatterns()
     {
         return ignoredResourcePatterns;
+    }
+
+    public ImmutableList<Pattern> getIgnoredClassPatterns()
+    {
+        return ignoredClassPatterns;
     }
 
     public ImmutableList<Pattern> getIgnoredDirectoryPatterns()
