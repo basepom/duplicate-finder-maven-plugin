@@ -25,4 +25,4 @@ The plugin has two goals:
 
 Up-to-date documentation is available from the [duplicate finder plugin Wiki](https://github.com/basepom/duplicate-finder-maven-plugin/wiki). A snapshot from the last release of the plugin is available in the `docs` folder in this repository.
 
-[![Build Status](https://travis-ci.org/basepom/duplicate-finder-maven-plugin.svg?branch=master)](https://travis-ci.org/basepom/duplicate-finder-maven-plugin)
+[![Build Status](https://travis-ci.org/basepom/duplicate-finder-maven-plugin.svg?branch=master)](https://travis-ci.org/basepom/duplicate-finder-maven-plugin)[![Latest Release](https://maven-badges.herokuapp.com/maven-central/org.basepom.maven/duplicate-finder-maven-plugin/badge.svg)](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.basepom.maven%22%20AND%20a%3A%22duplicate-finder-maven-plugin%22)
