@@ -32,8 +32,8 @@ import com.google.common.collect.Ordering;
 import org.apache.maven.artifact.Artifact;
 
 /**
- * Describes any of the possible elements on the classpath. These can be elements from the boot classpath, artifacts and local folder from the current project. For each
- * of the possible types exists a subclass which holds additional information.
+ * Describes any of the possible elements on the classpath. These can be elements from the boot classpath, artifacts and local
+ * folder from the current project. For each of the possible types exists a subclass which holds additional information.
  */
 public abstract class ClasspathElement implements Comparable<ClasspathElement>
 {
@@ -82,8 +82,7 @@ public abstract class ClasspathElement implements Comparable<ClasspathElement>
         @Override
         public String getName()
         {
-            return Joiner.on(':').skipNulls().join(
-                artifact.getGroupId(),
+            return Joiner.on(':').skipNulls().join(artifact.getGroupId(),
                 artifact.getArtifactId(),
                 artifact.getVersion(),
                 getType(artifact),
@@ -210,7 +209,8 @@ public abstract class ClasspathElement implements Comparable<ClasspathElement>
         }
 
         @Override
-        public boolean isBootClasspathElement() {
+        public boolean isBootClasspathElement()
+        {
             return true;
         }
 
@@ -247,13 +247,14 @@ public abstract class ClasspathElement implements Comparable<ClasspathElement>
 
             return Objects.equals(this.bootClasspathElement, that.bootClasspathElement);
         }
-}
+    }
 
     public static Function<ClasspathElement, String> getNameFunction()
     {
         return new Function<ClasspathElement, String>() {
             @Override
-            public String apply(@Nonnull ClasspathElement element) {
+            public String apply(@Nonnull ClasspathElement element)
+            {
                 return element.getName();
             }
         };

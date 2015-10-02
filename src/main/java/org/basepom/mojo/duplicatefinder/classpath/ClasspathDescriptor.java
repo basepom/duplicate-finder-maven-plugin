@@ -70,20 +70,17 @@ public class ClasspathDescriptor
         ".*third-party(\\.txt)?$",
         // HTML stuff from javadocs.
         ".*package\\.html$",
-        ".*overview\\.html$"
-        ));
+        ".*overview\\.html$"));
 
     private static final MatchPatternPredicate DEFAULT_IGNORED_CLASS_PREDICATE = new MatchPatternPredicate(Arrays.asList(
         // this regex matches inner classes
-        ".*\\$.*"
-        ));
+        ".*\\$.*"));
 
     private static final MatchPatternPredicate DEFAULT_IGNORED_LOCAL_DIRECTORIES = new MatchPatternPredicate(Arrays.asList(
         "^.git$",
         "^.svn$",
         "^.hg$",
-        "^.bzr$"
-        ));
+        "^.bzr$"));
 
     /**
      * This is a global, static cache which can be reused through multiple runs of the plugin in the same VM,
@@ -101,14 +98,14 @@ public class ClasspathDescriptor
     private final ImmutableList<Pattern> ignoredClassPatterns;
 
     public static ClasspathDescriptor createClasspathDescriptor(final MavenProject project,
-                                                                final Multimap<File, Artifact> fileToArtifactMap,
-                                                                final Collection<String> ignoredResourcePatterns,
-                                                                final Collection<String> ignoredClassPatterns,
-                                                                final Collection<MavenCoordinates> ignoredDependencies,
-                                                                final boolean useDefaultResourceIgnoreList,
-                                                                final boolean useDefaultClassIgnoreList,
-                                                                final Set<File> bootClasspath,
-                                                                final File[] projectFolders) throws MojoExecutionException, InvalidVersionSpecificationException
+        final Multimap<File, Artifact> fileToArtifactMap,
+        final Collection<String> ignoredResourcePatterns,
+        final Collection<String> ignoredClassPatterns,
+        final Collection<MavenCoordinates> ignoredDependencies,
+        final boolean useDefaultResourceIgnoreList,
+        final boolean useDefaultClassIgnoreList,
+        final Set<File> bootClasspath,
+        final File[] projectFolders) throws MojoExecutionException, InvalidVersionSpecificationException
     {
         checkNotNull(project, "project is null");
         checkNotNull(fileToArtifactMap, "fileToArtifactMap is null");
@@ -190,10 +187,10 @@ public class ClasspathDescriptor
     }
 
     private ClasspathDescriptor(final boolean useDefaultResourceIgnoreList,
-                                final Collection<String> ignoredResourcePatterns,
-                                final boolean useDefaultClassIgnoreList,
-                                final Collection<String> ignoredClassPatterns)
-                    throws MojoExecutionException
+        final Collection<String> ignoredResourcePatterns,
+        final boolean useDefaultClassIgnoreList,
+        final Collection<String> ignoredClassPatterns)
+            throws MojoExecutionException
     {
         final ImmutableList.Builder<Pattern> ignoredResourcePatternsBuilder = ImmutableList.builder();
 

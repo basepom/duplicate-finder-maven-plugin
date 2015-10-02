@@ -37,7 +37,7 @@ class MatchPatternPredicate implements Predicate<String>
 
         final ImmutableList.Builder<Pattern> builder = ImmutableList.builder();
         for (final String patternString : patternStrings) {
-            builder.add(Pattern.compile(patternString, Pattern.CASE_INSENSITIVE|Pattern.UNICODE_CASE));
+            builder.add(Pattern.compile(patternString, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE));
         }
 
         this.patterns = builder.build();

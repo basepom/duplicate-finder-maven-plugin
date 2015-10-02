@@ -134,8 +134,8 @@ public class MavenCoordinates
     public boolean matches(final MavenCoordinates other)
     {
         if (!(Objects.equals(getGroupId(), other.getGroupId())
-            && Objects.equals(getArtifactId(), other.getArtifactId())
-            && Objects.equals(getType(), other.getType()))) {
+              && Objects.equals(getArtifactId(), other.getArtifactId())
+              && Objects.equals(getType(), other.getType()))) {
             return false;
         }
 
@@ -147,7 +147,7 @@ public class MavenCoordinates
             }
         }
 
-        //  no version range and no version present, so any other version matches
+        // no version range and no version present, so any other version matches
         if (!getVersionRange().isPresent() && !getVersion().isPresent()) {
             return true;
         }
@@ -197,9 +197,9 @@ public class MavenCoordinates
         MavenCoordinates that = (MavenCoordinates) other;
 
         return Objects.equals(this.groupId, that.groupId)
-                        && Objects.equals(this.artifactId, that.artifactId)
-                        && Objects.equals(this.classifier, that.classifier)
-                        && Objects.equals(this.type, that.type);
+               && Objects.equals(this.artifactId, that.artifactId)
+               && Objects.equals(this.classifier, that.classifier)
+               && Objects.equals(this.type, that.type);
     }
 
     @Override

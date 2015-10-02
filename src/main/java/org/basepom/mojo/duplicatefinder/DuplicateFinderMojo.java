@@ -86,11 +86,7 @@ import org.codehaus.staxmate.out.SMOutputElement;
 /**
  * Finds duplicate classes/resources on the classpath.
  */
-@Mojo(name = "check",
-                requiresProject = true,
-                threadSafe = true,
-                defaultPhase = LifecyclePhase.VERIFY,
-                requiresDependencyResolution = ResolutionScope.TEST)
+@Mojo(name = "check", requiresProject = true, threadSafe = true, defaultPhase = LifecyclePhase.VERIFY, requiresDependencyResolution = ResolutionScope.TEST)
 public final class DuplicateFinderMojo extends AbstractMojo
 {
     private static final PluginLog LOG = new PluginLog(DuplicateFinderMojo.class);
@@ -127,6 +123,7 @@ public final class DuplicateFinderMojo extends AbstractMojo
 
     /**
      * Fail the build if files with the same name and the same content are detected.
+     *
      * @since 1.0.3
      */
     @Parameter(defaultValue = "false", property = "duplicate-finder.failBuildInCaseOfEqualContentConflict")
@@ -248,7 +245,7 @@ public final class DuplicateFinderMojo extends AbstractMojo
      *
      * @since 1.1.0
      */
-    @Parameter(defaultValue="2", property = "duplicate-finder.resultFileMinClasspathCount")
+    @Parameter(defaultValue = "2", property = "duplicate-finder.resultFileMinClasspathCount")
     protected int resultFileMinClasspathCount = 2;
 
     /**
@@ -257,7 +254,7 @@ public final class DuplicateFinderMojo extends AbstractMojo
      *
      * @since 1.1.1
      */
-    @Parameter(defaultValue="false", property = "duplicate-finder.includeBootClasspath")
+    @Parameter(defaultValue = "false", property = "duplicate-finder.includeBootClasspath")
     protected boolean includeBootClasspath = false;
 
     /**
@@ -265,7 +262,7 @@ public final class DuplicateFinderMojo extends AbstractMojo
      *
      * @since 1.1.1
      */
-    @Parameter(defaultValue="sun.boot.class.path", property = "duplicate-finder.bootClasspathProperty")
+    @Parameter(defaultValue = "sun.boot.class.path", property = "duplicate-finder.bootClasspathProperty")
     protected String bootClasspathProperty = "sun.boot.class.path";
 
     /**
@@ -273,7 +270,7 @@ public final class DuplicateFinderMojo extends AbstractMojo
      *
      * @since 1.2.0
      */
-    @Parameter(defaultValue="false", property = "duplicate-finder.includePomProjects")
+    @Parameter(defaultValue = "false", property = "duplicate-finder.includePomProjects")
     protected boolean includePomProjects = false;
 
     private final EnumSet<ConflictState> printState = EnumSet.of(CONFLICT_CONTENT_DIFFERENT);
@@ -287,7 +284,7 @@ public final class DuplicateFinderMojo extends AbstractMojo
     }
 
     // called by maven
-    public void setIgnoredDependencies(final Dependency [] dependencies) throws InvalidVersionSpecificationException
+    public void setIgnoredDependencies(final Dependency[] dependencies) throws InvalidVersionSpecificationException
     {
         checkArgument(dependencies != null);
 
@@ -379,7 +376,12 @@ public final class DuplicateFinderMojo extends AbstractMojo
                     if (checkTestClasspath) {
                         LOG.report(quiet, "Checking test classpath");
                         final ResultCollector resultCollector = new ResultCollector(printState, failState);
-                        final ClasspathDescriptor classpathDescriptor = checkClasspath(resultCollector, artifactFileResolver, TEST_SCOPE, bootClasspath, getOutputDirectory(project), getTestOutputDirectory(project));
+                        final ClasspathDescriptor classpathDescriptor = checkClasspath(resultCollector,
+                            artifactFileResolver,
+                            TEST_SCOPE,
+                            bootClasspath,
+                            getOutputDirectory(project),
+                            getTestOutputDirectory(project));
                         classpathResultBuilder.put("test", new SimpleImmutableEntry<ResultCollector, ClasspathDescriptor>(resultCollector, classpathDescriptor));
                     }
 
@@ -462,14 +464,11 @@ public final class DuplicateFinderMojo extends AbstractMojo
      * artifacts on the classpath, one or more additional project folders are added.
      */
     private ClasspathDescriptor checkClasspath(final ResultCollector resultCollector,
-                                               final ArtifactFileResolver artifactFileResolver,
-                                               final Set<String> scopes,
-                                               final Set<File> bootClasspath,
-                                               final File ... projectFolders)
-        throws MojoExecutionException,
-        InvalidVersionSpecificationException,
-        OverConstrainedVersionException,
-        DependencyResolutionRequiredException
+        final ArtifactFileResolver artifactFileResolver,
+        final Set<String> scopes,
+        final Set<File> bootClasspath,
+        final File ... projectFolders)
+            throws MojoExecutionException, InvalidVersionSpecificationException, OverConstrainedVersionException, DependencyResolutionRequiredException
     {
 
         // Map of files to artifacts. Depending on the type of build, referenced projects in a multi-module build
@@ -493,21 +492,23 @@ public final class DuplicateFinderMojo extends AbstractMojo
         return classpathDescriptor;
     }
 
-    private void checkForDuplicates(final ConflictType type, final ResultCollector resultCollector, final ClasspathDescriptor classpathDescriptor, final ArtifactFileResolver artifactFileResolver) throws MojoExecutionException, OverConstrainedVersionException
+    private void checkForDuplicates(final ConflictType type, final ResultCollector resultCollector, final ClasspathDescriptor classpathDescriptor, final ArtifactFileResolver artifactFileResolver)
+        throws MojoExecutionException, OverConstrainedVersionException
     {
         // only look at entries with a size > 1.
-        final Map<String, Collection<File>> filteredMap = ImmutableMap.copyOf(Maps.filterEntries(classpathDescriptor.getClasspathElementLocations(type), new Predicate<Entry<String, Collection<File>>>() {
+        final Map<String, Collection<File>> filteredMap = ImmutableMap.copyOf(Maps.filterEntries(classpathDescriptor.getClasspathElementLocations(type),
+            new Predicate<Entry<String, Collection<File>>>() {
 
-            @Override
-            public boolean apply(@Nonnull final Entry<String, Collection<File>> entry)
-            {
-                checkNotNull(entry, "entry is null");
-                checkState(entry.getValue() != null, "Entry '%s' is invalid", entry);
+                @Override
+                public boolean apply(@Nonnull final Entry<String, Collection<File>> entry)
+                {
+                    checkNotNull(entry, "entry is null");
+                    checkState(entry.getValue() != null, "Entry '%s' is invalid", entry);
 
-                return entry.getValue().size() > 1;
-            }
+                    return entry.getValue().size() > 1;
+                }
 
-        }));
+            }));
 
         for (final Map.Entry<String, Collection<File>> entry : filteredMap.entrySet()) {
             final String name = entry.getKey();
@@ -548,8 +549,7 @@ public final class DuplicateFinderMojo extends AbstractMojo
 
         final String resourcePath = type == ConflictType.CLASS ? name.replace('.', '/') + ".class" : name;
 
-        for (final File element : elements)
-        {
+        for (final File element : elements) {
             try {
                 final String newSHA256 = getSHA256HexOfElement(element, resourcePath);
 

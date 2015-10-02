@@ -219,14 +219,17 @@ public class TestMavenCoordinates
         final MavenCoordinates dependencyCoordinatesNoVersionNoVersionRange = new MavenCoordinates(dependency);
 
         // match any version
-        assertTrue(dependencyCoordinatesNoVersionNoVersionRange.matches(new MavenCoordinates(new DefaultArtifact("test.group", "test-artifact", "1.0", "test", "jar", null, new DefaultArtifactHandler()))));
-        assertTrue(dependencyCoordinatesNoVersionNoVersionRange.matches(new MavenCoordinates(new DefaultArtifact("test.group", "test-artifact", "2.0", "test", "jar", null, new DefaultArtifactHandler()))));
+        assertTrue(dependencyCoordinatesNoVersionNoVersionRange
+            .matches(new MavenCoordinates(new DefaultArtifact("test.group", "test-artifact", "1.0", "test", "jar", null, new DefaultArtifactHandler()))));
+        assertTrue(dependencyCoordinatesNoVersionNoVersionRange
+            .matches(new MavenCoordinates(new DefaultArtifact("test.group", "test-artifact", "2.0", "test", "jar", null, new DefaultArtifactHandler()))));
 
         dependency.setVersion("1.0");
         final MavenCoordinates dependencyCoordinatesVersion = new MavenCoordinates(dependency);
 
         // don't match anything without version
-        assertFalse(dependencyCoordinatesVersion.matches(new MavenCoordinates(new DefaultArtifact("test.group", "test-artifact", VersionRange.createFromVersionSpec("[1.0, 2.0)"), "test", "jar", null, new DefaultArtifactHandler()))));
+        assertFalse(dependencyCoordinatesVersion
+            .matches(new MavenCoordinates(new DefaultArtifact("test.group", "test-artifact", VersionRange.createFromVersionSpec("[1.0, 2.0)"), "test", "jar", null, new DefaultArtifactHandler()))));
 
         // But exact versions match (or don't)
         assertFalse(dependencyCoordinatesVersion.matches(new MavenCoordinates(new DefaultArtifact("test.group", "test-artifact", "1.1", "test", "jar", null, new DefaultArtifactHandler()))));

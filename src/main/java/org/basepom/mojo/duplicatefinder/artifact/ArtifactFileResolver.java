@@ -67,8 +67,8 @@ public class ArtifactFileResolver
     private final boolean preferLocal;
 
     public ArtifactFileResolver(final MavenProject project,
-                                final ImmutableSet<File> bootClasspath,
-                                final boolean preferLocal) throws DependencyResolutionRequiredException
+        final ImmutableSet<File> bootClasspath,
+        final boolean preferLocal) throws DependencyResolutionRequiredException
     {
         checkNotNull(project, "project is null");
         this.preferLocal = preferLocal;
@@ -213,13 +213,13 @@ public class ArtifactFileResolver
         }
 
         final DefaultArtifact canonicalizedArtifact = new DefaultArtifact(artifact.getGroupId(),
-                                                                          artifact.getArtifactId(),
-                                                                          versionRange,
-                                                                          artifact.getScope(),
-                                                                          type,
-                                                                          classifier,
-                                                                          artifact.getArtifactHandler(),
-                                                                          artifact.isOptional());
+            artifact.getArtifactId(),
+            versionRange,
+            artifact.getScope(),
+            type,
+            classifier,
+            artifact.getArtifactHandler(),
+            artifact.isOptional());
 
         return canonicalizedArtifact;
     }

@@ -171,7 +171,8 @@ public final class XMLWriterUtils
                 final File file = entry.getFile();
                 if (file.isDirectory()) {
                     addElement(conflictName, "directory", file);
-                } else {
+                }
+                else {
                     addElement(conflictName, "file", file);
                 }
             }

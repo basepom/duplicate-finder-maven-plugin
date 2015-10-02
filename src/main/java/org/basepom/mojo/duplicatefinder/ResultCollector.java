@@ -91,8 +91,8 @@ public class ResultCollector
             {
                 checkNotNull(conflictResult, "conflictResult is null");
                 return conflictResult.getConflictState() == state
-                    && conflictResult.getType() == type
-                    && !conflictResult.isExcepted();
+                       && conflictResult.getType() == type
+                       && !conflictResult.isExcepted();
             }
         });
 
@@ -119,10 +119,10 @@ public class ResultCollector
         private final String conflictName;
 
         ConflictResult(final ConflictType type,
-                       final String name,
-                       final SortedSet<ClasspathElement> classpathElements,
-                       final boolean excepted,
-                       final ConflictState conflictState)
+            final String name,
+            final SortedSet<ClasspathElement> classpathElements,
+            final boolean excepted,
+            final ConflictState conflictState)
         {
             this.type = type;
             this.name = name;
