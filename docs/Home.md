@@ -29,7 +29,7 @@ The duplicate-finder plugins supports a number of configuration settings:
         <plugin>
             <groupId>org.basepom.maven</groupId>
             <artifactId>duplicate-finder-maven-plugin</artifactId>
-            <version>1.1.0</version>
+            <version>1.2.1</version>
             <executions>
                 <execution>
                     <id>default</id>
