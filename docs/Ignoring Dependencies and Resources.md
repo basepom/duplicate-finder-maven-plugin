@@ -138,7 +138,7 @@ Ignore all classes that aren't from my company:
 </configuration>
 ```
 
-#### `ignoreDependencies` for global dependency exclusion
+#### `ignoredDependencies` for global dependency exclusion
 
 Sometimes, a dependency is hopeless. It may drag in a large number of
 duplicates or it may not have been written to any given standard. For
@@ -157,7 +157,7 @@ check. Usually, these dependencies are also in a non-standard scope
   [`NoClassDefFoundError`](http://docs.oracle.com/javase/8/docs/api/java/lang/NoClassDefFoundError.html))
   problems.
 
-The `ignoreDependencies` section contains [`dependency`](Describing
+The `ignoredDependencies` section contains [`dependency`](Describing
 Dependencies) elements. Each `dependency` can be fully or partially
 defined.
 
