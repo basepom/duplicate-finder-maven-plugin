@@ -17,7 +17,7 @@
     <parent>
         <groupId>org.basepom</groupId>
         <artifactId>basepom-oss</artifactId>
-        <version>17-SNAPSHOT</version>
+        <version>21</version>
     </parent>
 
     <groupId>org.basepom.maven</groupId>
@@ -289,6 +289,23 @@
                     <groupId>org.codehaus.gmavenplus</groupId>
                     <artifactId>gmavenplus-plugin</artifactId>
                     <version>1.2</version>
+                </plugin>
+
+                <!-- Use Jacoco with the invoker plugin
+                     for integration test coverage.
+                -->
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <id>default-it</id>
+                            <configuration>
+                                <destFile>${project.build.directory}/jacoco-it.exec</destFile>
+                                <propertyName>invoker.mavenOpts</propertyName>
+                            </configuration>
+                        </execution>
+                    </executions>
                 </plugin>
 
                 <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
