@@ -22,7 +22,7 @@
         </provides>
         <configuration>
             <!-- Location of a JDK7 in the Travis build environment -->
-            <jdkHome>/usr/lib/jvm/java-7-openjdk</jdkHome>
+            <jdkHome>/usr/lib/jvm/java-1.7.0-openjdk-amd64</jdkHome>
         </configuration>
     </toolchain>
 </toolchains>
