@@ -1,5 +1,10 @@
 # Changes
 
+##### 1.2.2 - 2018-02-18
+
+* Use correct path separator for classpath splitting, fixes #28 (Thanks @arxes-tolina)
+* Fix typo in warning message (Thanks @gaul)
+
 ##### 1.2.1 - 2015-09-18
 
 * Add support for ignoring classes by use of a regular expression, #16 (Thanks @mbellomo)
