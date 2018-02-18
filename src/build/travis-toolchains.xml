@@ -22,7 +22,7 @@
         </provides>
         <configuration>
             <!-- Location of a JDK7 in the Travis build environment -->
-            <jdkHome>/usr/lib/jvm/java-7-oracle</jdkHome>
+            <jdkHome>/usr/lib/jvm/java-7-openjdk</jdkHome>
         </configuration>
     </toolchain>
 </toolchains>
