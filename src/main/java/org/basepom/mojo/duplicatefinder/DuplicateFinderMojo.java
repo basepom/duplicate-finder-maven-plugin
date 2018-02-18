@@ -341,7 +341,7 @@ public final class DuplicateFinderMojo extends AbstractMojo
                     if (includeBootClasspath) {
                         String value = System.getProperty(bootClasspathProperty);
                         if (value != null) {
-                            for (String entry : Splitter.on(':').split(value)) {
+                            for (String entry : Splitter.on(File.pathSeparatorChar).split(value)) {
                                 File file = new File(entry);
                                 if (file.exists()) {
                                     LOG.debug("Adding '%s' as a boot classpath element", entry);
