@@ -323,7 +323,7 @@ public final class DuplicateFinderMojo extends AbstractMojo
                 // Deprecation warning for configuration values
 
                 if (ignoredResources.length > 0) {
-                    LOG.warn("<ignoreResources> has been deprecated and replaced with <ignoreResourcePatterns>. It will go away in version 1.2.0. Please update your POM accordingly!");
+                    LOG.warn("<ignoredResources> has been deprecated and replaced with <ignoredResourcePatterns>. It will go away in version 1.3.0. Please update your POM accordingly!");
                 }
 
                 try {
