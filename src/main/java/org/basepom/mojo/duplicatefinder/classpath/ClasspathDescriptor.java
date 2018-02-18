@@ -74,7 +74,8 @@ public class ClasspathDescriptor
 
     private static final MatchPatternPredicate DEFAULT_IGNORED_CLASS_PREDICATE = new MatchPatternPredicate(Arrays.asList(
         // this regex matches inner classes
-        ".*\\$.*"));
+        ".*\\$.*",
+        "module-info"));
 
     private static final MatchPatternPredicate DEFAULT_IGNORED_LOCAL_DIRECTORIES = new MatchPatternPredicate(Arrays.asList(
         "^.git$",
