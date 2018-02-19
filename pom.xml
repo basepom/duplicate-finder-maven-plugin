@@ -45,8 +45,8 @@
         <connection>scm:git:git://github.com/basepom/duplicate-finder-maven-plugin.git</connection>
         <developerConnection>scm:git:git://github.com/basepom/duplicate-finder-maven-plugin.git</developerConnection>
         <url>https://github.com/basepom/duplicate-finder-maven-plugin</url>
-      <tag>HEAD</tag>
-  </scm>
+        <tag>HEAD</tag>
+    </scm>
 
     <issueManagement>
         <system>Github</system>
@@ -74,7 +74,13 @@
     </contributors>
 
     <properties>
+        <!-- switch to spotbugs -->
+        <basepom.check.skip-findbugs>true</basepom.check.skip-findbugs>
+        <basepom.check.skip-spotbugs>${basepom.check.skip-extended}</basepom.check.skip-spotbugs>
+        <basepom.check.fail-spotbugs>${basepom.check.fail-extended}</basepom.check.fail-spotbugs>
+
         <dep.basepom-policy.version>6</dep.basepom-policy.version>
+        <dep.spotbugs.version>3.1.1</dep.spotbugs.version>
 
         <project.build.targetJdk>1.8</project.build.targetJdk>
 
@@ -169,9 +175,14 @@
         </dependency>
 
         <dependency>
+            <groupId>net.jcip</groupId>
+            <artifactId>jcip-annotations</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
             <groupId>com.google.code.findbugs</groupId>
-            <artifactId>annotations</artifactId>
-            <version>3.0.1</version>
+            <artifactId>jsr305</artifactId>
+            <version>${dep.findbugs.version}</version>
         </dependency>
 
         <dependency>
@@ -348,6 +359,17 @@
                         </lifecycleMappingMetadata>
                     </configuration>
                 </plugin>
+                <plugin>
+                    <groupId>com.github.spotbugs</groupId>
+                    <artifactId>spotbugs-maven-plugin</artifactId>
+                    <version>${dep.spotbugs.version}</version>
+                    <configuration>
+                        <effort>Max</effort>
+                        <skip>${basepom.check.skip-spotbugs}</skip>
+                        <maxHeap>${basepom.build.maxheap-mb}</maxHeap>
+                        <failOnError>${basepom.check.fail-spotbugs}</failOnError>
+                    </configuration>
+                </plugin>
             </plugins>
         </pluginManagement>
 
@@ -390,6 +412,23 @@
                     <execution>
                         <goals>
                             <goal>generate-metadata</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <configuration>
+                    <excludeFilterFile>${project.basedir}/src/build/findbugsExcludeFilter.xml</excludeFilterFile>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>default</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
                         </goals>
                     </execution>
                 </executions>
