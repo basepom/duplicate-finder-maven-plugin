@@ -1,6 +1,8 @@
 # Changes
 
-##### 1.2.2 - 2018-02-18
+##### 1.3.0 - 
+
+__Starting with 1.3.0, JDK8 will be required to run the plugin.__
 
 * Use correct path separator for classpath splitting, fixes #28 (Thanks @arxes-tolina)
 * Fix typo in warning message (Thanks @gaul)

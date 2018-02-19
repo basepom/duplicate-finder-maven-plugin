@@ -17,12 +17,12 @@
     <toolchain>
         <type>jdk</type>
         <provides>
-            <version>1.7</version>
+            <version>1.8</version>
             <vendor>sun</vendor>
         </provides>
         <configuration>
-            <!-- Location of a JDK7 in the Travis build environment -->
-            <jdkHome>/usr/lib/jvm/java-1.7.0-openjdk-amd64</jdkHome>
+            <!-- Location of a JDK8 in the Travis build environment -->
+            <jdkHome>/usr/lib/jvm/java-8-oracle</jdkHome>
         </configuration>
     </toolchain>
 </toolchains>
