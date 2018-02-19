@@ -16,13 +16,19 @@
 
     <modelVersion>4.0.0</modelVersion>
 
+    <parent>
+        <groupId>@project.groupId@.@project.artifactId@</groupId>
+        <artifactId>basepom</artifactId>
+        <version>1.0.under-test</version>
+    </parent>
+
     <groupId>testjar</groupId>
     <artifactId>setup-class-jars</artifactId>
-    <version>1.0.under-test</version>
+
     <packaging>pom</packaging>
     <description>
         Creates and installs two jars with nearly identical content into the integration
-        test maven repository. 
+        test maven repository.
 
         All the integration tests that check reporting or failure of errors use these jars for comparing.
     </description>
@@ -39,7 +45,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-install-plugin</artifactId>
-                <version>2.5.2</version>
                 <executions>
                     <execution>
                         <id>foundation</id>

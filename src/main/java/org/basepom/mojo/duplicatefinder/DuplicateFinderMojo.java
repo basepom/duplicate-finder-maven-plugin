@@ -326,6 +326,13 @@ public final class DuplicateFinderMojo extends AbstractMojo
                     LOG.warn("<ignoredResources> has been deprecated and replaced with <ignoredResourcePatterns>. It will go away in version 1.3.0. Please update your POM accordingly!");
                 }
 
+                if (includeBootClasspath) {
+                    double jdkVersion = Double.parseDouble(System.getProperty("java.vm.specification.version"));
+                    if (jdkVersion > 1.8d) {
+                        LOG.warn("<includeBootClasspath> is not supported on JDK 9 and beyond! Duplicates for JDK classes will not be detected!");
+                    }
+                }
+
                 try {
                     // Prep conflicting dependencies
                     MavenCoordinates projectCoordinates = new MavenCoordinates(project.getArtifact());

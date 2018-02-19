@@ -17,7 +17,7 @@
     <parent>
         <groupId>org.basepom</groupId>
         <artifactId>basepom-oss</artifactId>
-        <version>21</version>
+        <version>25</version>
     </parent>
 
     <groupId>org.basepom.maven</groupId>
@@ -81,7 +81,7 @@
         <dep.maven-api.version>3.0</dep.maven-api.version>
         <dep.plexus.version>1.5.5</dep.plexus.version>
         <dep.plugin.plugin.version>3.4</dep.plugin.plugin.version>
-        <dep.groovy.version>2.3.7</dep.groovy.version>
+        <dep.groovy.version>2.4.12</dep.groovy.version>
         <dep.slf4j.version>1.7.21</dep.slf4j.version>
         <dep.guava.version>19.0</dep.guava.version>
     </properties>

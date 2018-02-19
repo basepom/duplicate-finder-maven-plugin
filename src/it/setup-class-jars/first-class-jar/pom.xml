@@ -15,13 +15,15 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <parent>
+        <groupId>@project.groupId@.@project.artifactId@</groupId>
+        <artifactId>basepom</artifactId>
+        <version>1.0.under-test</version>
+    </parent>
+
     <groupId>testjar</groupId>
     <artifactId>first-class-jar</artifactId>
     <version>1.0.under-test</version>
-
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
 
     <build>
         <defaultGoal>package</defaultGoal>
