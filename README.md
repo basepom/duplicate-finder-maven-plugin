@@ -14,6 +14,8 @@ The plugins requires Apache Maven 3.x.x.
 
 Starting with release 1.2.0, Java 7 or better is required.
 
+Starting with release 1.3.0, Java 8 or better is required.
+
 ## Goals
 
 The plugin has two goals:
