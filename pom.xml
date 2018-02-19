@@ -74,7 +74,7 @@
     </contributors>
 
     <properties>
-        <dep.basepom-policy.version>4</dep.basepom-policy.version>
+        <dep.basepom-policy.version>6</dep.basepom-policy.version>
 
         <project.build.targetJdk>1.8</project.build.targetJdk>
 
