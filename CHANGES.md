@@ -4,6 +4,7 @@
 
 __Starting with 1.3.0, JDK8 will be required to run the plugin.__
 
+* Removed deprecated `<ignoredResources>` configuration option.
 * Use correct path separator for classpath splitting, fixes #28 (Thanks @arxes-tolina)
 * Fix typo in warning message (Thanks @gaul)
 

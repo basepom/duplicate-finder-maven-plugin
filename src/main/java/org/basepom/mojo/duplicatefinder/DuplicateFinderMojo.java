@@ -151,15 +151,6 @@ public final class DuplicateFinderMojo extends AbstractMojo
 
     /**
      * Ignored resources, which are not checked for multiple occurences.
-     *
-     * @deprecated Use ignoredResourcePatterns.
-     */
-    @Deprecated
-    @Parameter
-    protected String[] ignoredResources = new String[0];
-
-    /**
-     * Ignored resources, which are not checked for multiple occurences.
      */
     @Parameter
     protected String[] ignoredResourcePatterns = new String[0];
@@ -320,12 +311,6 @@ public final class DuplicateFinderMojo extends AbstractMojo
                     failState.add(CONFLICT_CONTENT_DIFFERENT);
                 }
 
-                // Deprecation warning for configuration values
-
-                if (ignoredResources.length > 0) {
-                    LOG.warn("<ignoredResources> has been deprecated and replaced with <ignoredResourcePatterns>. It will go away in version 1.3.0. Please update your POM accordingly!");
-                }
-
                 if (includeBootClasspath) {
                     double jdkVersion = Double.parseDouble(System.getProperty("java.vm.specification.version"));
                     if (jdkVersion > 1.8d) {
@@ -453,7 +438,6 @@ public final class DuplicateFinderMojo extends AbstractMojo
     {
         ImmutableSet.Builder<String> builder = ImmutableSet.builder();
         builder.add(ignoredResourcePatterns);
-        builder.add(ignoredResources);
 
         return builder.build();
     }
