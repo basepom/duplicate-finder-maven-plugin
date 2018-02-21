@@ -1,6 +1,6 @@
 # Changes
 
-##### 1.3.0 - 
+##### 1.3.0 - 2018-02-20
 
 __Starting with 1.3.0, JDK8 will be required to run the plugin.__
 
