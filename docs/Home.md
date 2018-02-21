@@ -10,7 +10,11 @@ This plugin is a friendly fork (same [main authors](Authors)) of the [Ning maven
 
 The plugins requires Apache Maven 3.x.x.
 
-Any version up to 1.2.0 will run with Java 6 or better. Starting with version 1.2.0, Java 7 or better is _required!_
+Any version up to 1.2.0 will run with Java 6 or better.
+
+Starting with version 1.2.0, Java 7 or better is _required!_
+
+Starting with version 1.3.0, Java 8 or better is _required!_
 
 ## Goals
 
@@ -29,7 +33,7 @@ The duplicate-finder plugins supports a number of configuration settings:
         <plugin>
             <groupId>org.basepom.maven</groupId>
             <artifactId>duplicate-finder-maven-plugin</artifactId>
-            <version>1.2.1</version>
+            <version>1.3.0</version>
             <executions>
                 <execution>
                     <id>default</id>
@@ -119,16 +123,13 @@ The duplicate-finder plugins supports a number of configuration settings:
                         <classifier>...</classifier>
                     </dependency>
                 </ignoredDependencies>
-                <ignoredResources>
-                    <ignoredResource>...</ignoredResource>
-                </ignoredResources>
             </configuration>
         </plugin>
     </plugins>
 </build>
 ```
 
-* [Simple configuration options](Simple Options)
-* [Classpath Exceptions](Classpath Exceptions)
-* [Ignoring Dependencies and Resources](Ignoring Dependencies and Resources)
-* [Result file options](Result file options)
+* [Simple configuration options](Simple%20Options)
+* [Classpath Exceptions](Classpath%20Exceptions)
+* [Ignoring Dependencies and Resources](Ignoring%20Dependencies%20and%20Resources)
+* [Result file options](Result%20file%20options)

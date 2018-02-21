@@ -22,19 +22,8 @@ This feature is very easy to abuse. Please use with care.
             <classifier>...</classifier>
         </dependency>
     </ignoredDependencies>
-    <ignoredResources>
-        <ignoredResource>...</ignoredResource>
-    </ignoredResources>
 </configuration>
 ```
-
-### `ignoredResources` deprecation
-
-For backwards compatibility to the old Ning plugin, the
-`<ignoredResources>` element is equivalent to
-`<ignoredResourcePatterns>`. The plugin will print a warning if the
-old element is used. The `<ignoredResources>` element will be removed
-with the release of version **1.3.0** of the plugin.
 
 #### `useDefaultResourceIgnoreList` flag
 

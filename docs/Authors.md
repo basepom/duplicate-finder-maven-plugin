@@ -15,6 +15,8 @@
 * @camshoff
 * @jakub-bochenski
 * Michael Bellomo (@mbellomo)
+* Frank Jakop (fjakop)
+* Brian Clozel (@bclozel)
 
 ---
 
