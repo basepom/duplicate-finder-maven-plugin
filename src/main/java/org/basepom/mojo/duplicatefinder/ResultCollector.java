@@ -21,10 +21,7 @@ import java.util.EnumSet;
 import java.util.Map;
 import java.util.SortedSet;
 
-import javax.annotation.Nonnull;
-
 import com.google.common.base.Joiner;
-import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ListMultimap;
@@ -84,16 +81,11 @@ public class ResultCollector
 
     public Map<String, Collection<ConflictResult>> getResults(final ConflictType type, final ConflictState state)
     {
-        Multimap<String, ConflictResult> result = Multimaps.filterValues(results, new Predicate<ConflictResult>() {
-
-            @Override
-            public boolean apply(@Nonnull ConflictResult conflictResult)
-            {
-                checkNotNull(conflictResult, "conflictResult is null");
-                return conflictResult.getConflictState() == state
-                       && conflictResult.getType() == type
-                       && !conflictResult.isExcepted();
-            }
+        Multimap<String, ConflictResult> result = Multimaps.filterValues(results, conflictResult -> {
+            checkNotNull(conflictResult, "conflictResult is null");
+            return conflictResult.getConflictState() == state
+                   && conflictResult.getType() == type
+                   && !conflictResult.isExcepted();
         });
 
         return ImmutableMap.copyOf(result.asMap());

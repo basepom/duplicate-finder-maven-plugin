@@ -17,7 +17,7 @@
     <parent>
         <groupId>org.basepom</groupId>
         <artifactId>basepom-oss</artifactId>
-        <version>25</version>
+        <version>30</version>
     </parent>
 
     <groupId>org.basepom.maven</groupId>
@@ -74,22 +74,14 @@
     </contributors>
 
     <properties>
-        <!-- switch to spotbugs -->
-        <basepom.check.skip-findbugs>true</basepom.check.skip-findbugs>
-        <basepom.check.skip-spotbugs>${basepom.check.skip-extended}</basepom.check.skip-spotbugs>
-        <basepom.check.fail-spotbugs>${basepom.check.fail-extended}</basepom.check.fail-spotbugs>
-
-        <dep.basepom-policy.version>6</dep.basepom-policy.version>
-        <dep.spotbugs.version>3.1.1</dep.spotbugs.version>
-
         <project.build.targetJdk>1.8</project.build.targetJdk>
 
         <dep.maven-api.version>3.0</dep.maven-api.version>
-        <dep.plexus.version>1.5.5</dep.plexus.version>
-        <dep.plugin.plugin.version>3.4</dep.plugin.plugin.version>
-        <dep.groovy.version>2.4.12</dep.groovy.version>
-        <dep.slf4j.version>1.7.21</dep.slf4j.version>
-        <dep.guava.version>19.0</dep.guava.version>
+        <dep.plexus.version>2.0.0</dep.plexus.version>
+        <dep.plugin.plugin.version>3.6.0</dep.plugin.plugin.version>
+        <dep.groovy.version>3.0.0-beta-3</dep.groovy.version>
+        <dep.slf4j.version>1.7.28</dep.slf4j.version>
+        <dep.guava.version>28.1-jre</dep.guava.version>
     </properties>
 
     <dependencies>
@@ -182,7 +174,7 @@
         <dependency>
             <groupId>com.google.code.findbugs</groupId>
             <artifactId>jsr305</artifactId>
-            <version>${dep.findbugs.version}</version>
+            <version>3.0.2</version>
         </dependency>
 
         <dependency>
@@ -244,7 +236,13 @@
 
         <dependency>
             <groupId>org.codehaus.groovy</groupId>
-            <artifactId>groovy-all</artifactId>
+            <artifactId>groovy</artifactId>
+            <version>${dep.groovy.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-xml</artifactId>
             <version>${dep.groovy.version}</version>
             <scope>test</scope>
         </dependency>
@@ -261,7 +259,7 @@
                         <toolchains>
                             <jdk>
                                 <version>${project.build.targetJdk}</version>
-                                <vendor>sun</vendor>
+                                <vendor>openjdk</vendor>
                             </jdk>
                         </toolchains>
                     </configuration>
@@ -418,31 +416,6 @@
             </plugin>
 
             <plugin>
-                <groupId>com.github.spotbugs</groupId>
-                <artifactId>spotbugs-maven-plugin</artifactId>
-                <configuration>
-                    <excludeFilterFile>${project.basedir}/src/build/findbugsExcludeFilter.xml</excludeFilterFile>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>default</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>findbugs-maven-plugin</artifactId>
-                <configuration>
-                    <excludeFilterFile>${project.basedir}/src/build/findbugsExcludeFilter.xml</excludeFilterFile>
-                </configuration>
-            </plugin>
-
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-pmd-plugin</artifactId>
                 <configuration>
@@ -469,7 +442,12 @@
                     </dependency>
                     <dependency>
                         <groupId>org.codehaus.groovy</groupId>
-                        <artifactId>groovy-all</artifactId>
+                        <artifactId>groovy</artifactId>
+                        <version>${dep.groovy.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.codehaus.groovy</groupId>
+                        <artifactId>groovy-xml</artifactId>
                         <version>${dep.groovy.version}</version>
                     </dependency>
                 </dependencies>

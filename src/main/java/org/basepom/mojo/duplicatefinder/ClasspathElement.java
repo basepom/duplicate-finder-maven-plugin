@@ -23,8 +23,6 @@ import static org.basepom.mojo.duplicatefinder.artifact.ArtifactHelper.isTestArt
 import java.io.File;
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
-
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Ordering;
@@ -251,12 +249,6 @@ public abstract class ClasspathElement implements Comparable<ClasspathElement>
 
     public static Function<ClasspathElement, String> getNameFunction()
     {
-        return new Function<ClasspathElement, String>() {
-            @Override
-            public String apply(@Nonnull ClasspathElement element)
-            {
-                return element.getName();
-            }
-        };
+        return ClasspathElement::getName;
     }
 }

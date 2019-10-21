@@ -18,8 +18,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.Collection;
 import java.util.regex.Pattern;
 
-import javax.annotation.Nonnull;
-
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 
@@ -49,13 +47,14 @@ class MatchPatternPredicate implements Predicate<String>
     }
 
     @Override
-    public boolean apply(@Nonnull final String input)
+    public boolean apply(final String input)
     {
-        final String value = input;
-        for (final Pattern pattern : patterns) {
-            if (pattern.matcher(value).matches()) {
-                LOG.debug("Ignoring '%s' (matches %s)", input, pattern.pattern());
-                return true;
+        if (input != null) {
+            for (final Pattern pattern : patterns) {
+                if (pattern.matcher(input).matches()) {
+                    LOG.debug("Ignoring '%s' (matches %s)", input, pattern.pattern());
+                    return true;
+                }
             }
         }
         return false;

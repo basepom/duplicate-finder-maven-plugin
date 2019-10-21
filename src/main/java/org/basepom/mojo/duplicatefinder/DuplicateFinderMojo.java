@@ -488,18 +488,12 @@ public final class DuplicateFinderMojo extends AbstractMojo
     {
         // only look at entries with a size > 1.
         final Map<String, Collection<File>> filteredMap = ImmutableMap.copyOf(Maps.filterEntries(classpathDescriptor.getClasspathElementLocations(type),
-            new Predicate<Entry<String, Collection<File>>>() {
-
-                @Override
-                public boolean apply(@Nonnull final Entry<String, Collection<File>> entry)
-                {
+                entry -> {
                     checkNotNull(entry, "entry is null");
                     checkState(entry.getValue() != null, "Entry '%s' is invalid", entry);
 
                     return entry.getValue().size() > 1;
-                }
-
-            }));
+                }));
 
         for (final Map.Entry<String, Collection<File>> entry : filteredMap.entrySet()) {
             final String name = entry.getKey();
