@@ -68,6 +68,7 @@ import org.apache.maven.artifact.versioning.OverConstrainedVersionException;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -286,7 +287,7 @@ public final class DuplicateFinderMojo extends AbstractMojo
     }
 
     @Override
-    public void execute() throws MojoExecutionException
+    public void execute() throws MojoExecutionException, MojoFailureException
     {
         try {
             if (skip) {
@@ -419,13 +420,16 @@ public final class DuplicateFinderMojo extends AbstractMojo
                     }
                 }
                 catch (final DependencyResolutionRequiredException e) {
-                    throw new MojoExecutionException("Could not resolve dependencies", e);
+                    throw new MojoFailureException("Could not resolve dependencies", e);
                 }
                 catch (final InvalidVersionSpecificationException e) {
-                    throw new MojoExecutionException("Invalid version specified", e);
+                    throw new MojoFailureException("Invalid version specified", e);
                 }
                 catch (final OverConstrainedVersionException e) {
-                    throw new MojoExecutionException("Version too constrained", e);
+                    throw new MojoFailureException("Version too constrained", e);
+                }
+                catch (final IOException e) {
+                    throw new MojoExecutionException("While loading artifacts", e);
                 }
             }
         }

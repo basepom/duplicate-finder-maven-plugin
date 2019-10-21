@@ -20,21 +20,21 @@ import static org.basepom.mojo.duplicatefinder.artifact.ArtifactHelper.getTestOu
 import static org.basepom.mojo.duplicatefinder.artifact.ArtifactHelper.isTestArtifact;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Multimap;
-
+import com.google.common.collect.MultimapBuilder;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
@@ -42,10 +42,10 @@ import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.project.MavenProject;
 import org.basepom.mojo.duplicatefinder.ClasspathElement;
-import org.basepom.mojo.duplicatefinder.PluginLog;
 import org.basepom.mojo.duplicatefinder.ClasspathElement.ClasspathArtifact;
 import org.basepom.mojo.duplicatefinder.ClasspathElement.ClasspathBootClasspathElement;
 import org.basepom.mojo.duplicatefinder.ClasspathElement.ClasspathLocalFolder;
+import org.basepom.mojo.duplicatefinder.PluginLog;
 
 /**
  * Resolves artifact references from the project into local and repository files and folders.
@@ -61,14 +61,15 @@ public class ArtifactFileResolver
     private final Multimap<File, Artifact> localFileArtifactCache;
     private final Map<Artifact, File> localArtifactFileCache;
 
-    private final BiMap<Artifact, File> repoArtifactCache;
+    private final Map<Artifact, File> repoArtifactCache;
+    private final Multimap<File, Artifact> repoFileCache;
     private final ImmutableSet<File> bootClasspath;
 
     private final boolean preferLocal;
 
     public ArtifactFileResolver(final MavenProject project,
         final ImmutableSet<File> bootClasspath,
-        final boolean preferLocal) throws DependencyResolutionRequiredException
+        final boolean preferLocal) throws DependencyResolutionRequiredException, IOException
     {
         checkNotNull(project, "project is null");
         this.preferLocal = preferLocal;
@@ -79,17 +80,21 @@ public class ArtifactFileResolver
         ImmutableMultimap.Builder<File, Artifact> localFileArtifactCacheBuilder = ImmutableMultimap.builder();
 
         // This can not be an immutable map builder, because the map is used for looking up while it is built up.
-        this.repoArtifactCache = HashBiMap.create(project.getArtifacts().size());
+        this.repoArtifactCache = new HashMap(project.getArtifacts().size());
+        // the artifact cache can not be a bimap, because for system artifacts, it is possible that multiple
+        // maven coordinates point to the same file.
+        this.repoFileCache = MultimapBuilder.hashKeys().hashSetValues().build();
 
         this.bootClasspath = bootClasspath;
 
         for (final Artifact artifact : project.getArtifacts()) {
-            final File repoPath = artifact.getFile();
+            final File repoPath = artifact.getFile().getCanonicalFile();
             final Artifact canonicalizedArtifact = ArtifactFileResolver.canonicalizeArtifact(artifact);
 
             checkState(repoPath != null && repoPath.exists(), "Repository Path '%s' does not exist.", repoPath);
             final File oldFile = repoArtifactCache.put(canonicalizedArtifact, repoPath);
             checkState(oldFile == null || oldFile.equals(repoPath), "Already encountered a file for %s: %s", canonicalizedArtifact, oldFile);
+            repoFileCache.put(repoPath, canonicalizedArtifact);
         }
 
         for (final MavenProject referencedProject : project.getProjectReferences().values()) {
@@ -165,8 +170,10 @@ public class ArtifactFileResolver
             return;
         }
 
-        if (repoArtifactCache.inverse().containsKey(file)) {
-            builder.add(new ClasspathArtifact(repoArtifactCache.inverse().get(file)));
+        if (repoFileCache.containsKey(file)) {
+            for (Artifact artifact : repoFileCache.get(file)) {
+                builder.add(new ClasspathArtifact(artifact));
+            }
             return;
         }
 
