@@ -18,8 +18,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.Collection;
 import java.util.List;
 
-import javax.annotation.Nonnull;
-
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 
@@ -41,20 +39,20 @@ public class MatchArtifactPredicate implements Predicate<Artifact>
     }
 
     @Override
-    public boolean apply(@Nonnull final Artifact artifact)
+    public boolean apply(final Artifact artifact)
     {
-        for (final MavenCoordinates mavenCoordinate : mavenCoordinates) {
-            try {
-                if (mavenCoordinate.matches(artifact)) {
-                    LOG.debug("Ignoring artifact '%s' (matches %s)", artifact, mavenCoordinate);
-                    return true;
+        if (artifact != null) {
+            for (final MavenCoordinates mavenCoordinate : mavenCoordinates) {
+                try {
+                    if (mavenCoordinate.matches(artifact)) {
+                        LOG.debug("Ignoring artifact '%s' (matches %s)", artifact, mavenCoordinate);
+                        return true;
+                    }
+                } catch (final OverConstrainedVersionException e) {
+                    LOG.warn("Caught '%s' while comparing '%s' to '%s'", e.getMessage(), mavenCoordinate, artifact);
                 }
             }
-            catch (final OverConstrainedVersionException e) {
-                LOG.warn("Caught '%s' while comparing '%s' to '%s'", e.getMessage(), mavenCoordinate, artifact);
-            }
         }
-
         return false;
     }
 }
