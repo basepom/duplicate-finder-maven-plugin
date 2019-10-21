@@ -18,11 +18,11 @@
         <type>jdk</type>
         <provides>
             <version>1.8</version>
-            <vendor>sun</vendor>
+            <vendor>openjdk</vendor>
         </provides>
         <configuration>
             <!-- Location of a JDK8 in the Travis build environment -->
-            <jdkHome>/usr/lib/jvm/java-8-oracle</jdkHome>
+            <jdkHome>/usr/lib/jvm/java-8-openjdk</jdkHome>
         </configuration>
     </toolchain>
 </toolchains>
