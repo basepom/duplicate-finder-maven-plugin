@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -33,6 +34,9 @@ import java.util.regex.PatternSyntaxException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import javax.lang.model.SourceVersion;
+
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
@@ -347,16 +351,12 @@ public class ClasspathDescriptor
             while ((entry = zipInput.getNextEntry()) != null) {
                 if (!entry.isDirectory()) {
                     final String name = entry.getName();
-                    if ("class".equals(Files.getFileExtension(name))) {
-                        final List<String> nameElements = Splitter.on("/").splitToList(name); // ZIP/Jars always use "/" as separators
-                        if (nameElements.isEmpty()) {
-                            LOG.warn("ZIP entry '%s' split into empty list!", entry);
-                        }
-                        else {
-                            final PackageNameHolder packageName = new PackageNameHolder(nameElements.subList(0, nameElements.size() - 1));
-                            final String className = packageName.getQualifiedName(Files.getNameWithoutExtension(name));
-                            cacheBuilder.addClass(className);
-                        }
+                    Optional<List<String>> validatedElements = validateClassName(name);
+                    if (validatedElements.isPresent()) {
+                        List<String> nameElements = validatedElements.get();
+                        final PackageNameHolder packageName = new PackageNameHolder(nameElements.subList(0, nameElements.size() - 1));
+                        final String className = packageName.getQualifiedName(Files.getNameWithoutExtension(name));
+                        cacheBuilder.addClass(className);
                     }
                     else {
                         final String resourcePath = name.replace('\\', File.separatorChar);
@@ -368,5 +368,39 @@ public class ClasspathDescriptor
         finally {
             closer.close();
         }
+    }
+
+    @VisibleForTesting
+    static Optional<List<String>> validateClassName(String fullClassPath) {
+        if (fullClassPath == null) {
+            return Optional.empty();
+        }
+
+        // ZIP/Jars always use "/" as separators
+        final List<String> nameElements = ImmutableList.copyOf(Splitter.on("/").splitToList(fullClassPath));
+        if (nameElements.isEmpty()) {
+            LOG.warn("ZIP entry '%s' split into empty list!", fullClassPath);
+            return Optional.empty();
+        }
+        String classFileName = nameElements.get(nameElements.size() - 1);
+
+        if (!"class".equals(Files.getFileExtension(classFileName))) {
+            LOG.debug("Ignoring %s, %s is not a class file", fullClassPath, classFileName);
+            return Optional.empty();
+        }
+        for (int i = 0; i < nameElements.size() - 1; i++) {
+            if (!SourceVersion.isIdentifier(nameElements.get(i))) {
+                LOG.debug("Ignoring %s, %s is not a valid package element", fullClassPath, nameElements.get(i));
+                return Optional.empty();
+            }
+        }
+
+        String className = Files.getNameWithoutExtension(classFileName);
+        if (!(SourceVersion.isIdentifier(className) || "module-info".equals(className))) {
+            LOG.debug("Ignoring %s, %s is not a valid class identifier", fullClassPath, className);
+            return Optional.empty();
+        }
+
+        return Optional.of(nameElements);
     }
 }
