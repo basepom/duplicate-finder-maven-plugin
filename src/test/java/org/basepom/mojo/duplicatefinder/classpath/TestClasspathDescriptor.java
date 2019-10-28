@@ -24,7 +24,7 @@ import org.junit.Test;
 public class TestClasspathDescriptor
 {
     @Test
-    public void testValidPackageNames()
+    public void testValidIdentifierNames()
     {
         String[] validNames = {
                 "_.class",
@@ -32,6 +32,8 @@ public class TestClasspathDescriptor
                 "test.class",
                 "__auto_generated/from/some/tool.class",
                 "some/inner$thing.class",
+                "some/package/package-info.class", // package info in sub package
+                "package-info.class", // package info in root package
                 "some/package/module-info.class", // module info in sub package
                 "module-info.class" // module info in root package
         };
@@ -43,7 +45,7 @@ public class TestClasspathDescriptor
     }
 
     @Test
-    public void testInvalidPackageNames()
+    public void testInvalidIdentifierNames()
     {
         String[] invalidNames = {
                 null, // null value
@@ -55,6 +57,7 @@ public class TestClasspathDescriptor
                 "2.0/foo.class", // package name invalid
                 "foo/bar/baz-blo/tst.class", // package name is invalid
                 "META-INF/versions/9/foo/module-info.class", // module info in version sub package
+                "META-INF/versions/9/foo/package-info.class" // package info in version sub package
         };
 
 
@@ -63,4 +66,22 @@ public class TestClasspathDescriptor
             assertFalse("Failure for '" + test + "'", result.isPresent());
         }
     }
+
+    @Test
+    public void testMatchDefaultClassnames()
+    {
+        String[] validClassNames = {
+                "foo$bar",
+                "hello.foo$bar",
+                "package-info",
+                "module-info",
+                "demo.package-info",
+                "foo.module-info"
+        };
+
+        for (String test : validClassNames) {
+            assertTrue("Failure for '" + test + "'", ClasspathDescriptor.DEFAULT_IGNORED_CLASS_PREDICATE.apply(test));
+        }
+    }
+
 }
