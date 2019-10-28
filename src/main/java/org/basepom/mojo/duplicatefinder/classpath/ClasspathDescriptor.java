@@ -76,10 +76,13 @@ public class ClasspathDescriptor
         ".*package\\.html$",
         ".*overview\\.html$"));
 
-    private static final MatchPatternPredicate DEFAULT_IGNORED_CLASS_PREDICATE = new MatchPatternPredicate(Arrays.asList(
-        // this regex matches inner classes
-        ".*\\$.*",
-        "module-info"));
+    @VisibleForTesting
+    static final MatchPatternPredicate DEFAULT_IGNORED_CLASS_PREDICATE = new MatchPatternPredicate(Arrays.asList(
+
+        "^(.*\\.)?.*\\$.*$",      // matches inner classes in any package
+        "^(.*\\.)?package-info$", // matches package-info in any package
+        "^(.*\\.)?module-info$"   // matches module-info in any package
+        ));
 
     private static final MatchPatternPredicate DEFAULT_IGNORED_LOCAL_DIRECTORIES = new MatchPatternPredicate(Arrays.asList(
         "^.git$",
@@ -396,7 +399,9 @@ public class ClasspathDescriptor
         }
 
         String className = Files.getNameWithoutExtension(classFileName);
-        if (!(SourceVersion.isIdentifier(className) || "module-info".equals(className))) {
+        if (!(SourceVersion.isIdentifier(className)
+              || "module-info".equals(className)
+              || "package-info".equals(className))) {
             LOG.debug("Ignoring %s, %s is not a valid class identifier", fullClassPath, className);
             return Optional.empty();
         }
