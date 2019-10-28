@@ -16,7 +16,11 @@ The duplicate finder plugin ignores the following classes by default unless the 
 
 | Regular expression | Description |
 | ------------------ | ----------- |
-| `^.*\$/.*`     | matches Java inner and nested classes. Before plugin version 1.2.1, this match was implicit and could not be turned off. |
+| `^.*\$/.*`     | matches Java inner and nested classes. Before plugin version 1.2.1, this match was implicit and could not be turned off. **Plugin version up to 1.3.0** |
+| `module-info` | JDK 9 module-info class. **Plugin version 1.3.0+** |
+| `^(.*\.)?.*\$.*$` | matches Java inner and nested classes in any package. **Plugin version 1.4.0+** |
+| `^(.*\.)?package-info$` | matches Java `package-info` class files in any package. **Plugin version 1.4.0+** |
+| `^(.*\.)?module-info$` | matches Java `module-info` class files in any package. **Plugin version 1.4.0+** |
 
 The following local directory names will also always be ignored. Files in these directory are never checked or touched by the plugins:
 

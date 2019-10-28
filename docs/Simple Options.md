@@ -98,8 +98,7 @@ Default: **false**
 
 ### `failBuildInCaseOfConflict`
 
-Fail the build if any class or resource on the classpath is duplicate
-and their SHA256 hash is different.
+Fail the build if any class or resource on the classpath is duplicate, regardless of the SHA256 checksum.
 
 Maven command line property: `duplicate-finder.failBuildInCaseOfConflict` (**Plugin version 1.1.1+**)
 
@@ -142,6 +141,8 @@ any additional jars that the JDK provides to an application.
 Maven command line property: `duplicate-finder.includeBootClasspath`
 
 Default: **false**
+
+**Warning! This option no longer works in JDK9+ because of changes in the classpath mechanism in JDK9. A warning was added in version 1.3.0+.**
 
 ### `bootClasspathProperty`
 
