@@ -5,21 +5,17 @@ cache:
     - $HOME/.m2
 
 jdk:
-  - openjdk8
   - openjdk11
 
 sudo: false
 
-before_install:
-  - cp src/build/travis-toolchains.xml ~/.m2/toolchains.xml
-  - wget https://archive.apache.org/dist/maven/maven-3/3.6.2/binaries/apache-maven-3.6.2-bin.zip
-  - unzip -qq apache-maven-3.6.2-bin.zip
-  - export M2_HOME=$PWD/apache-maven-3.6.2
-  - export PATH=$M2_HOME/bin:$PATH
-  - mvn --version
-
-install: mvn -DskipTests=true -Dbasepom.check.skip-all=true -Dbasepom.it.skip=true -B -fae install
-script: mvn -B -fae verify
+install: ./mvnw -DskipTests=true -Dbasepom.check.skip-all=true -B -fae install
+script:
+  - ./mvnw -B -fae verify
+  - jdk_switcher use openjdk11
+  - ./mvnw -Pit-jdk11 -B -fae invoker:integration-test
+  - jdk_switcher use openjdk8
+  - ./mvnw -Pit-jdk8 -B -fae invoker:integration-test
 
 addons:
   artifacts:
