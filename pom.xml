@@ -78,6 +78,7 @@
         <project.build.targetJdk>8</project.build.targetJdk>
         <!-- Activate an IT profile to run integration tests -->
         <basepom.it.skip>true</basepom.it.skip>
+        <basepom.it.parallel>8</basepom.it.parallel>
 
         <dep.maven-api.version>3.0</dep.maven-api.version>
         <dep.plexus.version>2.0.0</dep.plexus.version>
@@ -389,8 +390,6 @@
                     <excludeRoots combine.children="append">
                         <excludeRoot>target/generated-sources/plugin</excludeRoot>
                     </excludeRoots>
-                    <debug>true</debug>
-                    <showVersion>true</showVersion>
                 </configuration>
             </plugin>
 
@@ -463,6 +462,13 @@
                     </plugin>
                 </plugins>
             </build>
+        </profile>
+        <profile>
+            <id>it-jdk14</id>
+            <properties>
+                <project.build.targetJdk>14</project.build.targetJdk>
+                <basepom.it.skip>false</basepom.it.skip>
+            </properties>
         </profile>
         <profile>
             <id>it-jdk11</id>

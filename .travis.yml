@@ -1,20 +1,27 @@
 language: java
+dist: bionic
 
 cache:
   directories:
     - $HOME/.m2
 
 jdk:
+  - openjdk14
   - openjdk11
 
 sudo: false
 
-install: ./mvnw -DskipTests=true -Dbasepom.check.skip-all=true -B -fae install
+install:
+  - ./mvnw -DskipTests=true -Dbasepom.check.skip-all=true -B -fae install
+
 script:
+  - . ./src/build/travis.sh
   - ./mvnw -B -fae verify
-  - jdk_switcher use openjdk11
+  - switch_travis_jdk 14
+  - ./mvnw -Pit-jdk14 -B -fae invoker:integration-test
+  - switch_travis_jdk 11
   - ./mvnw -Pit-jdk11 -B -fae invoker:integration-test
-  - jdk_switcher use openjdk8
+  - switch_travis_jdk 8
   - ./mvnw -Pit-jdk8 -B -fae invoker:integration-test
 
 addons:
