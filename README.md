@@ -1,4 +1,7 @@
-[![Build Status](https://travis-ci.org/basepom/duplicate-finder-maven-plugin.svg?branch=master)](https://travis-ci.org/basepom/duplicate-finder-maven-plugin)[![Latest Release](https://maven-badges.herokuapp.com/maven-central/org.basepom.maven/duplicate-finder-maven-plugin/badge.svg)](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.basepom.maven%22%20AND%20a%3A%22duplicate-finder-maven-plugin%22)
+[![Build Status](https://github.com/basepom/duplicate-finder-maven-plugin/workflows/ci/badge.svg)](https://github.com/basepom/duplicate-finder-maven-plugin/actions?query=workflow%3Aci)[![Latest Release](https://maven-badges.herokuapp.com/maven-central/org.basepom.maven/duplicate-finder-maven-plugin/badge.svg)](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.basepom.maven%22%20AND%20a%3A%22duplicate-finder-maven-plugin%22)
+
+
+
 
 # duplicate-finder Maven plugin
 
