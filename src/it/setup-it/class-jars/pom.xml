@@ -20,6 +20,7 @@
         <groupId>@project.groupId@.@project.artifactId@</groupId>
         <artifactId>basepom</artifactId>
         <version>1.0.under-test</version>
+        <relativePath>../basepom/pom.xml</relativePath>
     </parent>
 
     <groupId>testjar</groupId>

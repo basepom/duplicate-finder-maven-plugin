@@ -19,10 +19,11 @@
         <groupId>@project.groupId@.@project.artifactId@</groupId>
         <artifactId>basepom</artifactId>
         <version>1.0.under-test</version>
+        <relativePath>../../basepom/pom.xml</relativePath>
     </parent>
 
     <groupId>testjar</groupId>
-    <artifactId>second-class-jar</artifactId>
+    <artifactId>first-class-jar</artifactId>
     <version>1.0.under-test</version>
 
     <build>
