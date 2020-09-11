@@ -17,7 +17,7 @@
     <parent>
         <groupId>org.basepom</groupId>
         <artifactId>basepom-oss</artifactId>
-        <version>30</version>
+        <version>33-SNAPSHOT</version>
     </parent>
 
     <groupId>org.basepom.maven</groupId>
@@ -74,7 +74,11 @@
     </contributors>
 
     <properties>
-        <project.build.targetJdk>1.8</project.build.targetJdk>
+        <project.build.systemJdk>11</project.build.systemJdk>
+        <project.build.targetJdk>8</project.build.targetJdk>
+        <!-- Activate an IT profile to run integration tests -->
+        <basepom.it.skip>true</basepom.it.skip>
+        <basepom.it.parallel>8</basepom.it.parallel>
 
         <dep.maven-api.version>3.0</dep.maven-api.version>
         <dep.plexus.version>2.0.0</dep.plexus.version>
@@ -252,20 +256,6 @@
         <pluginManagement>
             <plugins>
                 <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-toolchains-plugin</artifactId>
-                    <version>1.1</version>
-                    <configuration>
-                        <toolchains>
-                            <jdk>
-                                <version>${project.build.targetJdk}</version>
-                                <vendor>openjdk</vendor>
-                            </jdk>
-                        </toolchains>
-                    </configuration>
-                </plugin>
-
-                <plugin>
                     <groupId>org.codehaus.plexus</groupId>
                     <artifactId>plexus-component-metadata</artifactId>
                     <version>${dep.plexus.version}</version>
@@ -357,32 +347,10 @@
                         </lifecycleMappingMetadata>
                     </configuration>
                 </plugin>
-                <plugin>
-                    <groupId>com.github.spotbugs</groupId>
-                    <artifactId>spotbugs-maven-plugin</artifactId>
-                    <version>${dep.spotbugs.version}</version>
-                    <configuration>
-                        <effort>Max</effort>
-                        <skip>${basepom.check.skip-spotbugs}</skip>
-                        <maxHeap>${basepom.build.maxheap-mb}</maxHeap>
-                        <failOnError>${basepom.check.fail-spotbugs}</failOnError>
-                    </configuration>
-                </plugin>
             </plugins>
         </pluginManagement>
 
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-toolchains-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>toolchain</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-plugin-plugin</artifactId>
@@ -494,6 +462,27 @@
                     </plugin>
                 </plugins>
             </build>
+        </profile>
+        <profile>
+            <id>it-jdk14</id>
+            <properties>
+                <project.build.targetJdk>14</project.build.targetJdk>
+                <basepom.it.skip>false</basepom.it.skip>
+            </properties>
+        </profile>
+        <profile>
+            <id>it-jdk11</id>
+            <properties>
+                <project.build.targetJdk>11</project.build.targetJdk>
+                <basepom.it.skip>false</basepom.it.skip>
+            </properties>
+        </profile>
+        <profile>
+            <id>it-jdk8</id>
+            <properties>
+                <project.build.targetJdk>8</project.build.targetJdk>
+                <basepom.it.skip>false</basepom.it.skip>
+            </properties>
         </profile>
     </profiles>
 </project>
