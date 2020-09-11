@@ -36,6 +36,5 @@ jobs:
         with:
           java-version: ${{ matrix.it-version }}
       - name: Running IT on  Java ${{ matrix.it-version }}, built with Java ${{ matrix.java-version }}.
-        if: ${{ matrix.it-version  <= matrix.java-version }}
         run: |
           ./mvnw -Pit-jdk${{ matrix.it-version }} -fae invoker:integration-test invoker:verify
