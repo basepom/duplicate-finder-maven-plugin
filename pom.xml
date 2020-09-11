@@ -99,10 +99,12 @@
 
         <dep.maven-api.version>3.0</dep.maven-api.version>
         <dep.plexus.version>2.0.0</dep.plexus.version>
-        <dep.plugin.plugin.version>3.6.0</dep.plugin.plugin.version>
-        <dep.groovy.version>3.0.0-beta-3</dep.groovy.version>
+        <dep.groovy.version>3.0.5</dep.groovy.version>
         <dep.slf4j.version>1.7.28</dep.slf4j.version>
         <dep.guava.version>28.1-jre</dep.guava.version>
+
+        <dep.plugin.plugin.version>3.6.0</dep.plugin.plugin.version>
+        <dep.plugin.gmavenplus.plugin>1.10.0</dep.plugin.gmavenplus.plugin>
     </properties>
 
     <dependencies>
@@ -273,12 +275,6 @@
         <pluginManagement>
             <plugins>
                 <plugin>
-                    <groupId>org.codehaus.plexus</groupId>
-                    <artifactId>plexus-component-metadata</artifactId>
-                    <version>${dep.plexus.version}</version>
-                </plugin>
-
-                <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-plugin-plugin</artifactId>
                     <version>${dep.plugin.plugin.version}</version>
@@ -288,86 +284,33 @@
                 </plugin>
 
                 <plugin>
-                    <groupId>com.mycila</groupId>
-                    <artifactId>license-maven-plugin</artifactId>
-                    <configuration>
-                        <mapping>
-                            <groovy>SLASHSTAR_STYLE</groovy>
-                        </mapping>
-                        <excludes combine.children="append">
-                            <exclude>**/conflict-different-content</exclude>
-                            <exclude>**/conflict-same-content</exclude>
-                        </excludes>
-                    </configuration>
+                    <groupId>org.codehaus.plexus</groupId>
+                    <artifactId>plexus-component-metadata</artifactId>
+                    <version>${dep.plexus.version}</version>
                 </plugin>
 
                 <plugin>
                     <groupId>org.codehaus.gmavenplus</groupId>
                     <artifactId>gmavenplus-plugin</artifactId>
-                    <version>1.2</version>
-                </plugin>
-
-                <!-- Use Jacoco with the invoker plugin
-                     for integration test coverage.
-                -->
-                <plugin>
-                    <groupId>org.jacoco</groupId>
-                    <artifactId>jacoco-maven-plugin</artifactId>
-                    <executions>
-                        <execution>
-                            <id>default-it</id>
-                            <configuration>
-                                <destFile>${project.build.directory}/jacoco-it.exec</destFile>
-                                <propertyName>invoker.mavenOpts</propertyName>
-                            </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
-
-                <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
-                <plugin>
-                    <groupId>org.eclipse.m2e</groupId>
-                    <artifactId>lifecycle-mapping</artifactId>
-                    <version>1.0.0</version>
-                    <configuration>
-                        <lifecycleMappingMetadata>
-                            <pluginExecutions>
-                                <pluginExecution>
-                                    <pluginExecutionFilter>
-                                        <groupId>org.apache.maven.plugins</groupId>
-                                        <artifactId>maven-plugin-plugin</artifactId>
-                                        <versionRange>[0,)</versionRange>
-                                        <goals>
-                                            <goal>descriptor</goal>
-                                            <goal>helpmojo</goal>
-                                        </goals>
-                                    </pluginExecutionFilter>
-                                    <action>
-                                        <ignore />
-                                    </action>
-                                </pluginExecution>
-                                <pluginExecution>
-                                    <pluginExecutionFilter>
-                                        <groupId>org.codehaus.gmavenplus</groupId>
-                                        <artifactId>gmavenplus-plugin</artifactId>
-                                        <versionRange>[0,)</versionRange>
-                                        <goals>
-                                            <goal>addTestSources</goal>
-                                            <goal>testCompile</goal>
-                                        </goals>
-                                    </pluginExecutionFilter>
-                                    <action>
-                                        <ignore />
-                                    </action>
-                                </pluginExecution>
-                            </pluginExecutions>
-                        </lifecycleMappingMetadata>
-                    </configuration>
+                    <version>${dep.plugin.gmavenplus.plugin}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
 
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <configuration>
+                    <rules combine.children="append">
+                        <requireProperty>
+                            <property>project.build.targetJdk</property>
+                            <regex>^8$</regex>
+                            <regexMessage>Project must be built with JDK8 target. Do not specify an integration profile while building.</regexMessage>
+                        </requireProperty>
+                    </rules>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-plugin-plugin</artifactId>
@@ -401,6 +344,33 @@
             </plugin>
 
             <plugin>
+                <groupId>org.codehaus.gmavenplus</groupId>
+                <artifactId>gmavenplus-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>addTestSources</goal>
+                            <goal>compileTests</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>com.mycila</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <configuration>
+                    <mapping>
+                        <groovy>SLASHSTAR_STYLE</groovy>
+                    </mapping>
+                    <excludes combine.children="append">
+                        <exclude>**/conflict-different-content</exclude>
+                        <exclude>**/conflict-same-content</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-pmd-plugin</artifactId>
                 <configuration>
@@ -416,6 +386,9 @@
                 <configuration>
                     <!-- Allows access to the groovy utility class in the test source tree. -->
                     <addTestClassPath>true</addTestClassPath>
+                    <filterProperties>
+                        <project.it.enforce>${project.it.enforce}</project.it.enforce>
+                    </filterProperties>
                 </configuration>
 
                 <!-- dependency for verify.groovy scripts -->
@@ -438,52 +411,34 @@
                 </dependencies>
             </plugin>
 
+            <!-- Use Jacoco with the invoker plugin
+                 for integration test coverage.
+            -->
             <plugin>
-                <groupId>org.codehaus.gmavenplus</groupId>
-                <artifactId>gmavenplus-plugin</artifactId>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
                 <executions>
                     <execution>
-                        <goals>
-                            <goal>addTestSources</goal>
-                            <goal>testCompile</goal>
-                        </goals>
+                        <id>default-it</id>
+                        <configuration>
+                            <destFile>${project.build.directory}/jacoco-it.exec</destFile>
+                            <propertyName>invoker.mavenOpts</propertyName>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
         </plugins>
     </build>
 
+    <!-- do not activate IT profiles during a regular build, it would end up building a
+         plugin that would not run on a lower version of Java
+    -->
     <profiles>
-        <profile>
-            <id>travis</id>
-            <activation>
-                <property>
-                    <name>env.TRAVIS</name>
-                </property>
-            </activation>
-            <properties>
-                <!-- Travis does not yet support Maven 3.3.x -->
-                <basepom.maven.version>3.2.5</basepom.maven.version>
-            </properties>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-invoker-plugin</artifactId>
-                        <configuration>
-                            <!-- test must be turned off in travis due to MINVOKER-172 and travis setting .mavenrc -->
-                            <pomExcludes>
-                                <pomExclude>test-skip-property/pom.xml</pomExclude>
-                            </pomExcludes>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
         <profile>
             <id>it-jdk14</id>
             <properties>
                 <project.build.targetJdk>14</project.build.targetJdk>
+                <project.it.enforce>[14,15)</project.it.enforce>
                 <basepom.it.skip>false</basepom.it.skip>
             </properties>
         </profile>
@@ -491,6 +446,7 @@
             <id>it-jdk11</id>
             <properties>
                 <project.build.targetJdk>11</project.build.targetJdk>
+                <project.it.enforce>[11,12)</project.it.enforce>
                 <basepom.it.skip>false</basepom.it.skip>
             </properties>
         </profile>
@@ -498,6 +454,7 @@
             <id>it-jdk8</id>
             <properties>
                 <project.build.targetJdk>8</project.build.targetJdk>
+                <project.it.enforce>[1.8,9)</project.it.enforce>
                 <basepom.it.skip>false</basepom.it.skip>
             </properties>
         </profile>
