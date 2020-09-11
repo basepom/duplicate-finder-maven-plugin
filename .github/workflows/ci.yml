@@ -4,40 +4,38 @@ on:
   push:
     branches:
       - master
-  pull-request:
+  pull_request:
 
 jobs:
   ci:
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
       matrix:
-        java-versions:
-          - 11
-          - 14
+        java-version: [11, 14]
+        it-version: [8, 11, 14]
+
     steps:
       - uses: actions/checkout@v2
+      - name: Cache local Maven repository
+        uses: actions/cache@v2
+        with:
+            path: ~/.m2/repository
+            key: ${{ runner.os }}-${{ matrix.java-version }}-maven-${{ hashFiles('**/pom.xml') }}
+            restore-keys: |
+                ${{ runner.os }}-${{ matrix.java-version }}-maven-
       - uses: actions/setup-java@v1
         with:
-          java-version: 14
-      - uses: actions/setup-java@v1
-        with:
-          java-version: 11
-      - uses: actions/setup-java@v1
-        with:
-          java-version: 8
+          java-version: ${{ matrix.java-version }}
       - name: Build
         run: |
-          ./mvnw -DskipTests=true -Dbasepom.check.skip-all=true -B -fae install
+          ./mvnw -DskipTests=true -Dbasepom.check.skip-all=true -fae install
       - name: Test
         run: |
-          ./mvnw -B -fae verify
-      - name: Java 14 IT
+          ./mvnw -fae verify
+      - uses: actions/setup-java@v1
+        with:
+          java-version: ${{ matrix.it-version }}
+      - name: Running IT on  Java ${{ matrix.it-version }}, built with Java ${{ matrix.java-version }}.
+        if: ${{ matrix.it-version  <= matrix.java-version }}
         run: |
-          ./mvnw -Pit-jdk14 -B -fae invoker:integration-test
-      - name: Java 11 IT
-        run: |
-          ./mvnw -Pit-jdk11 -B -fae invoker:integration-test
-      - name: Java 8 IT
-        run: |
-          ./mvnw -Pit-jdk8 -B -fae invoker:integration-test
+          ./mvnw -Pit-jdk${{ matrix.it-version }} -fae invoker:integration-test invoker:verify
