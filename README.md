@@ -32,4 +32,4 @@ Up-to-date documentation is available from the [duplicate finder plugin Wiki](ht
 
 ## Release Notes
 
-See the CHANGES.md file.
+See the [Changelog](CHANGES.md).
