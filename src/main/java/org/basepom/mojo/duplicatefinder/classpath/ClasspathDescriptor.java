@@ -71,6 +71,7 @@ public class ClasspathDescriptor
         ".*license(\\.txt)?$",
         ".*notice(\\.txt)?$",
         ".*readme(\\.txt)?$",
+        ".*changelog(\\.txt)?$",
         ".*third-party(\\.txt)?$",
         // HTML stuff from javadocs.
         ".*package\\.html$",
