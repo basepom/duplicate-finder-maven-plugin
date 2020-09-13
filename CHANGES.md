@@ -1,5 +1,29 @@
 # Changes
 
+
+### 1.4.0 - 2019-10-27
+
+#### changed
+
+* Build with basepom 30
+* use slf4j 1.7.28 (from 1.7.21)
+* update plugin plugin to 3.6.0 (from 3.4)
+* update groovy to 3.0.0-beta-3 (from 2.4.12)
+* changed Travis Build to use OpenJDK 8 and 11
+* Clarify much more what is a resource and what is considered a class. This changes a lot of things that used to be matched as classes to be matched as resources. Especially all path elements (directories, jar file folders etc.) now must match the Java identifier specification. This e.g. rejects classes in Multi-release jars that are located in `META-INF/versions/<version>` because `META-INF` or the version number are not valid Java identifiers. An exception is made for `package-info` and `module-info` class files, whose names are not valid Java identifiers but are still loaded as classes from the class path.
+
+#### fixed
+
+* Do not crash if more than one artifact reference points to the same file (#25, #29, #35)
+* Fix Java 9+ module-version problems with multi-release jars (#31, #33)
+* Triage and fix outdated bugs (#23, #20, #17)
+
+#### security
+
+* Update Guava dependency to 28.1-jre (#36)
+* Use plexus 2.0.0 to build (#37)
+
+
 ##### 1.3.0 - 2018-02-20
 
 __Starting with 1.3.0, JDK8 will be required to run the plugin.__
