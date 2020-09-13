@@ -2,7 +2,11 @@
 
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) specification.
 
-### unreleased
+### 1.5.0 - 2020-09-13
+
+This version is functionally (almost) unchanged from 1.4.0 except that it is using a newer build system and is built with the JDK11 compiler for JDK8 target.
+
+The only substantial change over 1.4.0 is an additional ignored pattern (changelog.txt, #44).
 
 #### added
 
