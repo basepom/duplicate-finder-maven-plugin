@@ -1,10 +1,20 @@
 # Changes
 
+[Keep a Changelog](https://keepachangelog.com/en/1.0.0/) specification.
+
 ### unreleased
 
 #### added
 
 * ignore changelog.txt (#44) (Thanks @adamzr)
+
+#### changed
+
+* use github actions for CI, remove travis
+* use maven wrapper
+* build with JDK9+ only, still support JDK8 as runtime
+  * CI build with JDK 11, 14
+  * CI run integration tests on JDK 8, 11, 14
 
 ### 1.4.0 - 2019-10-27
 
