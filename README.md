@@ -19,6 +19,8 @@ Starting with release 1.2.0, Java 7 or better is required.
 
 Starting with release 1.3.0, Java 8 or better is required.
 
+Starting with release 1.5.0, Java 8 or better is required to run the plugin and Java 9 or better (Java 11 strongly recommended) is required to build the plugin.
+
 ## Goals
 
 The plugin has two goals:
