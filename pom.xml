@@ -17,7 +17,7 @@
     <parent>
         <groupId>org.basepom</groupId>
         <artifactId>basepom-oss</artifactId>
-        <version>33-SNAPSHOT</version>
+        <version>33</version>
     </parent>
 
     <groupId>org.basepom.maven</groupId>
