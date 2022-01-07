@@ -45,10 +45,8 @@ import java.util.SortedSet;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import javax.annotation.Nonnull;
 import javax.xml.stream.XMLStreamException;
 
-import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
@@ -59,7 +57,6 @@ import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.Closer;
-import com.pyx4j.log4j.MavenLogAppender;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
@@ -69,7 +66,6 @@ import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -268,13 +264,6 @@ public final class DuplicateFinderMojo extends AbstractMojo
     private final EnumSet<ConflictState> printState = EnumSet.of(CONFLICT_CONTENT_DIFFERENT);
     private final EnumSet<ConflictState> failState = EnumSet.noneOf(ConflictState.class);
 
-    @Override
-    public void setLog(final Log log)
-    {
-        super.setLog(log);
-        MavenLogAppender.startPluginLog(this);
-    }
-
     // called by maven
     public void setIgnoredDependencies(final Dependency[] dependencies) throws InvalidVersionSpecificationException
     {
@@ -289,152 +278,147 @@ public final class DuplicateFinderMojo extends AbstractMojo
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException
     {
-        try {
-            if (skip) {
-                LOG.report(quiet, "Skipping duplicate-finder execution!");
+        if (skip) {
+            LOG.report(quiet, "Skipping duplicate-finder execution!");
+        }
+        else if (!includePomProjects && "pom".equals(project.getArtifact().getType())) {
+            LOG.report(quiet, "Ignoring POM project!");
+        }
+        else {
+            if (printEqualFiles) {
+                printState.add(CONFLICT_CONTENT_EQUAL);
             }
-            else if (!includePomProjects && "pom".equals(project.getArtifact().getType())) {
-                LOG.report(quiet, "Ignoring POM project!");
+
+            if (failBuildInCaseOfConflict || failBuildInCaseOfEqualContentConflict) {
+                printState.add(CONFLICT_CONTENT_EQUAL);
+
+                failState.add(CONFLICT_CONTENT_EQUAL);
+                failState.add(CONFLICT_CONTENT_DIFFERENT);
             }
-            else {
-                if (printEqualFiles) {
-                    printState.add(CONFLICT_CONTENT_EQUAL);
+
+            if (failBuildInCaseOfDifferentContentConflict) {
+                failState.add(CONFLICT_CONTENT_DIFFERENT);
+            }
+
+            if (includeBootClasspath) {
+                double jdkVersion = Double.parseDouble(System.getProperty("java.vm.specification.version"));
+                if (jdkVersion > 1.8d) {
+                    LOG.warn("<includeBootClasspath> is not supported on JDK 9 and beyond! Duplicates for JDK classes will not be detected!");
+                }
+            }
+
+            try {
+                // Prep conflicting dependencies
+                MavenCoordinates projectCoordinates = new MavenCoordinates(project.getArtifact());
+
+                for (ConflictingDependency conflictingDependency : conflictingDependencies) {
+                    conflictingDependency.addProjectMavenCoordinates(projectCoordinates);
                 }
 
-                if (failBuildInCaseOfConflict || failBuildInCaseOfEqualContentConflict) {
-                    printState.add(CONFLICT_CONTENT_EQUAL);
+                // Find boot classpath information
 
-                    failState.add(CONFLICT_CONTENT_EQUAL);
-                    failState.add(CONFLICT_CONTENT_DIFFERENT);
-                }
-
-                if (failBuildInCaseOfDifferentContentConflict) {
-                    failState.add(CONFLICT_CONTENT_DIFFERENT);
-                }
+                ImmutableSet.Builder<File> bootClasspathBuilder = ImmutableSet.builder();
 
                 if (includeBootClasspath) {
-                    double jdkVersion = Double.parseDouble(System.getProperty("java.vm.specification.version"));
-                    if (jdkVersion > 1.8d) {
-                        LOG.warn("<includeBootClasspath> is not supported on JDK 9 and beyond! Duplicates for JDK classes will not be detected!");
-                    }
-                }
-
-                try {
-                    // Prep conflicting dependencies
-                    MavenCoordinates projectCoordinates = new MavenCoordinates(project.getArtifact());
-
-                    for (ConflictingDependency conflictingDependency : conflictingDependencies) {
-                        conflictingDependency.addProjectMavenCoordinates(projectCoordinates);
-                    }
-
-                    // Find boot classpath information
-
-                    ImmutableSet.Builder<File> bootClasspathBuilder = ImmutableSet.builder();
-
-                    if (includeBootClasspath) {
-                        String value = System.getProperty(bootClasspathProperty);
-                        if (value != null) {
-                            for (String entry : Splitter.on(File.pathSeparatorChar).split(value)) {
-                                File file = new File(entry);
-                                if (file.exists()) {
-                                    LOG.debug("Adding '%s' as a boot classpath element", entry);
-                                    bootClasspathBuilder.add(file);
-                                }
-                                else {
-                                    LOG.debug("Ignoring '%s', does not exist.", entry);
-                                }
+                    String value = System.getProperty(bootClasspathProperty);
+                    if (value != null) {
+                        for (String entry : Splitter.on(File.pathSeparatorChar).split(value)) {
+                            File file = new File(entry);
+                            if (file.exists()) {
+                                LOG.debug("Adding '%s' as a boot classpath element", entry);
+                                bootClasspathBuilder.add(file);
+                            }
+                            else {
+                                LOG.debug("Ignoring '%s', does not exist.", entry);
                             }
                         }
                     }
+                }
 
-                    final ImmutableSet<File> bootClasspath = bootClasspathBuilder.build();
+                final ImmutableSet<File> bootClasspath = bootClasspathBuilder.build();
 
-                    final ArtifactFileResolver artifactFileResolver = new ArtifactFileResolver(project, bootClasspath, preferLocal);
-                    final ImmutableMap.Builder<String, Entry<ResultCollector, ClasspathDescriptor>> classpathResultBuilder = ImmutableMap.builder();
+                final ArtifactFileResolver artifactFileResolver = new ArtifactFileResolver(project, bootClasspath, preferLocal);
+                final ImmutableMap.Builder<String, Entry<ResultCollector, ClasspathDescriptor>> classpathResultBuilder = ImmutableMap.builder();
 
-                    if (checkCompileClasspath) {
-                        LOG.report(quiet, "Checking compile classpath");
-                        final ResultCollector resultCollector = new ResultCollector(printState, failState);
-                        final ClasspathDescriptor classpathDescriptor = checkClasspath(resultCollector, artifactFileResolver, COMPILE_SCOPE, bootClasspath, getOutputDirectory(project));
-                        classpathResultBuilder.put("compile", new SimpleImmutableEntry<ResultCollector, ClasspathDescriptor>(resultCollector, classpathDescriptor));
-                    }
+                if (checkCompileClasspath) {
+                    LOG.report(quiet, "Checking compile classpath");
+                    final ResultCollector resultCollector = new ResultCollector(printState, failState);
+                    final ClasspathDescriptor classpathDescriptor = checkClasspath(resultCollector, artifactFileResolver, COMPILE_SCOPE, bootClasspath, getOutputDirectory(project));
+                    classpathResultBuilder.put("compile", new SimpleImmutableEntry<ResultCollector, ClasspathDescriptor>(resultCollector, classpathDescriptor));
+                }
 
-                    if (checkRuntimeClasspath) {
-                        LOG.report(quiet, "Checking runtime classpath");
-                        final ResultCollector resultCollector = new ResultCollector(printState, failState);
-                        final ClasspathDescriptor classpathDescriptor = checkClasspath(resultCollector, artifactFileResolver, RUNTIME_SCOPE, bootClasspath, getOutputDirectory(project));
-                        classpathResultBuilder.put("runtime", new SimpleImmutableEntry<ResultCollector, ClasspathDescriptor>(resultCollector, classpathDescriptor));
-                    }
+                if (checkRuntimeClasspath) {
+                    LOG.report(quiet, "Checking runtime classpath");
+                    final ResultCollector resultCollector = new ResultCollector(printState, failState);
+                    final ClasspathDescriptor classpathDescriptor = checkClasspath(resultCollector, artifactFileResolver, RUNTIME_SCOPE, bootClasspath, getOutputDirectory(project));
+                    classpathResultBuilder.put("runtime", new SimpleImmutableEntry<ResultCollector, ClasspathDescriptor>(resultCollector, classpathDescriptor));
+                }
 
-                    if (checkTestClasspath) {
-                        LOG.report(quiet, "Checking test classpath");
-                        final ResultCollector resultCollector = new ResultCollector(printState, failState);
-                        final ClasspathDescriptor classpathDescriptor = checkClasspath(resultCollector,
+                if (checkTestClasspath) {
+                    LOG.report(quiet, "Checking test classpath");
+                    final ResultCollector resultCollector = new ResultCollector(printState, failState);
+                    final ClasspathDescriptor classpathDescriptor = checkClasspath(resultCollector,
                             artifactFileResolver,
                             TEST_SCOPE,
                             bootClasspath,
                             getOutputDirectory(project),
                             getTestOutputDirectory(project));
-                        classpathResultBuilder.put("test", new SimpleImmutableEntry<ResultCollector, ClasspathDescriptor>(resultCollector, classpathDescriptor));
-                    }
+                    classpathResultBuilder.put("test", new SimpleImmutableEntry<ResultCollector, ClasspathDescriptor>(resultCollector, classpathDescriptor));
+                }
 
-                    final ImmutableMap<String, Entry<ResultCollector, ClasspathDescriptor>> classpathResults = classpathResultBuilder.build();
+                final ImmutableMap<String, Entry<ResultCollector, ClasspathDescriptor>> classpathResults = classpathResultBuilder.build();
 
-                    if (useResultFile) {
-                        checkState(resultFile != null, "resultFile must be set if useResultFile is true");
-                        writeResultFile(resultFile, classpathResults);
-                    }
+                if (useResultFile) {
+                    checkState(resultFile != null, "resultFile must be set if useResultFile is true");
+                    writeResultFile(resultFile, classpathResults);
+                }
 
-                    boolean failed = false;
+                boolean failed = false;
 
-                    for (Map.Entry<String, Entry<ResultCollector, ClasspathDescriptor>> classpathEntry : classpathResults.entrySet()) {
-                        String classpathName = classpathEntry.getKey();
-                        ResultCollector resultCollector = classpathEntry.getValue().getKey();
+                for (Map.Entry<String, Entry<ResultCollector, ClasspathDescriptor>> classpathEntry : classpathResults.entrySet()) {
+                    String classpathName = classpathEntry.getKey();
+                    ResultCollector resultCollector = classpathEntry.getValue().getKey();
 
-                        for (final ConflictState state : printState) {
-                            for (final ConflictType type : ConflictType.values()) {
-                                if (resultCollector.hasConflictsFor(type, state)) {
-                                    final Map<String, Collection<ConflictResult>> results = resultCollector.getResults(type, state);
-                                    for (final Map.Entry<String, Collection<ConflictResult>> entry : results.entrySet()) {
-                                        final String artifactNames = entry.getKey();
-                                        final Collection<ConflictResult> conflictResults = entry.getValue();
+                    for (final ConflictState state : printState) {
+                        for (final ConflictType type : ConflictType.values()) {
+                            if (resultCollector.hasConflictsFor(type, state)) {
+                                final Map<String, Collection<ConflictResult>> results = resultCollector.getResults(type, state);
+                                for (final Map.Entry<String, Collection<ConflictResult>> entry : results.entrySet()) {
+                                    final String artifactNames = entry.getKey();
+                                    final Collection<ConflictResult> conflictResults = entry.getValue();
 
-                                        LOG.warn("Found duplicate %s %s in [%s]:", state.getHint(), type.getType(), artifactNames);
-                                        for (final ConflictResult conflictResult : conflictResults) {
-                                            LOG.warn("  %s", conflictResult.getName());
-                                        }
+                                    LOG.warn("Found duplicate %s %s in [%s]:", state.getHint(), type.getType(), artifactNames);
+                                    for (final ConflictResult conflictResult : conflictResults) {
+                                        LOG.warn("  %s", conflictResult.getName());
                                     }
                                 }
                             }
                         }
-
-                        failed |= resultCollector.isFailed();
-
-                        if (resultCollector.isFailed()) {
-                            LOG.warn("Found duplicate classes/resources in %s classpath.", classpathName);
-                        }
                     }
 
-                    if (failed) {
-                        throw new MojoExecutionException("Found duplicate classes/resources!");
+                    failed |= resultCollector.isFailed();
+
+                    if (resultCollector.isFailed()) {
+                        LOG.warn("Found duplicate classes/resources in %s classpath.", classpathName);
                     }
                 }
-                catch (final DependencyResolutionRequiredException e) {
-                    throw new MojoFailureException("Could not resolve dependencies", e);
-                }
-                catch (final InvalidVersionSpecificationException e) {
-                    throw new MojoFailureException("Invalid version specified", e);
-                }
-                catch (final OverConstrainedVersionException e) {
-                    throw new MojoFailureException("Version too constrained", e);
-                }
-                catch (final IOException e) {
-                    throw new MojoExecutionException("While loading artifacts", e);
+
+                if (failed) {
+                    throw new MojoExecutionException("Found duplicate classes/resources!");
                 }
             }
-        }
-        finally {
-            MavenLogAppender.endPluginLog(this);
+            catch (final DependencyResolutionRequiredException e) {
+                throw new MojoFailureException("Could not resolve dependencies", e);
+            }
+            catch (final InvalidVersionSpecificationException e) {
+                throw new MojoFailureException("Invalid version specified", e);
+            }
+            catch (final OverConstrainedVersionException e) {
+                throw new MojoFailureException("Version too constrained", e);
+            }
+            catch (final IOException e) {
+                throw new MojoExecutionException("While loading artifacts", e);
+            }
         }
     }
 
