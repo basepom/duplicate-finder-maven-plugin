@@ -2,6 +2,14 @@
 
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) specification.
 
+### 1.5.1 - 2021-01-06
+
+This version is identical to 1.5.0 except that it now uses the native maven 3.x logging.
+
+### removed
+
+Removed log4j 1.x dependency. While this was not vulnerable to the log4shell attack, it is outdated and should no longer be used.
+
 ### 1.5.0 - 2020-09-13
 
 This version is functionally (almost) unchanged from 1.4.0 except that it is using a newer build system and is built with the JDK11 compiler for JDK8 target.
