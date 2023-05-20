@@ -176,50 +176,6 @@ public abstract class ClasspathElement implements Comparable<ClasspathElement> {
         }
     }
 
-    public static class ClasspathBootClasspathElement extends ClasspathElement {
-
-        private final File bootClasspathElement;
-
-        public ClasspathBootClasspathElement(final File bootClasspathElement) {
-            this.bootClasspathElement = checkNotNull(bootClasspathElement, "bootClasspathElement is null");
-        }
-
-        @Override
-        public boolean isBootClasspathElement() {
-            return true;
-        }
-
-        @Override
-        public String getName() {
-            return bootClasspathElement.getAbsolutePath();
-        }
-
-        @Override
-        public File getFile() {
-            return bootClasspathElement;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hashCode(bootClasspathElement);
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (o == null || o.getClass() != this.getClass()) {
-                return false;
-            }
-
-            if (o == this) {
-                return true;
-            }
-
-            ClasspathBootClasspathElement that = (ClasspathBootClasspathElement) o;
-
-            return Objects.equals(this.bootClasspathElement, that.bootClasspathElement);
-        }
-    }
-
     public static Function<ClasspathElement, String> getNameFunction() {
         return ClasspathElement::getName;
     }

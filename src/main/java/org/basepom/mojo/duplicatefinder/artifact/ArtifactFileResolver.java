@@ -38,7 +38,6 @@ import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.project.MavenProject;
 import org.basepom.mojo.duplicatefinder.ClasspathElement;
 import org.basepom.mojo.duplicatefinder.ClasspathElement.ClasspathArtifact;
-import org.basepom.mojo.duplicatefinder.ClasspathElement.ClasspathBootClasspathElement;
 import org.basepom.mojo.duplicatefinder.ClasspathElement.ClasspathLocalFolder;
 import org.basepom.mojo.duplicatefinder.PluginLog;
 
@@ -71,12 +70,9 @@ public class ArtifactFileResolver {
             .hashKeys()
             .hashSetValues()
             .build();
-    private final ImmutableSet<File> bootClasspath;
-
     private final boolean preferLocal;
 
     public ArtifactFileResolver(final MavenProject project,
-            final ImmutableSet<File> bootClasspath,
             final boolean preferLocal) throws DependencyResolutionRequiredException, IOException {
         checkNotNull(project, "project is null");
         this.preferLocal = preferLocal;
@@ -88,8 +84,6 @@ public class ArtifactFileResolver {
 
         // This can not be an immutable map builder, because the map is used for looking up while it is built up.
         this.repoArtifactCache = new HashMap(project.getArtifacts().size());
-
-        this.bootClasspath = bootClasspath;
 
         for (final Artifact artifact : project.getArtifacts()) {
             final File repoPath = artifact.getFile().getCanonicalFile();
@@ -176,11 +170,6 @@ public class ArtifactFileResolver {
             for (Artifact artifact : repoFileCache.get(file)) {
                 builder.add(new ClasspathArtifact(artifact));
             }
-            return;
-        }
-
-        if (bootClasspath.contains(file)) {
-            builder.add(new ClasspathBootClasspathElement(file));
             return;
         }
 

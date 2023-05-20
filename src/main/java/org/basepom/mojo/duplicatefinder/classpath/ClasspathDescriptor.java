@@ -114,7 +114,6 @@ public class ClasspathDescriptor {
             final Collection<MavenCoordinates> ignoredDependencies,
             final boolean useDefaultResourceIgnoreList,
             final boolean useDefaultClassIgnoreList,
-            final Set<File> bootClasspath,
             final File[] projectFolders) throws MojoExecutionException, InvalidVersionSpecificationException {
         checkNotNull(project, "project is null");
         checkNotNull(fileToArtifactMap, "fileToArtifactMap is null");
@@ -127,20 +126,6 @@ public class ClasspathDescriptor {
                 useDefaultClassIgnoreList, ignoredClassPatterns);
 
         File file = null;
-
-        try {
-            for (File bootClasspathElement : bootClasspath) {
-                file = bootClasspathElement;
-                if (file.exists()) {
-                    LOG.debug("Adding '%s' as a boot classpath element", file);
-                    classpathDescriptor.addClasspathElement(file);
-                } else {
-                    LOG.debug("Ignoring '%s', does not exist.", file);
-                }
-            }
-        } catch (final IOException ex) {
-            throw new MojoExecutionException(format("Error trying to access file '%s' from boot classpath", file), ex);
-        }
 
         final MatchArtifactPredicate matchArtifactPredicate = new MatchArtifactPredicate(ignoredDependencies);
 
