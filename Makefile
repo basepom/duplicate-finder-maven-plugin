@@ -33,12 +33,10 @@ tests: MAVEN_CONFIG += -Dbasepom.it.skip=false
 tests:
 	${MAVEN} surefire:test invoker:install invoker:integration-test invoker:verify
 
-deploy: MAVEN_CONFIG += -Dbasepom.it.skip=false
 deploy:
 	${MAVEN} clean deploy
 
 # run install b/c https://issues.apache.org/jira/browse/MJAVADOC-701
-deploy-site: MAVEN_CONFIG += -Dbasepom.it.skip=false
 deploy-site:
 	${MAVEN} clean install site-deploy
 
