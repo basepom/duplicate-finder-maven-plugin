@@ -13,6 +13,8 @@
  */
 package org.basepom.mojo.duplicatefinder.groovy
 
+import groovy.xml.XmlSlurper
+
 /**
  * Helper tool for the integration tests. Do not use outside the integration tests. Placed in the test sources
  * so that the integration tests can pick it up through the addTestClassPath setting of the invoker plugin.
