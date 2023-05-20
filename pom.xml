@@ -87,9 +87,6 @@
         <project.build.targetJdk>11</project.build.targetJdk>
         <project.moduleName>org.basepom.mojo.duplicatefinder</project.moduleName>
 
-        <!-- <maven.compiler.source>1.8</maven.compiler.source> -->
-        <!-- <maven.compiler.target>1.8</maven.compiler.target> -->
-
         <basepom.nexus-staging.staging-url>https://oss.sonatype.org/</basepom.nexus-staging.staging-url>
         <basepom.release.profiles>basepom.oss-release,plugin-release</basepom.release.profiles>
         <basepom.release.tag-name-format>duplicate-finder-maven-plugin-@{project.version}</basepom.release.tag-name-format>
@@ -103,8 +100,6 @@
         <!-- site requires full javadoc generation -->
         <basepom.javadoc.skip>false</basepom.javadoc.skip>
 
-        <!-- Activate an IT profile to run integration tests -->
-        <basepom.it.skip>true</basepom.it.skip>
         <basepom.it.fork-count>8</basepom.it.fork-count>
 
         <dep.groovy.version>4.0.12</dep.groovy.version>

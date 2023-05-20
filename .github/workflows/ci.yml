@@ -42,6 +42,6 @@ jobs:
 
     - name: Run unit tests
       env:
-        MAVEN_CONFIG: "-B -fae"
+        MAVEN_CONFIG: "-Dbasepom.it.fork-count=1 -B -fae"
       run: |
         make tests
