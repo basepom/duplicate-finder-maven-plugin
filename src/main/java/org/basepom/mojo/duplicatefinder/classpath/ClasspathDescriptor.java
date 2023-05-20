@@ -49,6 +49,7 @@ import com.google.common.collect.MultimapBuilder;
 import com.google.common.io.Closer;
 import com.google.common.io.Files;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -57,6 +58,7 @@ import org.basepom.mojo.duplicatefinder.ConflictType;
 import org.basepom.mojo.duplicatefinder.PluginLog;
 import org.basepom.mojo.duplicatefinder.artifact.MavenCoordinates;
 
+@SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
 public class ClasspathDescriptor
 {
     private static final PluginLog LOG = new PluginLog(ClasspathDescriptor.class);

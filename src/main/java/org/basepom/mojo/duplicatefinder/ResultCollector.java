@@ -28,7 +28,9 @@ import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder.SetMultimapBuilder;
 import com.google.common.collect.Multimaps;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
+@SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
 public class ResultCollector
 {
     private final EnumSet<ConflictState> printState;
@@ -36,7 +38,9 @@ public class ResultCollector
 
     private final EnumMap<ConflictType, EnumSet<ConflictState>> seenResults = new EnumMap<>(ConflictType.class);
 
-    private final ListMultimap<String, ConflictResult> results = SetMultimapBuilder.linkedHashKeys().arrayListValues().build();
+    private final ListMultimap<String, ConflictResult> results = SetMultimapBuilder.linkedHashKeys()
+            .arrayListValues()
+            .build();
 
     private ConflictState conflictState = ConflictState.NO_CONFLICT;
 

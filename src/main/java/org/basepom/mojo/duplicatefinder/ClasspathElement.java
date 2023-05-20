@@ -27,6 +27,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Ordering;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.maven.artifact.Artifact;
 
 /**
@@ -118,6 +119,7 @@ public abstract class ClasspathElement implements Comparable<ClasspathElement>
         }
 
         @Override
+        @SuppressFBWarnings("EI_EXPOSE_REP")
         public Artifact getArtifact()
         {
             return artifact;

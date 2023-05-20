@@ -35,6 +35,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
@@ -53,6 +54,7 @@ import org.basepom.mojo.duplicatefinder.PluginLog;
  * Only manages the dependencies because the main project can have multiple (two) folders
  * for the project. This is not supported by this resolver.
  */
+@SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
 public class ArtifactFileResolver
 {
     private static final PluginLog LOG = new PluginLog(ArtifactFileResolver.class);
@@ -62,7 +64,13 @@ public class ArtifactFileResolver
     private final Map<Artifact, File> localArtifactFileCache;
 
     private final Map<Artifact, File> repoArtifactCache;
-    private final Multimap<File, Artifact> repoFileCache;
+
+    // the artifact cache can not be a bimap, because for system artifacts, it is possible that multiple
+    // maven coordinates point to the same file.
+    private final Multimap<File, Artifact> repoFileCache = MultimapBuilder
+            .hashKeys()
+            .hashSetValues()
+            .build();
     private final ImmutableSet<File> bootClasspath;
 
     private final boolean preferLocal;
@@ -81,9 +89,6 @@ public class ArtifactFileResolver
 
         // This can not be an immutable map builder, because the map is used for looking up while it is built up.
         this.repoArtifactCache = new HashMap(project.getArtifacts().size());
-        // the artifact cache can not be a bimap, because for system artifacts, it is possible that multiple
-        // maven coordinates point to the same file.
-        this.repoFileCache = MultimapBuilder.hashKeys().hashSetValues().build();
 
         this.bootClasspath = bootClasspath;
 
