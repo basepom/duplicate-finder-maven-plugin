@@ -44,10 +44,6 @@ public abstract class ClasspathElement implements Comparable<ClasspathElement> {
         throw new UnsupportedOperationException();
     }
 
-    public boolean isBootClasspathElement() {
-        return false;
-    }
-
     public boolean isLocalFolder() {
         return false;
     }

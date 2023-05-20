@@ -113,13 +113,6 @@ public final class ITools
   }
 
   /**
-   * Checks whether a given conflictResult is also a bootClasspath element match.
-   */
-  def static isBootClasspathMatch(conflictResult) {
-    assert 1 == conflictResult.conflictNames.conflictName.grep{it.@bootClasspathElement.text() == "true" }.size()
-  }
-
-  /**
    * Loads the full XML result file and returns the root result node for the named result.
    */
   def static loadXml(dir, String name) {

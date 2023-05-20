@@ -28,6 +28,8 @@ import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException
 import org.apache.maven.artifact.versioning.OverConstrainedVersionException;
 import org.apache.maven.model.Dependency;
 import org.basepom.mojo.duplicatefinder.artifact.MavenCoordinates;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -35,6 +37,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * Captures the &lt;exceptions&gt; section from the plugin configuration.
  */
 public class ConflictingDependency {
+    private static final Logger LOG = LoggerFactory.getLogger(ConflictingDependency.class);
 
     private final Set<MavenCoordinates> conflictingDependencies = new LinkedHashSet<>();
     private final Set<String> classes = new HashSet<>();
@@ -43,7 +46,6 @@ public class ConflictingDependency {
     private Pattern[] matchingResources = new Pattern[0];
     private boolean currentProject = false;
     private boolean currentProjectIncluded = false;
-    private boolean bootClasspath = false;
 
     // Called by maven
     public void setConflictingDependencies(final Dependency[] conflictingDependencies) throws InvalidVersionSpecificationException {
@@ -97,12 +99,10 @@ public class ConflictingDependency {
     }
 
     // Called by maven
-    public void setBootClasspath(final boolean bootClasspath) {
-        this.bootClasspath = bootClasspath;
-    }
 
-    boolean hasBootClasspath() {
-        return bootClasspath;
+    @Deprecated
+    public void setBootClasspath(final boolean bootClasspath) {
+        LOG.warn("<bootClasspath> attribute is deprecated and has no function!");
     }
 
     boolean isCurrentProjectIncluded() {
@@ -137,14 +137,8 @@ public class ConflictingDependency {
         return result;
     }
 
-    public boolean isForArtifacts(final boolean bootClasspathConflict, final Set<Artifact> artifacts) throws OverConstrainedVersionException {
+    public boolean isForArtifacts(final Set<Artifact> artifacts) throws OverConstrainedVersionException {
         checkNotNull(artifacts, "artifacts is null");
-
-        // If the conflict matches the boot classpath but this exception does not cover it, return false
-        // immediately.
-        if (bootClasspathConflict && !bootClasspath) {
-            return false;
-        }
 
         // An exception can contain more than the actually matching
         // artifacts. In that case, we will check this exception if at least

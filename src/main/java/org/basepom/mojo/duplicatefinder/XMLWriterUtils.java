@@ -67,7 +67,6 @@ public final class XMLWriterUtils {
         addAttribute(conflictingDependencyElement, "currentProject", conflictingDependency.hasCurrentProject());
         addAttribute(conflictingDependencyElement, "currentProjectIncluded", conflictingDependency.isCurrentProjectIncluded());
         addAttribute(conflictingDependencyElement, "wildcard", conflictingDependency.isWildcard());
-        addAttribute(conflictingDependencyElement, "bootClasspath", conflictingDependency.hasBootClasspath());
 
         SMOutputElement dependenciesElement = conflictingDependencyElement.addElement("dependencies");
         for (MavenCoordinates dependency : conflictingDependency.getDependencies()) {
@@ -154,7 +153,6 @@ public final class XMLWriterUtils {
             addAttribute(conflictName, "name", entry.getName());
             addAttribute(conflictName, "artifact", entry.hasArtifact());
             addAttribute(conflictName, "localFolder", entry.isLocalFolder());
-            addAttribute(conflictName, "bootClasspathElement", entry.isBootClasspathElement());
             if (entry.hasArtifact()) {
                 addArtifact(conflictName, "artifact", entry.getArtifact());
             } else {

@@ -458,10 +458,7 @@ public final class DuplicateFinderMojo extends AbstractMojo {
 
             ImmutableSet.Builder<Artifact> artifactBuilder = ImmutableSet.builder();
 
-            boolean bootClasspathConflict = false;
             for (ClasspathElement conflictingClasspathElement : conflictingClasspathElements) {
-                bootClasspathConflict |= conflictingClasspathElement.isBootClasspathElement();
-
                 if (conflictingClasspathElement.hasArtifact()) {
                     artifactBuilder.add(conflictingClasspathElement.getArtifact());
                 } else if (conflictingClasspathElement.isLocalFolder()) {
@@ -469,7 +466,7 @@ public final class DuplicateFinderMojo extends AbstractMojo {
                 }
             }
 
-            final boolean excepted = isExcepted(type, name, bootClasspathConflict, artifactBuilder.build());
+            final boolean excepted = isExcepted(type, name, artifactBuilder.build());
             final ConflictState conflictState = DuplicateFinderMojo.determineConflictState(type, name, elements);
 
             resultCollector.addConflict(type, name, conflictingClasspathElements, excepted, conflictState);
@@ -539,14 +536,14 @@ public final class DuplicateFinderMojo extends AbstractMojo {
         }
     }
 
-    private boolean isExcepted(final ConflictType type, final String name, final boolean bootClasspathConflict, final Set<Artifact> artifacts)
+    private boolean isExcepted(final ConflictType type, final String name, final Set<Artifact> artifacts)
             throws OverConstrainedVersionException {
         final ImmutableSet.Builder<ConflictingDependency> conflictBuilder = ImmutableSet.builder();
         checkState(conflictingDependencies != null, "conflictingDependencies is null");
 
         // Find all exception definitions from the configuration that match these artifacts.
         for (final ConflictingDependency conflictingDependency : conflictingDependencies) {
-            if (conflictingDependency.isForArtifacts(bootClasspathConflict, artifacts)) {
+            if (conflictingDependency.isForArtifacts(artifacts)) {
                 conflictBuilder.add(conflictingDependency);
             }
         }
