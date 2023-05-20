@@ -19,11 +19,11 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import java.util.zip.ZipEntry;
@@ -33,15 +33,13 @@ import javax.lang.model.SourceVersion;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
-import com.google.common.io.Closer;
 import com.google.common.io.Files;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.maven.artifact.Artifact;
@@ -135,7 +133,7 @@ public class ClasspathDescriptor {
             // any entry is either a jar in the repo or a folder in the target folder of a referenced
             // project. Add the elements that are not ignored by the ignoredDependencies predicate to
             // the classpath descriptor.
-            for (final Map.Entry<File, Artifact> entry : fileToArtifactMap.entries()) {
+            for (final Entry<File, Artifact> entry : fileToArtifactMap.entries()) {
                 artifact = entry.getValue();
                 file = entry.getKey();
 
@@ -180,14 +178,14 @@ public class ClasspathDescriptor {
             final boolean useDefaultClassIgnoreList,
             final Collection<String> ignoredClassPatterns)
             throws MojoExecutionException {
-        final ImmutableList.Builder<Pattern> ignoredResourcePatternsBuilder = ImmutableList.builder();
+        final Builder<Pattern> ignoredResourcePatternsBuilder = ImmutableList.builder();
 
         // build resource predicate...
-        Predicate<String> resourcesPredicate = Predicates.alwaysFalse();
+        Predicate<String> resourcesPredicate = s -> false;
 
         // predicate matching the default ignores
         if (useDefaultResourceIgnoreList) {
-            resourcesPredicate = Predicates.or(resourcesPredicate, DEFAULT_IGNORED_RESOURCES_PREDICATE);
+            resourcesPredicate = resourcesPredicate.or(DEFAULT_IGNORED_RESOURCES_PREDICATE);
             ignoredResourcePatternsBuilder.addAll(DEFAULT_IGNORED_RESOURCES_PREDICATE.getPatterns());
         }
 
@@ -195,7 +193,7 @@ public class ClasspathDescriptor {
             try {
                 // predicate matching the user ignores
                 MatchPatternPredicate ignoredResourcesPredicate = new MatchPatternPredicate(ignoredResourcePatterns);
-                resourcesPredicate = Predicates.or(resourcesPredicate, ignoredResourcesPredicate);
+                resourcesPredicate = resourcesPredicate.or(ignoredResourcesPredicate);
                 ignoredResourcePatternsBuilder.addAll(ignoredResourcesPredicate.getPatterns());
             } catch (final PatternSyntaxException pse) {
                 throw new MojoExecutionException("Error compiling resourceIgnore pattern: " + pse.getMessage());
@@ -205,14 +203,14 @@ public class ClasspathDescriptor {
         this.resourcesPredicate = resourcesPredicate;
         this.ignoredResourcePatterns = ignoredResourcePatternsBuilder.build();
 
-        final ImmutableList.Builder<Pattern> ignoredClassPatternsBuilder = ImmutableList.builder();
+        final Builder<Pattern> ignoredClassPatternsBuilder = ImmutableList.builder();
 
         // build class predicate.
-        Predicate<String> classPredicate = Predicates.alwaysFalse();
+        Predicate<String> classPredicate = s -> false;
 
         // predicate matching the default ignores
         if (useDefaultClassIgnoreList) {
-            classPredicate = Predicates.or(classPredicate, DEFAULT_IGNORED_CLASS_PREDICATE);
+            classPredicate = classPredicate.or(DEFAULT_IGNORED_CLASS_PREDICATE);
             ignoredClassPatternsBuilder.addAll(DEFAULT_IGNORED_CLASS_PREDICATE.getPatterns());
         }
 
@@ -220,7 +218,7 @@ public class ClasspathDescriptor {
             try {
                 // predicate matching the user ignores
                 MatchPatternPredicate ignoredPackagePredicate = new MatchPatternPredicate(ignoredClassPatterns);
-                classPredicate = Predicates.or(classPredicate, ignoredPackagePredicate);
+                classPredicate = classPredicate.or(ignoredPackagePredicate);
                 ignoredClassPatternsBuilder.addAll(ignoredPackagePredicate.getPatterns());
             } catch (final PatternSyntaxException pse) {
                 throw new MojoExecutionException("Error compiling classIgnore pattern: " + pse.getMessage());
@@ -284,7 +282,7 @@ public class ClasspathDescriptor {
         final File[] files = workDir.listFiles();
 
         if (files != null) {
-            for (final File file : Arrays.asList(files)) {
+            for (final File file : files) {
                 if (file.isDirectory()) {
                     if (DEFAULT_IGNORED_LOCAL_DIRECTORIES.apply(file.getName())) {
                         LOG.debug("Ignoring local directory '%s'", file.getAbsolutePath());
@@ -308,11 +306,10 @@ public class ClasspathDescriptor {
     }
 
     private void addArchive(final ClasspathCacheElement.Builder cacheBuilder, final File element) throws IOException {
-        final Closer closer = Closer.create();
 
-        try {
-            final InputStream input = closer.register(element.toURI().toURL().openStream());
-            final ZipInputStream zipInput = closer.register(new ZipInputStream(input));
+        try (
+            final InputStream input = element.toURI().toURL().openStream();
+            final ZipInputStream zipInput = new ZipInputStream(input)) {
 
             ZipEntry entry;
 
@@ -331,8 +328,6 @@ public class ClasspathDescriptor {
                     }
                 }
             }
-        } finally {
-            closer.close();
         }
     }
 

@@ -14,10 +14,9 @@
 package org.basepom.mojo.duplicatefinder.classpath;
 
 import java.io.File;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
-import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 
@@ -27,7 +26,7 @@ class ClasspathCacheElement {
     private final ImmutableSet<String> classes;
     private final ImmutableSet<String> resources;
 
-    public static ClasspathCacheElement.Builder builder(final File element) {
+    public static Builder builder(final File element) {
         return new Builder(element);
     }
 
@@ -38,13 +37,13 @@ class ClasspathCacheElement {
     }
 
     void putClasses(final Multimap<String, File> classMap, final Predicate<String> excludePredicate) {
-        for (final String className : Collections2.filter(classes, Predicates.not(excludePredicate))) {
+        for (final String className : classes.stream().filter(excludePredicate.negate()).collect(Collectors.toList())) {
             classMap.put(className, element);
         }
     }
 
     void putResources(final Multimap<String, File> resourceMap, final Predicate<String> excludePredicate) {
-        for (final String resource : Collections2.filter(resources, Predicates.not(excludePredicate))) {
+        for (final String resource : resources.stream().filter(excludePredicate.negate()).collect(Collectors.toList())) {
             resourceMap.put(resource, element);
         }
     }

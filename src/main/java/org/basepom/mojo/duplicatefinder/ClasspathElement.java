@@ -15,8 +15,8 @@ package org.basepom.mojo.duplicatefinder;
 
 import java.io.File;
 import java.util.Objects;
+import java.util.function.Function;
 
-import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Ordering;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;

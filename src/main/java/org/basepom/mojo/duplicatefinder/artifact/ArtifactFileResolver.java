@@ -33,7 +33,6 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
-import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.project.MavenProject;
 import org.basepom.mojo.duplicatefinder.ClasspathElement;
@@ -83,13 +82,13 @@ public class ArtifactFileResolver {
         ImmutableMultimap.Builder<File, Artifact> localFileArtifactCacheBuilder = ImmutableMultimap.builder();
 
         // This can not be an immutable map builder, because the map is used for looking up while it is built up.
-        this.repoArtifactCache = new HashMap(project.getArtifacts().size());
+        this.repoArtifactCache = new HashMap<>(project.getArtifacts().size());
 
         for (final Artifact artifact : project.getArtifacts()) {
             final File repoPath = artifact.getFile().getCanonicalFile();
             final Artifact canonicalizedArtifact = ArtifactFileResolver.canonicalizeArtifact(artifact);
 
-            checkState(repoPath != null && repoPath.exists(), "Repository Path '%s' does not exist.", repoPath);
+            checkState(repoPath.exists(), "Repository Path '%s' does not exist.", repoPath);
             final File oldFile = repoArtifactCache.put(canonicalizedArtifact, repoPath);
             checkState(oldFile == null || oldFile.equals(repoPath), "Already encountered a file for %s: %s", canonicalizedArtifact, oldFile);
             repoFileCache.put(repoPath, canonicalizedArtifact);
@@ -110,7 +109,7 @@ public class ArtifactFileResolver {
 
                 final File outputDir = isTestArtifact(artifact) ? getTestOutputDirectory(referencedProject) : getOutputDirectory(referencedProject);
 
-                if (outputDir != null && outputDir.exists()) {
+                if (outputDir.exists()) {
                     localFileArtifactCacheBuilder.put(outputDir, artifact);
                 }
             }
@@ -129,8 +128,7 @@ public class ArtifactFileResolver {
         this.localArtifactFileCache = localArtifactFileCacheBuilder.build();
     }
 
-    public ImmutableMultimap<File, Artifact> resolveArtifactsForScopes(final Set<String> scopes)
-            throws InvalidVersionSpecificationException, DependencyResolutionRequiredException {
+    public ImmutableMultimap<File, Artifact> resolveArtifactsForScopes(final Set<String> scopes) {
         checkNotNull(scopes, "scopes is null");
 
         final ImmutableMultimap.Builder<File, Artifact> inScopeBuilder = ImmutableMultimap.builder();
@@ -209,7 +207,7 @@ public class ArtifactFileResolver {
             classifier = "tests";
         }
 
-        final DefaultArtifact canonicalizedArtifact = new DefaultArtifact(artifact.getGroupId(),
+        return new DefaultArtifact(artifact.getGroupId(),
                 artifact.getArtifactId(),
                 versionRange,
                 artifact.getScope(),
@@ -217,8 +215,6 @@ public class ArtifactFileResolver {
                 classifier,
                 artifact.getArtifactHandler(),
                 artifact.isOptional());
-
-        return canonicalizedArtifact;
     }
 
     private Set<Artifact> listArtifacts() {

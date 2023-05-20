@@ -17,7 +17,7 @@ import java.util.Objects;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Optional;
+import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
@@ -45,12 +45,12 @@ public class MavenCoordinates {
         this.groupId = checkNotNull(dependency.getGroupId(), "groupId for dependency '%s' is null", dependency);
 
         final String version = dependency.getVersion();
-        this.version = version == null ? Optional.<ArtifactVersion>absent() : Optional.of(new DefaultArtifactVersion(version));
+        this.version = Optional.ofNullable(version).map(DefaultArtifactVersion::new);
 
         if (this.version.isPresent()) {
             this.versionRange = Optional.of(VersionRange.createFromVersionSpec(version));
         } else {
-            this.versionRange = Optional.absent();
+            this.versionRange = Optional.empty();
         }
 
         final String type = dependency.getType();
@@ -60,7 +60,7 @@ public class MavenCoordinates {
             this.type = "jar";
         } else {
             this.type = MoreObjects.firstNonNull(type, "jar");
-            this.classifier = Optional.fromNullable(classifier);
+            this.classifier = Optional.ofNullable(classifier);
         }
     }
 
@@ -69,13 +69,13 @@ public class MavenCoordinates {
 
         this.artifactId = checkNotNull(artifact.getArtifactId(), "artifactId for artifact '%s' is null", artifact);
         this.groupId = checkNotNull(artifact.getGroupId(), "groupId for artifact '%s' is null", artifact);
-        this.versionRange = Optional.fromNullable(artifact.getVersionRange());
+        this.versionRange = Optional.ofNullable(artifact.getVersionRange());
 
         if (this.versionRange.isPresent()) {
-            this.version = Optional.fromNullable(artifact.getSelectedVersion());
+            this.version = Optional.ofNullable(artifact.getSelectedVersion());
         } else {
             final String version = artifact.getBaseVersion();
-            this.version = version == null ? Optional.<ArtifactVersion>absent() : Optional.of(new DefaultArtifactVersion(version));
+            this.version = Optional.ofNullable(version).map(DefaultArtifactVersion::new);
         }
 
         final String type = artifact.getType();
@@ -85,7 +85,7 @@ public class MavenCoordinates {
             this.type = "jar";
         } else {
             this.type = MoreObjects.firstNonNull(type, "jar");
-            this.classifier = Optional.fromNullable(classifier);
+            this.classifier = Optional.ofNullable(classifier);
         }
     }
 
@@ -127,7 +127,7 @@ public class MavenCoordinates {
         // If a classifier is present, try to match the other classifier,
         // otherwise, if no classifier is present, it matches all classifiers from the other MavenCoordinates.
         if (getClassifier().isPresent()) {
-            if (!Objects.equals(getClassifier().get(), other.getClassifier().orNull())) {
+            if (!Objects.equals(getClassifier().get(), other.getClassifier().orElse(null))) {
                 return false;
             }
         }
@@ -150,7 +150,7 @@ public class MavenCoordinates {
             final ArtifactVersion recommendedVersion = getVersionRange().get().getRecommendedVersion();
             if (recommendedVersion != null) {
                 // Yes, then it must be matched.
-                return Objects.equals(recommendedVersion, other.getVersion().orNull());
+                return Objects.equals(recommendedVersion, other.getVersion().orElse(null));
             }
 
             // No, see if the other version is in the range
@@ -160,7 +160,7 @@ public class MavenCoordinates {
         }
 
         // exact version match.
-        return Objects.equals(getVersion().orNull(), other.getVersion().orNull());
+        return Objects.equals(getVersion().orElse(null), other.getVersion().orElse(null));
     }
 
     @Override
@@ -199,7 +199,7 @@ public class MavenCoordinates {
         }
 
         builder.add(getType());
-        builder.add(getClassifier().or("<any>"));
+        builder.add(getClassifier().orElse("<any>"));
         return Joiner.on(':').join(builder.build());
     }
 }

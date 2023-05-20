@@ -14,7 +14,6 @@
 package org.basepom.mojo.duplicatefinder;
 
 import java.io.BufferedInputStream;
-import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -93,13 +92,13 @@ public final class DuplicateFinderMojo extends AbstractMojo {
 
     private static final Set<String> COMPILE_SCOPE = ImmutableSet.of(SCOPE_COMPILE, SCOPE_PROVIDED, SCOPE_SYSTEM);
     private static final Set<String> RUNTIME_SCOPE = ImmutableSet.of(SCOPE_COMPILE, SCOPE_RUNTIME);
-    private static final Set<String> TEST_SCOPE = ImmutableSet.<String>of(); // Empty == all scopes
+    private static final Set<String> TEST_SCOPE = ImmutableSet.of(); // Empty == all scopes
 
     /**
      * The maven project (effective pom).
      */
     @Parameter(defaultValue = "${project}", readonly = true)
-    private MavenProject project;
+    public MavenProject project;
 
     /**
      * Report files that have the same sha256 has value.
@@ -107,7 +106,7 @@ public final class DuplicateFinderMojo extends AbstractMojo {
      * @since 1.0.6
      */
     @Parameter(defaultValue = "false", property = "duplicate-finder.printEqualFiles")
-    protected boolean printEqualFiles = false;
+    public boolean printEqualFiles = false;
 
     /**
      * Fail the build if files with the same name but different content are detected.
@@ -115,7 +114,7 @@ public final class DuplicateFinderMojo extends AbstractMojo {
      * @since 1.0.3
      */
     @Parameter(defaultValue = "false", property = "duplicate-finder.failBuildInCaseOfDifferentContentConflict")
-    protected boolean failBuildInCaseOfDifferentContentConflict = false;
+    public boolean failBuildInCaseOfDifferentContentConflict = false;
 
     /**
      * Fail the build if files with the same name and the same content are detected.
@@ -123,19 +122,19 @@ public final class DuplicateFinderMojo extends AbstractMojo {
      * @since 1.0.3
      */
     @Parameter(defaultValue = "false", property = "duplicate-finder.failBuildInCaseOfEqualContentConflict")
-    protected boolean failBuildInCaseOfEqualContentConflict = false;
+    public boolean failBuildInCaseOfEqualContentConflict = false;
 
     /**
      * Fail the build if any files with the same name are found.
      */
     @Parameter(defaultValue = "false", property = "duplicate-finder.failBuildInCaseOfConflict")
-    protected boolean failBuildInCaseOfConflict = false;
+    public boolean failBuildInCaseOfConflict = false;
 
     /**
      * Use the default resource ignore list.
      */
     @Parameter(defaultValue = "true", property = "duplicate-finder.useDefaultResourceIgnoreList")
-    protected boolean useDefaultResourceIgnoreList = true;
+    public boolean useDefaultResourceIgnoreList = true;
 
     /**
      * Use the default class ignore list.
@@ -143,13 +142,13 @@ public final class DuplicateFinderMojo extends AbstractMojo {
      * @since 1.2.1
      */
     @Parameter(defaultValue = "true", property = "duplicate-finder.useDefaultClassIgnoreList")
-    protected boolean useDefaultClassIgnoreList = true;
+    public boolean useDefaultClassIgnoreList = true;
 
     /**
      * Ignored resources, which are not checked for multiple occurences.
      */
     @Parameter
-    protected String[] ignoredResourcePatterns = new String[0];
+    public String[] ignoredResourcePatterns = new String[0];
 
     /**
      * Ignored classes, which are not checked for multiple occurences.
@@ -157,43 +156,43 @@ public final class DuplicateFinderMojo extends AbstractMojo {
      * @since 1.2.1
      */
     @Parameter
-    protected String[] ignoredClassPatterns = new String[0];
+    public String[] ignoredClassPatterns = new String[0];
 
     /**
      * Artifacts with expected and resolved versions that are checked.
      */
     @Parameter(alias = "exceptions")
-    protected ConflictingDependency[] conflictingDependencies = new ConflictingDependency[0];
+    public ConflictingDependency[] conflictingDependencies = new ConflictingDependency[0];
 
     /**
      * Dependencies that should not be checked at all.
      */
     @Parameter(alias = "ignoredDependencies")
-    protected MavenCoordinates[] ignoredDependencies = new MavenCoordinates[0];
+    public MavenCoordinates[] ignoredDependencies = new MavenCoordinates[0];
 
     /**
      * Check resources and classes on the compile class path.
      */
     @Parameter(defaultValue = "true", property = "duplicate-finder.checkCompileClasspath")
-    protected boolean checkCompileClasspath = true;
+    public boolean checkCompileClasspath = true;
 
     /**
      * Check resources and classes on the runtime class path.
      */
     @Parameter(defaultValue = "true", property = "duplicate-finder.checkRuntimeClasspath")
-    protected boolean checkRuntimeClasspath = true;
+    public boolean checkRuntimeClasspath = true;
 
     /**
      * Check resources and classes on the test class path.
      */
     @Parameter(defaultValue = "true", property = "duplicate-finder.checkTestClasspath")
-    protected boolean checkTestClasspath = true;
+    public boolean checkTestClasspath = true;
 
     /**
      * Skips the plugin execution.
      */
     @Parameter(defaultValue = "false", property = "duplicate-finder.skip")
-    protected boolean skip = false;
+    public boolean skip = false;
 
     /**
      * Quiets the plugin (report only errors).
@@ -201,7 +200,7 @@ public final class DuplicateFinderMojo extends AbstractMojo {
      * @since 1.1.0
      */
     @Parameter(defaultValue = "false", property = "duplicate-finder.quiet")
-    protected boolean quiet = false;
+    public boolean quiet = false;
 
     /**
      * Whether existing local directories with classes or existing artifacts are preferred.
@@ -209,7 +208,7 @@ public final class DuplicateFinderMojo extends AbstractMojo {
      * @since 1.1.0
      */
     @Parameter(defaultValue = "true", property = "duplicate-finder.preferLocal")
-    protected boolean preferLocal = true;
+    public boolean preferLocal = true;
 
     /**
      * Output file for the result of the plugin.
@@ -217,7 +216,7 @@ public final class DuplicateFinderMojo extends AbstractMojo {
      * @since 1.1.0
      */
     @Parameter(defaultValue = "${project.build.directory}/duplicate-finder-result.xml", property = "duplicate-finder.resultFile")
-    protected File resultFile;
+    public File resultFile;
 
     /**
      * Write result to output file.
@@ -225,7 +224,7 @@ public final class DuplicateFinderMojo extends AbstractMojo {
      * @since 1.1.0
      */
     @Parameter(defaultValue = "true", property = "duplicate-finder.useResultFile")
-    protected boolean useResultFile = true;
+    public boolean useResultFile = true;
 
     /**
      * Minimum occurences on the class path to be listed in the result file.
@@ -233,7 +232,7 @@ public final class DuplicateFinderMojo extends AbstractMojo {
      * @since 1.1.0
      */
     @Parameter(defaultValue = "2", property = "duplicate-finder.resultFileMinClasspathCount")
-    protected int resultFileMinClasspathCount = 2;
+    public int resultFileMinClasspathCount = 2;
 
     /**
      * Include the boot class path in duplicate detection. This will find duplicates with the JDK
@@ -244,7 +243,7 @@ public final class DuplicateFinderMojo extends AbstractMojo {
      */
     @Parameter(defaultValue = "false", property = "duplicate-finder.includeBootClasspath")
     @Deprecated
-    protected boolean includeBootClasspath = false;
+    public boolean includeBootClasspath = false;
 
     /**
      * System property that contains the boot class path.
@@ -254,7 +253,7 @@ public final class DuplicateFinderMojo extends AbstractMojo {
      */
     @Parameter(defaultValue = "sun.boot.class.path", property = "duplicate-finder.bootClasspathProperty")
     @Deprecated
-    protected String bootClasspathProperty = null;
+    public String bootClasspathProperty = null;
 
     /**
      * Include POM projects in validation.
@@ -262,7 +261,7 @@ public final class DuplicateFinderMojo extends AbstractMojo {
      * @since 1.2.0
      */
     @Parameter(defaultValue = "false", property = "duplicate-finder.includePomProjects")
-    protected boolean includePomProjects = false;
+    public boolean includePomProjects = false;
 
     private final EnumSet<ConflictState> printState = EnumSet.of(CONFLICT_CONTENT_DIFFERENT);
     private final EnumSet<ConflictState> failState = EnumSet.noneOf(ConflictState.class);
@@ -319,7 +318,7 @@ public final class DuplicateFinderMojo extends AbstractMojo {
                     final ResultCollector resultCollector = new ResultCollector(printState, failState);
                     final ClasspathDescriptor classpathDescriptor = checkClasspath(resultCollector, artifactFileResolver, COMPILE_SCOPE,
                             getOutputDirectory(project));
-                    classpathResultBuilder.put("compile", new SimpleImmutableEntry<ResultCollector, ClasspathDescriptor>(resultCollector, classpathDescriptor));
+                    classpathResultBuilder.put("compile", new SimpleImmutableEntry<>(resultCollector, classpathDescriptor));
                 }
 
                 if (checkRuntimeClasspath) {
@@ -327,7 +326,7 @@ public final class DuplicateFinderMojo extends AbstractMojo {
                     final ResultCollector resultCollector = new ResultCollector(printState, failState);
                     final ClasspathDescriptor classpathDescriptor = checkClasspath(resultCollector, artifactFileResolver, RUNTIME_SCOPE,
                             getOutputDirectory(project));
-                    classpathResultBuilder.put("runtime", new SimpleImmutableEntry<ResultCollector, ClasspathDescriptor>(resultCollector, classpathDescriptor));
+                    classpathResultBuilder.put("runtime", new SimpleImmutableEntry<>(resultCollector, classpathDescriptor));
                 }
 
                 if (checkTestClasspath) {
@@ -338,7 +337,7 @@ public final class DuplicateFinderMojo extends AbstractMojo {
                             TEST_SCOPE,
                             getOutputDirectory(project),
                             getTestOutputDirectory(project));
-                    classpathResultBuilder.put("test", new SimpleImmutableEntry<ResultCollector, ClasspathDescriptor>(resultCollector, classpathDescriptor));
+                    classpathResultBuilder.put("test", new SimpleImmutableEntry<>(resultCollector, classpathDescriptor));
                 }
 
                 final ImmutableMap<String, Entry<ResultCollector, ClasspathDescriptor>> classpathResults = classpathResultBuilder.build();
@@ -439,7 +438,7 @@ public final class DuplicateFinderMojo extends AbstractMojo {
 
     private void checkForDuplicates(final ConflictType type, final ResultCollector resultCollector, final ClasspathDescriptor classpathDescriptor,
             final ArtifactFileResolver artifactFileResolver)
-            throws MojoExecutionException, OverConstrainedVersionException {
+            throws OverConstrainedVersionException {
         // only look at entries with a size > 1.
         final Map<String, Collection<File>> filteredMap = ImmutableMap.copyOf(Maps.filterEntries(classpathDescriptor.getClasspathElementLocations(type),
                 entry -> {
@@ -515,22 +514,17 @@ public final class DuplicateFinderMojo extends AbstractMojo {
      * @throws IOException if any error occurs on reading class in archive
      */
     private static String getSHA256HexOfElement(final File file, final String resourcePath) throws IOException {
-        final Closer closer = Closer.create();
-        InputStream in;
 
-        try {
+        try (Closer closer = Closer.create()) {
+            InputStream in;
+
             if (file.isDirectory()) {
                 final File resourceFile = new File(file, resourcePath);
                 in = closer.register(new BufferedInputStream(new FileInputStream(resourceFile)));
             } else {
                 final ZipFile zip = new ZipFile(file);
 
-                closer.register(new Closeable() {
-                    @Override
-                    public void close() throws IOException {
-                        zip.close();
-                    }
-                });
+                closer.register(zip::close);
 
                 final ZipEntry zipEntry = zip.getEntry(resourcePath);
 
@@ -542,8 +536,6 @@ public final class DuplicateFinderMojo extends AbstractMojo {
             }
 
             return SHA_256.newHasher().putBytes(ByteStreams.toByteArray(in)).hash().toString();
-        } finally {
-            closer.close();
         }
     }
 
@@ -609,7 +601,7 @@ public final class DuplicateFinderMojo extends AbstractMojo {
     }
 
     private void addConfiguration(SMOutputElement rootElement)
-            throws XMLStreamException, InvalidVersionSpecificationException {
+            throws XMLStreamException {
         SMOutputElement prefs = XMLWriterUtils.addElement(rootElement, "configuration", null);
         // Simple configuration options
         XMLWriterUtils.addAttribute(prefs, "skip", skip);

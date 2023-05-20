@@ -47,8 +47,8 @@ public class ConflictingDependency {
 
     // Called by maven
     public void setConflictingDependencies(final Dependency[] conflictingDependencies) throws InvalidVersionSpecificationException {
-        for (int idx = 0; idx < conflictingDependencies.length; idx++) {
-            this.conflictingDependencies.add(new MavenCoordinates(conflictingDependencies[idx]));
+        for (Dependency conflictingDependency : conflictingDependencies) {
+            this.conflictingDependencies.add(new MavenCoordinates(conflictingDependency));
         }
     }
 
@@ -61,7 +61,7 @@ public class ConflictingDependency {
     }
 
     public String[] getClasses() {
-        return classes.toArray(new String[classes.size()]);
+        return classes.toArray(new String[0]);
     }
 
     // Called by maven
@@ -70,7 +70,7 @@ public class ConflictingDependency {
     }
 
     public String[] getPackages() {
-        return packages.toArray(new String[packages.size()]);
+        return packages.toArray(new String[0]);
     }
 
     // Called by maven
@@ -79,7 +79,7 @@ public class ConflictingDependency {
     }
 
     public String[] getResources() {
-        return resources.toArray(new String[resources.size()]);
+        return resources.toArray(new String[0]);
     }
 
     // Called by maven
@@ -208,8 +208,8 @@ public class ConflictingDependency {
             return true;
         }
 
-        for (int i = 0; i < matchingResources.length; i++) {
-            if (matchingResources[i].matcher(resourceAsRelative).matches()) {
+        for (Pattern matchingResource : matchingResources) {
+            if (matchingResource.matcher(resourceAsRelative).matches()) {
                 return true;
             }
         }

@@ -18,9 +18,9 @@ import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.SortedSet;
+import java.util.stream.Collectors;
 
 import com.google.common.base.Joiner;
-import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimap;
@@ -95,7 +95,9 @@ public class ResultCollector {
     }
 
     private static String buildConflictName(final SortedSet<ClasspathElement> conflictArtifactNames) {
-        return Joiner.on(", ").join(Collections2.transform(conflictArtifactNames, ClasspathElement.getNameFunction()));
+        return Joiner.on(", ").join(conflictArtifactNames.stream()
+                .map(ClasspathElement.getNameFunction())
+                .collect(Collectors.toList()));
     }
 
     public class ConflictResult {
