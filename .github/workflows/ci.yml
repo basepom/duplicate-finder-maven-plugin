@@ -1,40 +1,47 @@
-name: ci
+name: CI build
 
 on:
   push:
     branches:
-      - master
+    - main
   pull_request:
+    branches:
+    - main
 
 jobs:
   ci:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        java-version: [11, 14]
-        it-version: [8, 11, 14]
+        test-java-version: [ 11, 17, 20 ]
 
     steps:
-      - uses: actions/checkout@v2
-      - name: Cache local Maven repository
-        uses: actions/cache@v2
-        with:
-            path: ~/.m2/repository
-            key: ${{ runner.os }}-${{ matrix.java-version }}-maven-${{ hashFiles('**/pom.xml') }}
-            restore-keys: |
-                ${{ runner.os }}-${{ matrix.java-version }}-maven-
-      - uses: actions/setup-java@v1
-        with:
-          java-version: ${{ matrix.java-version }}
-      - name: Build
-        run: |
-          ./mvnw -DskipTests=true -Dbasepom.check.skip-all=true -fae install
-      - name: Test
-        run: |
-          ./mvnw -fae verify
-      - uses: actions/setup-java@v1
-        with:
-          java-version: ${{ matrix.it-version }}
-      - name: Running IT on  Java ${{ matrix.it-version }}, built with Java ${{ matrix.java-version }}.
-        run: |
-          ./mvnw -Pit-jdk${{ matrix.it-version }} -fae invoker:integration-test invoker:verify
+    - uses: actions/checkout@v3
+
+    - uses: actions/setup-java@v3
+      id: setup_build_jdk
+      name: Setup Build JDK
+      with:
+        java-version: 17
+        distribution: temurin
+        cache: maven
+
+    - name: Build
+      env:
+        MAVEN_CONFIG: "-Pfast -Dbasepom.check.skip-enforcer=false -B -fae"
+      run: |
+        make install
+
+    - uses: actions/setup-java@v3
+      id: setup_test_jdk
+      name: Setup Test JDK
+      with:
+        java-version: ${{ matrix.test-java-version }}
+        distribution: temurin
+        cache: maven
+
+    - name: Run unit tests
+      env:
+        MAVEN_CONFIG: "-B -fae"
+      run: |
+        make test
