@@ -44,4 +44,4 @@ jobs:
       env:
         MAVEN_CONFIG: "-B -fae"
       run: |
-        make test
+        make tests
