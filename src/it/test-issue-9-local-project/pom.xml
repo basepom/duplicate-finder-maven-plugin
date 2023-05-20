@@ -12,7 +12,7 @@
 ~   limitations under the License.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
@@ -23,9 +23,11 @@
     </parent>
 
     <artifactId>test-issue-9-local-project</artifactId>
-    <description>A local project is used as a plugin dependency and has duplicates against the actual project. This test ensures that these duplicates are not flagged.</description>
+    <description>A local project is used as a plugin dependency and has duplicates against the actual project. This test ensures that these duplicates are not
+        flagged.
+    </description>
     <packaging>pom</packaging>
-    
+
     <modules>
         <module>p1</module>
         <module>p2</module>

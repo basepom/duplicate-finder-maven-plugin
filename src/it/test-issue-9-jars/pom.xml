@@ -12,7 +12,7 @@
 ~   limitations under the License.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
@@ -23,9 +23,10 @@
     </parent>
 
     <artifactId>test-issue-9-local-project</artifactId>
-    <description>Dependencies betweeen a plugin dependency and a project dependency clash. This test ensures that these duplicates are not flagged.</description>
+    <description>Dependencies betweeen a plugin dependency and a project dependency clash. This test ensures that these duplicates are not flagged.
+    </description>
     <packaging>jar</packaging>
-    
+
     <dependencies>
         <dependency>
             <groupId>testjar</groupId>
@@ -44,17 +45,17 @@
                     <failBuildInCaseOfConflict>true</failBuildInCaseOfConflict>
                 </configuration>
             </plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<dependencies>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <dependencies>
                     <dependency>
                         <groupId>testjar</groupId>
                         <artifactId>first-diff-jar</artifactId>
                         <version>1.0.under-test</version>
                     </dependency>
-				</dependencies>
-			</plugin>
+                </dependencies>
+            </plugin>
         </plugins>
     </build>
 </project>

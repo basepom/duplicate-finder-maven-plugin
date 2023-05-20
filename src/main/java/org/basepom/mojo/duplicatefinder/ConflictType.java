@@ -13,25 +13,21 @@
  */
 package org.basepom.mojo.duplicatefinder;
 
-public enum ConflictType
-{
+public enum ConflictType {
     CLASS("classes"), RESOURCE("resources");
 
     private final String type;
 
-    ConflictType(String type)
-    {
+    ConflictType(String type) {
         this.type = type;
     }
 
-    public String getType()
-    {
+    public String getType() {
         return type;
     }
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         return type;
     }
 }

@@ -16,8 +16,8 @@ import static org.basepom.mojo.duplicatefinder.groovy.ITools.*
 def (result, xml) = loadXmlAndResult(basedir, "test")
 
 overallState(CONFLICT_DIFF, 1, FAILED, result) // This is "1" because both conflictResults are in the same conflict.
-checkConflictResult("conflict-same-content",      TYPE_RESOURCE, CONFLICT_EQUAL, NOT_EXCEPTED, PRINTED, FAILED, findConflictResult(result, 2, FIRST_JAR, SECOND_JAR))
-checkConflictResult("conflict-different-content", TYPE_RESOURCE, CONFLICT_DIFF,  NOT_EXCEPTED, PRINTED, FAILED, findConflictResult(result, 2, FIRST_JAR, SECOND_JAR))
+checkConflictResult("conflict-same-content", TYPE_RESOURCE, CONFLICT_EQUAL, NOT_EXCEPTED, PRINTED, FAILED, findConflictResult(result, 2, FIRST_JAR, SECOND_JAR))
+checkConflictResult("conflict-different-content", TYPE_RESOURCE, CONFLICT_DIFF, NOT_EXCEPTED, PRINTED, FAILED, findConflictResult(result, 2, FIRST_JAR, SECOND_JAR))
 
 def conflictingDependencies = xml.configuration.conflictingDependencies
 assert 1 == conflictingDependencies.size()

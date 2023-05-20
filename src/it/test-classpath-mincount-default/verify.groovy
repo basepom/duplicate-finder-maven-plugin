@@ -17,9 +17,9 @@ def (result, xml) = loadXmlAndResult(basedir, "test")
 assert "2" == xml.configuration.@resultFileMinClasspathCount.text()
 
 overallState(CONFLICT_DIFF, 2, NOT_FAILED, result)
-checkConflictResult("diff.Demo",                  TYPE_CLASS,    CONFLICT_DIFF,  NOT_EXCEPTED, PRINTED,     NOT_FAILED, findConflictResult(result, 1, FIRST_CLASS_JAR, FIRST_DIFF_JAR))
-checkConflictResult("conflict-same-content",      TYPE_RESOURCE, CONFLICT_EQUAL, NOT_EXCEPTED, NOT_PRINTED, NOT_FAILED, findConflictResult(result, 2, FIRST_JAR, SECOND_JAR))
-checkConflictResult("conflict-different-content", TYPE_RESOURCE, CONFLICT_DIFF,  NOT_EXCEPTED, PRINTED,     NOT_FAILED, findConflictResult(result, 2, FIRST_JAR, SECOND_JAR))
+checkConflictResult("diff.Demo", TYPE_CLASS, CONFLICT_DIFF, NOT_EXCEPTED, PRINTED, NOT_FAILED, findConflictResult(result, 1, FIRST_CLASS_JAR, FIRST_DIFF_JAR))
+checkConflictResult("conflict-same-content", TYPE_RESOURCE, CONFLICT_EQUAL, NOT_EXCEPTED, NOT_PRINTED, NOT_FAILED, findConflictResult(result, 2, FIRST_JAR, SECOND_JAR))
+checkConflictResult("conflict-different-content", TYPE_RESOURCE, CONFLICT_DIFF, NOT_EXCEPTED, PRINTED, NOT_FAILED, findConflictResult(result, 2, FIRST_JAR, SECOND_JAR))
 
 assert 2 == result.classpathElements.size()
 

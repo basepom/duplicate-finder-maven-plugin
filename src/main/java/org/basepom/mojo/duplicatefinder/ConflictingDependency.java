@@ -13,8 +13,6 @@
  */
 package org.basepom.mojo.duplicatefinder;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -25,18 +23,19 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import com.google.common.collect.ImmutableList;
-
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.OverConstrainedVersionException;
 import org.apache.maven.model.Dependency;
 import org.basepom.mojo.duplicatefinder.artifact.MavenCoordinates;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * Captures the &lt;exceptions&gt; section from the plugin configuration.
  */
-public class ConflictingDependency
-{
+public class ConflictingDependency {
+
     private final Set<MavenCoordinates> conflictingDependencies = new LinkedHashSet<>();
     private final Set<String> classes = new HashSet<>();
     private final Set<String> packages = new HashSet<>();
@@ -47,84 +46,70 @@ public class ConflictingDependency
     private boolean bootClasspath = false;
 
     // Called by maven
-    public void setConflictingDependencies(final Dependency[] conflictingDependencies) throws InvalidVersionSpecificationException
-    {
+    public void setConflictingDependencies(final Dependency[] conflictingDependencies) throws InvalidVersionSpecificationException {
         for (int idx = 0; idx < conflictingDependencies.length; idx++) {
             this.conflictingDependencies.add(new MavenCoordinates(conflictingDependencies[idx]));
         }
     }
 
     // Called by maven
-    public void setResourcePatterns(final String[] resourcePatterns)
-    {
+    public void setResourcePatterns(final String[] resourcePatterns) {
         this.matchingResources = new Pattern[resourcePatterns.length];
         for (int i = 0; i < resourcePatterns.length; i++) {
             this.matchingResources[i] = Pattern.compile(resourcePatterns[i], Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
         }
     }
 
-    public String[] getClasses()
-    {
+    public String[] getClasses() {
         return classes.toArray(new String[classes.size()]);
     }
 
     // Called by maven
-    public void setClasses(final String[] classes)
-    {
+    public void setClasses(final String[] classes) {
         this.classes.addAll(Arrays.asList(classes));
     }
 
-    public String[] getPackages()
-    {
+    public String[] getPackages() {
         return packages.toArray(new String[packages.size()]);
     }
 
     // Called by maven
-    public void setPackages(final String[] packages)
-    {
+    public void setPackages(final String[] packages) {
         this.packages.addAll(Arrays.asList(packages));
     }
 
-    public String[] getResources()
-    {
+    public String[] getResources() {
         return resources.toArray(new String[resources.size()]);
     }
 
     // Called by maven
-    public void setResources(final String[] resources)
-    {
+    public void setResources(final String[] resources) {
         this.resources.addAll(Arrays.asList(resources));
     }
 
     // Called by maven
-    public void setCurrentProject(final boolean currentProject)
-    {
+    public void setCurrentProject(final boolean currentProject) {
         this.currentProject = currentProject;
     }
 
-    boolean hasCurrentProject()
-    {
+    boolean hasCurrentProject() {
         return currentProject;
     }
 
     // Called by maven
-    public void setBootClasspath(final boolean bootClasspath)
-    {
+    public void setBootClasspath(final boolean bootClasspath) {
         this.bootClasspath = bootClasspath;
     }
 
-    boolean hasBootClasspath()
-    {
+    boolean hasBootClasspath() {
         return bootClasspath;
     }
 
-    boolean isCurrentProjectIncluded()
-    {
+    boolean isCurrentProjectIncluded() {
         return currentProjectIncluded;
     }
 
-    void addProjectMavenCoordinates(final MavenCoordinates projectMavenCoordinates)
-    {
+    void addProjectMavenCoordinates(final MavenCoordinates projectMavenCoordinates) {
         this.currentProjectIncluded = conflictingDependencies.contains(projectMavenCoordinates);
         if (this.currentProject) {
             // The exclusion should also look at the current project, add the project
@@ -133,18 +118,15 @@ public class ConflictingDependency
         }
     }
 
-    List<MavenCoordinates> getDependencies()
-    {
+    List<MavenCoordinates> getDependencies() {
         return ImmutableList.copyOf(conflictingDependencies);
     }
 
-    Pattern[] getResourcePatterns()
-    {
+    Pattern[] getResourcePatterns() {
         return matchingResources;
     }
 
-    public List<String> getDependencyNames()
-    {
+    public List<String> getDependencyNames() {
         final List<String> result = new ArrayList<>(conflictingDependencies.size());
 
         for (final MavenCoordinates conflictingDependency : conflictingDependencies) {
@@ -155,8 +137,7 @@ public class ConflictingDependency
         return result;
     }
 
-    public boolean isForArtifacts(final boolean bootClasspathConflict, final Set<Artifact> artifacts) throws OverConstrainedVersionException
-    {
+    public boolean isForArtifacts(final boolean bootClasspathConflict, final Set<Artifact> artifacts) throws OverConstrainedVersionException {
         checkNotNull(artifacts, "artifacts is null");
 
         // If the conflict matches the boot classpath but this exception does not cover it, return false
@@ -180,8 +161,7 @@ public class ConflictingDependency
                 if (conflictingDependency.matches(artifact)) {
                     if (--numMatches == 0) {
                         return true;
-                    }
-                    else {
+                    } else {
                         break; // for (final MavenCoordinates...
                     }
                 }
@@ -190,13 +170,11 @@ public class ConflictingDependency
         return false;
     }
 
-    boolean isWildcard()
-    {
+    boolean isWildcard() {
         return classes.isEmpty() && packages.isEmpty() && resources.isEmpty() && matchingResources.length == 0;
     }
 
-    public boolean containsClass(final String className)
-    {
+    public boolean containsClass(final String className) {
         if (isWildcard()) {
             // Nothing given --> match everything.
             return true;
@@ -204,8 +182,7 @@ public class ConflictingDependency
 
         if (classes.contains(className)) {
             return true;
-        }
-        else {
+        } else {
             for (final String packageName : packages) {
                 final String pkgName = packageName.endsWith(".") ? packageName : packageName + ".";
                 if (className.startsWith(pkgName)) {
@@ -216,8 +193,7 @@ public class ConflictingDependency
         }
     }
 
-    public boolean containsResource(final String resource)
-    {
+    public boolean containsResource(final String resource) {
         if (isWildcard()) {
             // Nothing given --> match everything
             return true;
@@ -226,8 +202,8 @@ public class ConflictingDependency
         final String resourceAsRelative = resource.startsWith("/") || resource.startsWith("\\") ? resource.substring(1) : resource;
 
         if (resources.contains(resourceAsRelative) ||
-            resources.contains("/" + resourceAsRelative) ||
-            resources.contains("\\" + resourceAsRelative)) {
+                resources.contains("/" + resourceAsRelative) ||
+                resources.contains("\\" + resourceAsRelative)) {
 
             return true;
         }

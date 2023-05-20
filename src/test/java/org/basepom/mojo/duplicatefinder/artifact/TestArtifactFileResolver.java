@@ -13,30 +13,30 @@
  */
 package org.basepom.mojo.duplicatefinder.artifact;
 
-import static org.junit.Assert.assertEquals;
-
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.artifact.handler.ArtifactHandler;
 import org.apache.maven.artifact.handler.DefaultArtifactHandler;
-import org.basepom.mojo.duplicatefinder.artifact.ArtifactFileResolver;
 import org.junit.Test;
 
-public class TestArtifactFileResolver
-{
+import static org.junit.Assert.assertEquals;
+
+public class TestArtifactFileResolver {
+
     private final ArtifactHandler handler = new DefaultArtifactHandler();
 
     @Test
-    public void testCanonicalization()
-    {
+    public void testCanonicalization() {
         final Artifact jarArtifact = new DefaultArtifact("foo.group", "foo-id", "1.0", "compile", "jar", null, handler);
 
         assertEquals(jarArtifact, ArtifactFileResolver.canonicalizeArtifact(jarArtifact));
 
         final Artifact testJarArtifact = new DefaultArtifact("foo.group", "foo-id", "1.0", "compile", "jar", "tests", handler);
         assertEquals(testJarArtifact, ArtifactFileResolver.canonicalizeArtifact(testJarArtifact));
-        assertEquals(testJarArtifact, ArtifactFileResolver.canonicalizeArtifact(new DefaultArtifact("foo.group", "foo-id", "1.0", "compile", "test-jar", null, handler)));
-        assertEquals(testJarArtifact, ArtifactFileResolver.canonicalizeArtifact(new DefaultArtifact("foo.group", "foo-id", "1.0", "compile", "test-jar", "tests", handler)));
+        assertEquals(testJarArtifact,
+                ArtifactFileResolver.canonicalizeArtifact(new DefaultArtifact("foo.group", "foo-id", "1.0", "compile", "test-jar", null, handler)));
+        assertEquals(testJarArtifact,
+                ArtifactFileResolver.canonicalizeArtifact(new DefaultArtifact("foo.group", "foo-id", "1.0", "compile", "test-jar", "tests", handler)));
 
         final Artifact testArtifact = new DefaultArtifact("foo.group", "foo-id", "1.0", "compile", "zip", "tests", handler);
         assertEquals(testArtifact, ArtifactFileResolver.canonicalizeArtifact(testArtifact));

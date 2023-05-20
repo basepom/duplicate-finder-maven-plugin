@@ -13,34 +13,31 @@
  */
 package org.basepom.mojo.duplicatefinder.classpath;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import java.util.Collection;
 import java.util.List;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
-
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.OverConstrainedVersionException;
 import org.basepom.mojo.duplicatefinder.PluginLog;
 import org.basepom.mojo.duplicatefinder.artifact.MavenCoordinates;
 
-public class MatchArtifactPredicate implements Predicate<Artifact>
-{
+import static com.google.common.base.Preconditions.checkNotNull;
+
+public class MatchArtifactPredicate implements Predicate<Artifact> {
+
     private static final PluginLog LOG = new PluginLog(MatchArtifactPredicate.class);
 
     private final List<MavenCoordinates> mavenCoordinates;
 
-    MatchArtifactPredicate(final Collection<MavenCoordinates> dependencies) throws InvalidVersionSpecificationException
-    {
+    MatchArtifactPredicate(final Collection<MavenCoordinates> dependencies) throws InvalidVersionSpecificationException {
         this.mavenCoordinates = ImmutableList.copyOf(checkNotNull(dependencies, "dependencies is null"));
     }
 
     @Override
-    public boolean apply(final Artifact artifact)
-    {
+    public boolean apply(final Artifact artifact) {
         if (artifact != null) {
             for (final MavenCoordinates mavenCoordinate : mavenCoordinates) {
                 try {

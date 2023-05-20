@@ -13,19 +13,18 @@
  */
 package org.basepom.mojo.duplicatefinder.classpath;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import java.util.List;
 import java.util.Optional;
 
 import org.junit.Test;
 
-public class TestClasspathDescriptor
-{
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+public class TestClasspathDescriptor {
+
     @Test
-    public void testValidIdentifierNames()
-    {
+    public void testValidIdentifierNames() {
         String[] validNames = {
                 "_.class",
                 "hello/world.class",
@@ -45,8 +44,7 @@ public class TestClasspathDescriptor
     }
 
     @Test
-    public void testInvalidIdentifierNames()
-    {
+    public void testInvalidIdentifierNames() {
         String[] invalidNames = {
                 null, // null value
                 "", // empty string
@@ -68,8 +66,7 @@ public class TestClasspathDescriptor
     }
 
     @Test
-    public void testMatchDefaultClassnames()
-    {
+    public void testMatchDefaultClassnames() {
         String[] validClassNames = {
                 "foo$bar",
                 "hello.foo$bar",

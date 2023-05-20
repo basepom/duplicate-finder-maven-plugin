@@ -16,7 +16,7 @@ import static org.basepom.mojo.duplicatefinder.groovy.ITools.*
 def result = loadTestXml(basedir)
 
 overallState(CONFLICT_DIFF, 2, FAILED, result)
-checkConflictResult("demo.Demo", TYPE_CLASS, CONFLICT_EQUAL, NOT_EXCEPTED, PRINTED, FAILED,  findConflictResult(result, SECOND_CLASS_JAR, SECOND_EQUAL_JAR))
-checkConflictResult("diff.Demo", TYPE_CLASS, CONFLICT_DIFF,  NOT_EXCEPTED, PRINTED, FAILED, findConflictResult(result, FIRST_CLASS_JAR, FIRST_DIFF_JAR))
+checkConflictResult("demo.Demo", TYPE_CLASS, CONFLICT_EQUAL, NOT_EXCEPTED, PRINTED, FAILED, findConflictResult(result, SECOND_CLASS_JAR, SECOND_EQUAL_JAR))
+checkConflictResult("diff.Demo", TYPE_CLASS, CONFLICT_DIFF, NOT_EXCEPTED, PRINTED, FAILED, findConflictResult(result, FIRST_CLASS_JAR, FIRST_DIFF_JAR))
 
 return true

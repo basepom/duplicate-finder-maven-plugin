@@ -13,15 +13,12 @@
  */
 package org.basepom.mojo.duplicatefinder.artifact;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import java.util.Objects;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
-
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
@@ -30,8 +27,10 @@ import org.apache.maven.artifact.versioning.OverConstrainedVersionException;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.model.Dependency;
 
-public class MavenCoordinates
-{
+import static com.google.common.base.Preconditions.checkNotNull;
+
+public class MavenCoordinates {
+
     private final String artifactId;
     private final String groupId;
     private final Optional<? extends ArtifactVersion> version;
@@ -39,8 +38,7 @@ public class MavenCoordinates
     private final String type;
     private final Optional<String> classifier;
 
-    public MavenCoordinates(final Dependency dependency) throws InvalidVersionSpecificationException
-    {
+    public MavenCoordinates(final Dependency dependency) throws InvalidVersionSpecificationException {
         checkNotNull(dependency, "dependency is null");
 
         this.artifactId = checkNotNull(dependency.getArtifactId(), "artifactId for dependency '%s' is null", dependency);
@@ -51,8 +49,7 @@ public class MavenCoordinates
 
         if (this.version.isPresent()) {
             this.versionRange = Optional.of(VersionRange.createFromVersionSpec(version));
-        }
-        else {
+        } else {
             this.versionRange = Optional.absent();
         }
 
@@ -61,15 +58,13 @@ public class MavenCoordinates
         if ("test-jar".equals(type)) {
             this.classifier = Optional.of(MoreObjects.firstNonNull(classifier, "tests"));
             this.type = "jar";
-        }
-        else {
+        } else {
             this.type = MoreObjects.firstNonNull(type, "jar");
             this.classifier = Optional.fromNullable(classifier);
         }
     }
 
-    public MavenCoordinates(final Artifact artifact) throws OverConstrainedVersionException
-    {
+    public MavenCoordinates(final Artifact artifact) throws OverConstrainedVersionException {
         checkNotNull(artifact, "artifact is null");
 
         this.artifactId = checkNotNull(artifact.getArtifactId(), "artifactId for artifact '%s' is null", artifact);
@@ -78,8 +73,7 @@ public class MavenCoordinates
 
         if (this.versionRange.isPresent()) {
             this.version = Optional.fromNullable(artifact.getSelectedVersion());
-        }
-        else {
+        } else {
             final String version = artifact.getBaseVersion();
             this.version = version == null ? Optional.<ArtifactVersion>absent() : Optional.of(new DefaultArtifactVersion(version));
         }
@@ -89,53 +83,44 @@ public class MavenCoordinates
         if ("test-jar".equals(type)) {
             this.classifier = Optional.of(MoreObjects.firstNonNull(classifier, "tests"));
             this.type = "jar";
-        }
-        else {
+        } else {
             this.type = MoreObjects.firstNonNull(type, "jar");
             this.classifier = Optional.fromNullable(classifier);
         }
     }
 
-    public String getArtifactId()
-    {
+    public String getArtifactId() {
         return artifactId;
     }
 
-    public String getGroupId()
-    {
+    public String getGroupId() {
         return groupId;
     }
 
-    public Optional<? extends ArtifactVersion> getVersion()
-    {
+    public Optional<? extends ArtifactVersion> getVersion() {
         return version;
     }
 
-    public Optional<VersionRange> getVersionRange()
-    {
+    public Optional<VersionRange> getVersionRange() {
         return versionRange;
     }
 
-    public String getType()
-    {
+    public String getType() {
         return type;
     }
 
-    public Optional<String> getClassifier()
-    {
+    public Optional<String> getClassifier() {
         return classifier;
     }
 
-    public boolean matches(final Artifact artifact) throws OverConstrainedVersionException
-    {
+    public boolean matches(final Artifact artifact) throws OverConstrainedVersionException {
         return matches(new MavenCoordinates(artifact));
     }
 
-    public boolean matches(final MavenCoordinates other)
-    {
+    public boolean matches(final MavenCoordinates other) {
         if (!(Objects.equals(getGroupId(), other.getGroupId())
-              && Objects.equals(getArtifactId(), other.getArtifactId())
-              && Objects.equals(getType(), other.getType()))) {
+                && Objects.equals(getArtifactId(), other.getArtifactId())
+                && Objects.equals(getType(), other.getType()))) {
             return false;
         }
 
@@ -179,14 +164,12 @@ public class MavenCoordinates
     }
 
     @Override
-    public int hashCode()
-    {
+    public int hashCode() {
         return Objects.hash(groupId, artifactId, classifier, type);
     }
 
     @Override
-    public boolean equals(final Object other)
-    {
+    public boolean equals(final Object other) {
         if (other == null || other.getClass() != this.getClass()) {
             return false;
         }
@@ -197,14 +180,13 @@ public class MavenCoordinates
         MavenCoordinates that = (MavenCoordinates) other;
 
         return Objects.equals(this.groupId, that.groupId)
-               && Objects.equals(this.artifactId, that.artifactId)
-               && Objects.equals(this.classifier, that.classifier)
-               && Objects.equals(this.type, that.type);
+                && Objects.equals(this.artifactId, that.artifactId)
+                && Objects.equals(this.classifier, that.classifier)
+                && Objects.equals(this.type, that.type);
     }
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         final ImmutableList.Builder<String> builder = ImmutableList.builder();
 
         builder.add(getGroupId());
@@ -212,8 +194,7 @@ public class MavenCoordinates
 
         if (getVersion().isPresent()) {
             builder.add(getVersion().get().toString());
-        }
-        else {
+        } else {
             builder.add("<any>");
         }
 

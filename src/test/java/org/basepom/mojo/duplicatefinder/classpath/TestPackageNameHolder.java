@@ -13,18 +13,15 @@
  */
 package org.basepom.mojo.duplicatefinder.classpath;
 
-import static org.junit.Assert.assertEquals;
-
 import com.google.common.collect.ImmutableList;
-
-import org.basepom.mojo.duplicatefinder.classpath.PackageNameHolder;
 import org.junit.Test;
 
-public class TestPackageNameHolder
-{
+import static org.junit.Assert.assertEquals;
+
+public class TestPackageNameHolder {
+
     @Test
-    public void testEmpty()
-    {
+    public void testEmpty() {
         final PackageNameHolder p1 = new PackageNameHolder();
         assertEquals("foo", p1.getQualifiedName("foo"));
         assertEquals("foo", p1.getQualifiedPath("foo"));
@@ -35,8 +32,7 @@ public class TestPackageNameHolder
     }
 
     @Test
-    public void testPrefilled()
-    {
+    public void testPrefilled() {
         final PackageNameHolder p1 = new PackageNameHolder(ImmutableList.of("hello", "world"));
         assertEquals("hello.world.foo", p1.getQualifiedName("foo"));
         assertEquals("hello/world/foo", p1.getQualifiedPath("foo"));

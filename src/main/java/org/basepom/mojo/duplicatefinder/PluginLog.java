@@ -13,81 +13,70 @@
  */
 package org.basepom.mojo.duplicatefinder;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import static java.lang.String.format;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+public final class PluginLog {
 
-public final class PluginLog
-{
     private final Logger logger;
 
-    public PluginLog(final Class<?> clazz)
-    {
+    public PluginLog(final Class<?> clazz) {
         checkNotNull(clazz, "clazz is null");
         this.logger = LoggerFactory.getLogger(clazz);
     }
 
-    public void debug(final String fmt, final Object ... args)
-    {
+    public void debug(final String fmt, final Object... args) {
         checkNotNull(fmt, "fmt is null");
         logger.debug(format(fmt, args));
     }
 
-    public void debug(final Throwable t, final String fmt, final Object ... args)
-    {
+    public void debug(final Throwable t, final String fmt, final Object... args) {
         checkNotNull(fmt, "fmt is null");
         checkNotNull(t, "t is null");
         logger.debug(format(fmt, args), t);
     }
 
-    public void info(final String fmt, final Object ... args)
-    {
+    public void info(final String fmt, final Object... args) {
         checkNotNull(fmt, "fmt is null");
         logger.info(format(fmt, args));
     }
 
-    public void info(final Throwable t, final String fmt, final Object ... args)
-    {
+    public void info(final Throwable t, final String fmt, final Object... args) {
         checkNotNull(fmt, "fmt is null");
         checkNotNull(t, "t is null");
         logger.info(format(fmt, args), t);
     }
 
-    public void warn(final String fmt, final Object ... args)
-    {
+    public void warn(final String fmt, final Object... args) {
         checkNotNull(fmt, "fmt is null");
         logger.warn(format(fmt, args));
     }
 
-    public void warn(final Throwable t, final String fmt, final Object ... args)
-    {
+    public void warn(final Throwable t, final String fmt, final Object... args) {
         checkNotNull(fmt, "fmt is null");
         checkNotNull(t, "t is null");
         logger.warn(format(fmt, args), t);
     }
 
-    public void error(final String fmt, final Object ... args)
-    {
+    public void error(final String fmt, final Object... args) {
         checkNotNull(fmt, "fmt is null");
         logger.error(format(fmt, args));
     }
 
-    public void error(final Throwable t, final String fmt, final Object ... args)
-    {
+    public void error(final Throwable t, final String fmt, final Object... args) {
         checkNotNull(fmt, "fmt is null");
         checkNotNull(t, "t is null");
         logger.error(format(fmt, args), t);
     }
 
-    public void report(final boolean quiet, final String fmt, final Object ... args)
-    {
+    public void report(final boolean quiet, final String fmt, final Object... args) {
         if (quiet) {
             debug(fmt, args);
-        }
-        else {
+        } else {
             info(fmt, args);
         }
     }

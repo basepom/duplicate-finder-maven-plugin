@@ -13,12 +13,6 @@
  */
 package org.basepom.mojo.duplicatefinder.artifact;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-import static org.basepom.mojo.duplicatefinder.artifact.ArtifactHelper.getOutputDirectory;
-import static org.basepom.mojo.duplicatefinder.artifact.ArtifactHelper.getTestOutputDirectory;
-import static org.basepom.mojo.duplicatefinder.artifact.ArtifactHelper.isTestArtifact;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
@@ -48,15 +42,21 @@ import org.basepom.mojo.duplicatefinder.ClasspathElement.ClasspathBootClasspathE
 import org.basepom.mojo.duplicatefinder.ClasspathElement.ClasspathLocalFolder;
 import org.basepom.mojo.duplicatefinder.PluginLog;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+import static org.basepom.mojo.duplicatefinder.artifact.ArtifactHelper.getOutputDirectory;
+import static org.basepom.mojo.duplicatefinder.artifact.ArtifactHelper.getTestOutputDirectory;
+import static org.basepom.mojo.duplicatefinder.artifact.ArtifactHelper.isTestArtifact;
+
 /**
  * Resolves artifact references from the project into local and repository files and folders.
- *
+ * <p>
  * Only manages the dependencies because the main project can have multiple (two) folders
  * for the project. This is not supported by this resolver.
  */
 @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
-public class ArtifactFileResolver
-{
+public class ArtifactFileResolver {
+
     private static final PluginLog LOG = new PluginLog(ArtifactFileResolver.class);
 
     // A BiMultimap would come in really handy here...
@@ -76,9 +76,8 @@ public class ArtifactFileResolver
     private final boolean preferLocal;
 
     public ArtifactFileResolver(final MavenProject project,
-        final ImmutableSet<File> bootClasspath,
-        final boolean preferLocal) throws DependencyResolutionRequiredException, IOException
-    {
+            final ImmutableSet<File> bootClasspath,
+            final boolean preferLocal) throws DependencyResolutionRequiredException, IOException {
         checkNotNull(project, "project is null");
         this.preferLocal = preferLocal;
 
@@ -136,8 +135,8 @@ public class ArtifactFileResolver
         this.localArtifactFileCache = localArtifactFileCacheBuilder.build();
     }
 
-    public ImmutableMultimap<File, Artifact> resolveArtifactsForScopes(final Set<String> scopes) throws InvalidVersionSpecificationException, DependencyResolutionRequiredException
-    {
+    public ImmutableMultimap<File, Artifact> resolveArtifactsForScopes(final Set<String> scopes)
+            throws InvalidVersionSpecificationException, DependencyResolutionRequiredException {
         checkNotNull(scopes, "scopes is null");
 
         final ImmutableMultimap.Builder<File, Artifact> inScopeBuilder = ImmutableMultimap.builder();
@@ -154,8 +153,7 @@ public class ArtifactFileResolver
         return inScopeBuilder.build();
     }
 
-    public ImmutableSortedSet<ClasspathElement> getClasspathElementsForElements(final Collection<File> elements)
-    {
+    public ImmutableSortedSet<ClasspathElement> getClasspathElementsForElements(final Collection<File> elements) {
         final ImmutableSortedSet.Builder<ClasspathElement> builder = ImmutableSortedSet.naturalOrder();
 
         for (final File element : elements) {
@@ -164,8 +162,7 @@ public class ArtifactFileResolver
         return builder.build();
     }
 
-    private void resolveClasspathElementsForFile(final File file, ImmutableSet.Builder<ClasspathElement> builder)
-    {
+    private void resolveClasspathElementsForFile(final File file, ImmutableSet.Builder<ClasspathElement> builder) {
         checkNotNull(file, "file is null");
 
         if (preferLocal && localFileArtifactCache.containsKey(file)) {
@@ -197,8 +194,7 @@ public class ArtifactFileResolver
         builder.add(new ClasspathLocalFolder(file));
     }
 
-    private File resolveFileForArtifact(final Artifact artifact)
-    {
+    private File resolveFileForArtifact(final Artifact artifact) {
         checkNotNull(artifact, "artifact is null");
 
         if (preferLocal && localArtifactFileCache.containsKey(artifact)) {
@@ -213,9 +209,9 @@ public class ArtifactFileResolver
     }
 
     @VisibleForTesting
-    static DefaultArtifact canonicalizeArtifact(final Artifact artifact)
-    {
-        final VersionRange versionRange = artifact.getVersionRange() == null ? VersionRange.createFromVersion(artifact.getVersion()) : artifact.getVersionRange();
+    static DefaultArtifact canonicalizeArtifact(final Artifact artifact) {
+        final VersionRange versionRange =
+                artifact.getVersionRange() == null ? VersionRange.createFromVersion(artifact.getVersion()) : artifact.getVersionRange();
         String type = MoreObjects.firstNonNull(artifact.getType(), "jar");
         String classifier = artifact.getClassifier();
 
@@ -225,30 +221,28 @@ public class ArtifactFileResolver
         }
 
         final DefaultArtifact canonicalizedArtifact = new DefaultArtifact(artifact.getGroupId(),
-            artifact.getArtifactId(),
-            versionRange,
-            artifact.getScope(),
-            type,
-            classifier,
-            artifact.getArtifactHandler(),
-            artifact.isOptional());
+                artifact.getArtifactId(),
+                versionRange,
+                artifact.getScope(),
+                type,
+                classifier,
+                artifact.getArtifactHandler(),
+                artifact.isOptional());
 
         return canonicalizedArtifact;
     }
 
-    private Set<Artifact> listArtifacts()
-    {
+    private Set<Artifact> listArtifacts() {
         return ImmutableSet.<Artifact>builder().addAll(localArtifactFileCache.keySet()).addAll(repoArtifactCache.keySet()).build();
     }
 
-    private static Set<Artifact> findRepoArtifacts(final MavenProject project, final Map<Artifact, File> repoArtifactCache)
-    {
+    private static Set<Artifact> findRepoArtifacts(final MavenProject project, final Map<Artifact, File> repoArtifactCache) {
         final ImmutableSet.Builder<Artifact> builder = ImmutableSet.builder();
 
         for (final Artifact artifact : repoArtifactCache.keySet()) {
             if (Objects.equals(project.getArtifact().getGroupId(), artifact.getGroupId())
-                && Objects.equals(project.getArtifact().getArtifactId(), artifact.getArtifactId())
-                && Objects.equals(project.getArtifact().getBaseVersion(), artifact.getBaseVersion())) {
+                    && Objects.equals(project.getArtifact().getArtifactId(), artifact.getArtifactId())
+                    && Objects.equals(project.getArtifact().getBaseVersion(), artifact.getBaseVersion())) {
                 builder.add(artifact);
             }
         }

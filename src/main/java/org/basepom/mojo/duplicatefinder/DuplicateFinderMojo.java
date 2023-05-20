@@ -13,21 +13,6 @@
  */
 package org.basepom.mojo.duplicatefinder;
 
-import static java.lang.String.format;
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-import static org.apache.maven.artifact.Artifact.SCOPE_COMPILE;
-import static org.apache.maven.artifact.Artifact.SCOPE_PROVIDED;
-import static org.apache.maven.artifact.Artifact.SCOPE_RUNTIME;
-import static org.apache.maven.artifact.Artifact.SCOPE_SYSTEM;
-import static org.basepom.mojo.duplicatefinder.ConflictState.CONFLICT_CONTENT_DIFFERENT;
-import static org.basepom.mojo.duplicatefinder.ConflictState.CONFLICT_CONTENT_EQUAL;
-import static org.basepom.mojo.duplicatefinder.ConflictType.CLASS;
-import static org.basepom.mojo.duplicatefinder.ConflictType.RESOURCE;
-import static org.basepom.mojo.duplicatefinder.artifact.ArtifactHelper.getOutputDirectory;
-import static org.basepom.mojo.duplicatefinder.artifact.ArtifactHelper.getTestOutputDirectory;
-
 import java.io.BufferedInputStream;
 import java.io.Closeable;
 import java.io.File;
@@ -57,7 +42,6 @@ import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.Closer;
-
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
@@ -80,12 +64,28 @@ import org.codehaus.staxmate.SMOutputFactory;
 import org.codehaus.staxmate.out.SMOutputDocument;
 import org.codehaus.staxmate.out.SMOutputElement;
 
+import static java.lang.String.format;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+import static org.apache.maven.artifact.Artifact.SCOPE_COMPILE;
+import static org.apache.maven.artifact.Artifact.SCOPE_PROVIDED;
+import static org.apache.maven.artifact.Artifact.SCOPE_RUNTIME;
+import static org.apache.maven.artifact.Artifact.SCOPE_SYSTEM;
+import static org.basepom.mojo.duplicatefinder.ConflictState.CONFLICT_CONTENT_DIFFERENT;
+import static org.basepom.mojo.duplicatefinder.ConflictState.CONFLICT_CONTENT_EQUAL;
+import static org.basepom.mojo.duplicatefinder.ConflictType.CLASS;
+import static org.basepom.mojo.duplicatefinder.ConflictType.RESOURCE;
+import static org.basepom.mojo.duplicatefinder.artifact.ArtifactHelper.getOutputDirectory;
+import static org.basepom.mojo.duplicatefinder.artifact.ArtifactHelper.getTestOutputDirectory;
+
 /**
  * Finds duplicate classes/resources on the classpath.
  */
 @Mojo(name = "check", requiresProject = true, threadSafe = true, defaultPhase = LifecyclePhase.VERIFY, requiresDependencyResolution = ResolutionScope.TEST)
-public final class DuplicateFinderMojo extends AbstractMojo
-{
+public final class DuplicateFinderMojo extends AbstractMojo {
+
     private static final PluginLog LOG = new PluginLog(DuplicateFinderMojo.class);
 
     private static final int SAVE_FILE_VERSION = 1;
@@ -265,8 +265,7 @@ public final class DuplicateFinderMojo extends AbstractMojo
     private final EnumSet<ConflictState> failState = EnumSet.noneOf(ConflictState.class);
 
     // called by maven
-    public void setIgnoredDependencies(final Dependency[] dependencies) throws InvalidVersionSpecificationException
-    {
+    public void setIgnoredDependencies(final Dependency[] dependencies) throws InvalidVersionSpecificationException {
         checkArgument(dependencies != null);
 
         this.ignoredDependencies = new MavenCoordinates[dependencies.length];
@@ -276,15 +275,12 @@ public final class DuplicateFinderMojo extends AbstractMojo
     }
 
     @Override
-    public void execute() throws MojoExecutionException, MojoFailureException
-    {
+    public void execute() throws MojoExecutionException, MojoFailureException {
         if (skip) {
             LOG.report(quiet, "Skipping duplicate-finder execution!");
-        }
-        else if (!includePomProjects && "pom".equals(project.getArtifact().getType())) {
+        } else if (!includePomProjects && "pom".equals(project.getArtifact().getType())) {
             LOG.report(quiet, "Ignoring POM project!");
-        }
-        else {
+        } else {
             if (printEqualFiles) {
                 printState.add(CONFLICT_CONTENT_EQUAL);
             }
@@ -327,8 +323,7 @@ public final class DuplicateFinderMojo extends AbstractMojo
                             if (file.exists()) {
                                 LOG.debug("Adding '%s' as a boot classpath element", entry);
                                 bootClasspathBuilder.add(file);
-                            }
-                            else {
+                            } else {
                                 LOG.debug("Ignoring '%s', does not exist.", entry);
                             }
                         }
@@ -343,14 +338,16 @@ public final class DuplicateFinderMojo extends AbstractMojo
                 if (checkCompileClasspath) {
                     LOG.report(quiet, "Checking compile classpath");
                     final ResultCollector resultCollector = new ResultCollector(printState, failState);
-                    final ClasspathDescriptor classpathDescriptor = checkClasspath(resultCollector, artifactFileResolver, COMPILE_SCOPE, bootClasspath, getOutputDirectory(project));
+                    final ClasspathDescriptor classpathDescriptor = checkClasspath(resultCollector, artifactFileResolver, COMPILE_SCOPE, bootClasspath,
+                            getOutputDirectory(project));
                     classpathResultBuilder.put("compile", new SimpleImmutableEntry<ResultCollector, ClasspathDescriptor>(resultCollector, classpathDescriptor));
                 }
 
                 if (checkRuntimeClasspath) {
                     LOG.report(quiet, "Checking runtime classpath");
                     final ResultCollector resultCollector = new ResultCollector(printState, failState);
-                    final ClasspathDescriptor classpathDescriptor = checkClasspath(resultCollector, artifactFileResolver, RUNTIME_SCOPE, bootClasspath, getOutputDirectory(project));
+                    final ClasspathDescriptor classpathDescriptor = checkClasspath(resultCollector, artifactFileResolver, RUNTIME_SCOPE, bootClasspath,
+                            getOutputDirectory(project));
                     classpathResultBuilder.put("runtime", new SimpleImmutableEntry<ResultCollector, ClasspathDescriptor>(resultCollector, classpathDescriptor));
                 }
 
@@ -406,32 +403,26 @@ public final class DuplicateFinderMojo extends AbstractMojo
                 if (failed) {
                     throw new MojoExecutionException("Found duplicate classes/resources!");
                 }
-            }
-            catch (final DependencyResolutionRequiredException e) {
+            } catch (final DependencyResolutionRequiredException e) {
                 throw new MojoFailureException("Could not resolve dependencies", e);
-            }
-            catch (final InvalidVersionSpecificationException e) {
+            } catch (final InvalidVersionSpecificationException e) {
                 throw new MojoFailureException("Invalid version specified", e);
-            }
-            catch (final OverConstrainedVersionException e) {
+            } catch (final OverConstrainedVersionException e) {
                 throw new MojoFailureException("Version too constrained", e);
-            }
-            catch (final IOException e) {
+            } catch (final IOException e) {
                 throw new MojoExecutionException("While loading artifacts", e);
             }
         }
     }
 
-    private ImmutableSet<String> getIgnoredResourcePatterns()
-    {
+    private ImmutableSet<String> getIgnoredResourcePatterns() {
         ImmutableSet.Builder<String> builder = ImmutableSet.builder();
         builder.add(ignoredResourcePatterns);
 
         return builder.build();
     }
 
-    private ImmutableSet<String> getIgnoredClassPatterns()
-    {
+    private ImmutableSet<String> getIgnoredClassPatterns() {
         ImmutableSet.Builder<String> builder = ImmutableSet.builder();
         builder.add(ignoredClassPatterns);
 
@@ -443,26 +434,25 @@ public final class DuplicateFinderMojo extends AbstractMojo
      * artifacts on the classpath, one or more additional project folders are added.
      */
     private ClasspathDescriptor checkClasspath(final ResultCollector resultCollector,
-        final ArtifactFileResolver artifactFileResolver,
-        final Set<String> scopes,
-        final Set<File> bootClasspath,
-        final File ... projectFolders)
-            throws MojoExecutionException, InvalidVersionSpecificationException, OverConstrainedVersionException, DependencyResolutionRequiredException
-    {
+            final ArtifactFileResolver artifactFileResolver,
+            final Set<String> scopes,
+            final Set<File> bootClasspath,
+            final File... projectFolders)
+            throws MojoExecutionException, InvalidVersionSpecificationException, OverConstrainedVersionException, DependencyResolutionRequiredException {
 
         // Map of files to artifacts. Depending on the type of build, referenced projects in a multi-module build
         // may be local folders in the project instead of repo jar references.
         final Multimap<File, Artifact> fileToArtifactMap = artifactFileResolver.resolveArtifactsForScopes(scopes);
 
         final ClasspathDescriptor classpathDescriptor = ClasspathDescriptor.createClasspathDescriptor(project,
-            fileToArtifactMap,
-            getIgnoredResourcePatterns(),
-            getIgnoredClassPatterns(),
-            Arrays.asList(ignoredDependencies),
-            useDefaultResourceIgnoreList,
-            useDefaultClassIgnoreList,
-            bootClasspath,
-            projectFolders);
+                fileToArtifactMap,
+                getIgnoredResourcePatterns(),
+                getIgnoredClassPatterns(),
+                Arrays.asList(ignoredDependencies),
+                useDefaultResourceIgnoreList,
+                useDefaultClassIgnoreList,
+                bootClasspath,
+                projectFolders);
 
         // Now a scope specific classpath descriptor (scope relevant artifacts and project folders) and the global artifact resolver
         // are primed. Run conflict resolution for classes and resources.
@@ -471,9 +461,9 @@ public final class DuplicateFinderMojo extends AbstractMojo
         return classpathDescriptor;
     }
 
-    private void checkForDuplicates(final ConflictType type, final ResultCollector resultCollector, final ClasspathDescriptor classpathDescriptor, final ArtifactFileResolver artifactFileResolver)
-        throws MojoExecutionException, OverConstrainedVersionException
-    {
+    private void checkForDuplicates(final ConflictType type, final ResultCollector resultCollector, final ClasspathDescriptor classpathDescriptor,
+            final ArtifactFileResolver artifactFileResolver)
+            throws MojoExecutionException, OverConstrainedVersionException {
         // only look at entries with a size > 1.
         final Map<String, Collection<File>> filteredMap = ImmutableMap.copyOf(Maps.filterEntries(classpathDescriptor.getClasspathElementLocations(type),
                 entry -> {
@@ -499,8 +489,7 @@ public final class DuplicateFinderMojo extends AbstractMojo
 
                 if (conflictingClasspathElement.hasArtifact()) {
                     artifactBuilder.add(conflictingClasspathElement.getArtifact());
-                }
-                else if (conflictingClasspathElement.isLocalFolder()) {
+                } else if (conflictingClasspathElement.isLocalFolder()) {
                     artifactBuilder.add(project.getArtifact());
                 }
             }
@@ -515,8 +504,7 @@ public final class DuplicateFinderMojo extends AbstractMojo
     /**
      * Detects class/resource differences via SHA256 hash comparison.
      */
-    private static ConflictState determineConflictState(final ConflictType type, final String name, final Iterable<File> elements)
-    {
+    private static ConflictState determineConflictState(final ConflictType type, final String name, final Iterable<File> elements) {
         File firstFile = null;
         String firstSHA256 = null;
 
@@ -530,13 +518,11 @@ public final class DuplicateFinderMojo extends AbstractMojo
                     // save sha256 hash from the first element
                     firstSHA256 = newSHA256;
                     firstFile = element;
-                }
-                else if (!newSHA256.equals(firstSHA256)) {
+                } else if (!newSHA256.equals(firstSHA256)) {
                     LOG.debug("Found different SHA256 hashes for elements %s in file %s and %s", resourcePath, firstFile, element);
                     return ConflictState.CONFLICT_CONTENT_DIFFERENT;
                 }
-            }
-            catch (final IOException ex) {
+            } catch (final IOException ex) {
                 LOG.warn(ex, "Could not read content from file %s!", element);
             }
         }
@@ -547,13 +533,12 @@ public final class DuplicateFinderMojo extends AbstractMojo
     /**
      * Calculates the SHA256 Hash of a class in a file.
      *
-     * @param file the archive contains the class
+     * @param file         the archive contains the class
      * @param resourcePath the name of the class
      * @return the MD% Hash as Hex-Value
      * @throws IOException if any error occurs on reading class in archive
      */
-    private static String getSHA256HexOfElement(final File file, final String resourcePath) throws IOException
-    {
+    private static String getSHA256HexOfElement(final File file, final String resourcePath) throws IOException {
         final Closer closer = Closer.create();
         InputStream in;
 
@@ -561,14 +546,12 @@ public final class DuplicateFinderMojo extends AbstractMojo
             if (file.isDirectory()) {
                 final File resourceFile = new File(file, resourcePath);
                 in = closer.register(new BufferedInputStream(new FileInputStream(resourceFile)));
-            }
-            else {
+            } else {
                 final ZipFile zip = new ZipFile(file);
 
                 closer.register(new Closeable() {
                     @Override
-                    public void close() throws IOException
-                    {
+                    public void close() throws IOException {
                         zip.close();
                     }
                 });
@@ -583,14 +566,13 @@ public final class DuplicateFinderMojo extends AbstractMojo
             }
 
             return SHA_256.newHasher().putBytes(ByteStreams.toByteArray(in)).hash().toString();
-        }
-        finally {
+        } finally {
             closer.close();
         }
     }
 
-    private boolean isExcepted(final ConflictType type, final String name, final boolean bootClasspathConflict, final Set<Artifact> artifacts) throws OverConstrainedVersionException
-    {
+    private boolean isExcepted(final ConflictType type, final String name, final boolean bootClasspathConflict, final Set<Artifact> artifacts)
+            throws OverConstrainedVersionException {
         final ImmutableSet.Builder<ConflictingDependency> conflictBuilder = ImmutableSet.builder();
         checkState(conflictingDependencies != null, "conflictingDependencies is null");
 
@@ -605,8 +587,7 @@ public final class DuplicateFinderMojo extends AbstractMojo
         for (final ConflictingDependency conflictingDependency : conflictBuilder.build()) {
             if (type == ConflictType.CLASS && conflictingDependency.containsClass(name)) {
                 return true;
-            }
-            else if (type == ConflictType.RESOURCE && conflictingDependency.containsResource(name)) {
+            } else if (type == ConflictType.RESOURCE && conflictingDependency.containsResource(name)) {
                 return true;
             }
         }
@@ -614,8 +595,7 @@ public final class DuplicateFinderMojo extends AbstractMojo
     }
 
     private void writeResultFile(File resultFile, ImmutableMap<String, Entry<ResultCollector, ClasspathDescriptor>> results)
-        throws MojoExecutionException, InvalidVersionSpecificationException, OverConstrainedVersionException
-    {
+            throws MojoExecutionException, InvalidVersionSpecificationException, OverConstrainedVersionException {
         File parent = resultFile.getParentFile();
         if (!parent.exists()) {
             if (!parent.mkdirs()) {
@@ -647,15 +627,13 @@ public final class DuplicateFinderMojo extends AbstractMojo
             }
 
             resultDocument.closeRootAndWriter();
-        }
-        catch (XMLStreamException e) {
+        } catch (XMLStreamException e) {
             throw new MojoExecutionException("While writing result file", e);
         }
     }
 
     private void addConfiguration(SMOutputElement rootElement)
-        throws XMLStreamException, InvalidVersionSpecificationException
-    {
+            throws XMLStreamException, InvalidVersionSpecificationException {
         SMOutputElement prefs = XMLWriterUtils.addElement(rootElement, "configuration", null);
         // Simple configuration options
         XMLWriterUtils.addAttribute(prefs, "skip", skip);

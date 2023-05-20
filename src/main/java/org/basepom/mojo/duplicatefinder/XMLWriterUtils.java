@@ -28,16 +28,14 @@ import org.basepom.mojo.duplicatefinder.artifact.MavenCoordinates;
 import org.basepom.mojo.duplicatefinder.classpath.ClasspathDescriptor;
 import org.codehaus.staxmate.out.SMOutputElement;
 
-public final class XMLWriterUtils
-{
-    private XMLWriterUtils()
-    {
+public final class XMLWriterUtils {
+
+    private XMLWriterUtils() {
         throw new AssertionError("do not instantiate");
     }
 
     public static SMOutputElement addElement(SMOutputElement document, String name, Object value)
-        throws XMLStreamException
-    {
+            throws XMLStreamException {
         SMOutputElement element = document.addElement(name);
         if (value != null) {
             element.addCharacters(value.toString());
@@ -46,16 +44,14 @@ public final class XMLWriterUtils
     }
 
     public static void addAttribute(SMOutputElement document, String name, Object value)
-        throws XMLStreamException
-    {
+            throws XMLStreamException {
         if (value != null) {
             document.addAttribute(name, value.toString());
         }
     }
 
     public static void addProjectInformation(SMOutputElement rootElement, MavenProject project)
-        throws XMLStreamException
-    {
+            throws XMLStreamException {
         SMOutputElement projectElement = rootElement.addElement("project");
         addAttribute(projectElement, "artifactId", project.getArtifact().getArtifactId());
         addAttribute(projectElement, "groupId", project.getArtifact().getGroupId());
@@ -65,8 +61,7 @@ public final class XMLWriterUtils
     }
 
     public static void addConflictingDependency(SMOutputElement conflictingDependenciesElement, String name, ConflictingDependency conflictingDependency)
-        throws XMLStreamException
-    {
+            throws XMLStreamException {
         SMOutputElement conflictingDependencyElement = conflictingDependenciesElement.addElement(name);
 
         addAttribute(conflictingDependencyElement, "currentProject", conflictingDependency.hasCurrentProject());
@@ -101,8 +96,7 @@ public final class XMLWriterUtils
     }
 
     public static void addMavenCoordinate(SMOutputElement dependenciesElement, String name, MavenCoordinates dependency)
-        throws XMLStreamException
-    {
+            throws XMLStreamException {
         SMOutputElement dependencyElement = dependenciesElement.addElement(name);
         addAttribute(dependencyElement, "artifactId", dependency.getArtifactId());
         addAttribute(dependencyElement, "groupId", dependency.getGroupId());
@@ -123,16 +117,14 @@ public final class XMLWriterUtils
     }
 
     public static void addArtifact(SMOutputElement artifactElement, String name, Artifact artifact)
-        throws XMLStreamException, OverConstrainedVersionException
-    {
+            throws XMLStreamException, OverConstrainedVersionException {
         // lazy. Replace with a real dependency writer if that somehow loses or mangles information.
         MavenCoordinates coordinates = new MavenCoordinates(artifact);
         addMavenCoordinate(artifactElement, name, coordinates);
     }
 
     public static void addResultCollector(SMOutputElement resultElement, ResultCollector resultCollector)
-        throws XMLStreamException, OverConstrainedVersionException
-    {
+            throws XMLStreamException, OverConstrainedVersionException {
         addAttribute(resultElement, "conflictState", resultCollector.getConflictState());
         addAttribute(resultElement, "failed", resultCollector.isFailed());
         SMOutputElement conflictsElement = resultElement.addElement("conflicts");
@@ -148,8 +140,7 @@ public final class XMLWriterUtils
     }
 
     private static void addConflictResult(SMOutputElement conflictResultsElement, ConflictResult conflictResult)
-        throws XMLStreamException, OverConstrainedVersionException
-    {
+            throws XMLStreamException, OverConstrainedVersionException {
         SMOutputElement conflictResultElement = conflictResultsElement.addElement("conflictResult");
         addAttribute(conflictResultElement, "name", conflictResult.getName());
         addAttribute(conflictResultElement, "type", conflictResult.getType());
@@ -166,13 +157,11 @@ public final class XMLWriterUtils
             addAttribute(conflictName, "bootClasspathElement", entry.isBootClasspathElement());
             if (entry.hasArtifact()) {
                 addArtifact(conflictName, "artifact", entry.getArtifact());
-            }
-            else {
+            } else {
                 final File file = entry.getFile();
                 if (file.isDirectory()) {
                     addElement(conflictName, "directory", file);
-                }
-                else {
+                } else {
                     addElement(conflictName, "file", file);
                 }
             }
@@ -180,8 +169,7 @@ public final class XMLWriterUtils
     }
 
     public static void addClasspathDescriptor(SMOutputElement resultElement, int resultFileMinClasspathCount, ClasspathDescriptor classpathDescriptor)
-        throws XMLStreamException
-    {
+            throws XMLStreamException {
         SMOutputElement resourceExclusionPatternsElement = resultElement.addElement("ignoredResourcePatterns");
         for (Pattern resourceExclusionPattern : classpathDescriptor.getIgnoredResourcePatterns()) {
             addElement(resourceExclusionPatternsElement, "ignoredResourcePattern", resourceExclusionPattern.toString());

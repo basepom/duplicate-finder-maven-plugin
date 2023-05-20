@@ -13,9 +13,9 @@
  */
 package diff;
 
-public class Demo
-{
-    public static final void main(String ... args) throws Exception {
+public class Demo {
+
+    public static final void main(String... args) throws Exception {
         System.out.println("Hello, first-class-jar World!");
     }
 }

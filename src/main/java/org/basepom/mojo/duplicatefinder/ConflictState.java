@@ -15,8 +15,7 @@ package org.basepom.mojo.duplicatefinder;
 
 import static com.google.common.base.Preconditions.checkState;
 
-public enum ConflictState
-{
+public enum ConflictState {
     // Conflict states in order from low to high.
     NO_CONFLICT("no-conflict", ""),
     CONFLICT_CONTENT_EQUAL("content-equal", "(but equal)"),
@@ -25,19 +24,16 @@ public enum ConflictState
     private final String value;
     private final String hint;
 
-    ConflictState(String value, String hint)
-    {
+    ConflictState(String value, String hint) {
         this.value = value;
         this.hint = hint;
     }
 
-    public String getHint()
-    {
+    public String getHint() {
         return hint;
     }
 
-    public static ConflictState max(final ConflictState ... states)
-    {
+    public static ConflictState max(final ConflictState... states) {
         checkState(states.length > 0, "states is empty");
 
         ConflictState result = states[0];
@@ -51,8 +47,7 @@ public enum ConflictState
     }
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         return value;
     }
 }

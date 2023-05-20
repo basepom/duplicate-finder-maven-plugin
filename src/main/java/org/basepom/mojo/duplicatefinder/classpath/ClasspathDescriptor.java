@@ -13,11 +13,6 @@
  */
 package org.basepom.mojo.duplicatefinder.classpath;
 
-import static java.lang.String.format;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -48,7 +43,6 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import com.google.common.io.Closer;
 import com.google.common.io.Files;
-
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
@@ -58,40 +52,45 @@ import org.basepom.mojo.duplicatefinder.ConflictType;
 import org.basepom.mojo.duplicatefinder.PluginLog;
 import org.basepom.mojo.duplicatefinder.artifact.MavenCoordinates;
 
+import static java.lang.String.format;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+
 @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
-public class ClasspathDescriptor
-{
+public class ClasspathDescriptor {
+
     private static final PluginLog LOG = new PluginLog(ClasspathDescriptor.class);
 
     private static final MatchPatternPredicate DEFAULT_IGNORED_RESOURCES_PREDICATE = new MatchPatternPredicate(Arrays.asList(
-        // Standard jar folders
-        "^META-INF/.*",
-        "^OSGI-INF/.*",
-        // directory name that shows up all the time
-        "^licenses/.*",
-        // file names that show up all the time
-        ".*license(\\.txt)?$",
-        ".*notice(\\.txt)?$",
-        ".*readme(\\.txt)?$",
-        ".*changelog(\\.txt)?$",
-        ".*third-party(\\.txt)?$",
-        // HTML stuff from javadocs.
-        ".*package\\.html$",
-        ".*overview\\.html$"));
+            // Standard jar folders
+            "^META-INF/.*",
+            "^OSGI-INF/.*",
+            // directory name that shows up all the time
+            "^licenses/.*",
+            // file names that show up all the time
+            ".*license(\\.txt)?$",
+            ".*notice(\\.txt)?$",
+            ".*readme(\\.txt)?$",
+            ".*changelog(\\.txt)?$",
+            ".*third-party(\\.txt)?$",
+            // HTML stuff from javadocs.
+            ".*package\\.html$",
+            ".*overview\\.html$"));
 
     @VisibleForTesting
     static final MatchPatternPredicate DEFAULT_IGNORED_CLASS_PREDICATE = new MatchPatternPredicate(Arrays.asList(
 
-        "^(.*\\.)?.*\\$.*$",      // matches inner classes in any package
-        "^(.*\\.)?package-info$", // matches package-info in any package
-        "^(.*\\.)?module-info$"   // matches module-info in any package
-        ));
+            "^(.*\\.)?.*\\$.*$",      // matches inner classes in any package
+            "^(.*\\.)?package-info$", // matches package-info in any package
+            "^(.*\\.)?module-info$"   // matches module-info in any package
+    ));
 
     private static final MatchPatternPredicate DEFAULT_IGNORED_LOCAL_DIRECTORIES = new MatchPatternPredicate(Arrays.asList(
-        "^.git$",
-        "^.svn$",
-        "^.hg$",
-        "^.bzr$"));
+            "^.git$",
+            "^.svn$",
+            "^.hg$",
+            "^.bzr$"));
 
     /**
      * This is a global, static cache which can be reused through multiple runs of the plugin in the same VM,
@@ -109,15 +108,14 @@ public class ClasspathDescriptor
     private final ImmutableList<Pattern> ignoredClassPatterns;
 
     public static ClasspathDescriptor createClasspathDescriptor(final MavenProject project,
-        final Multimap<File, Artifact> fileToArtifactMap,
-        final Collection<String> ignoredResourcePatterns,
-        final Collection<String> ignoredClassPatterns,
-        final Collection<MavenCoordinates> ignoredDependencies,
-        final boolean useDefaultResourceIgnoreList,
-        final boolean useDefaultClassIgnoreList,
-        final Set<File> bootClasspath,
-        final File[] projectFolders) throws MojoExecutionException, InvalidVersionSpecificationException
-    {
+            final Multimap<File, Artifact> fileToArtifactMap,
+            final Collection<String> ignoredResourcePatterns,
+            final Collection<String> ignoredClassPatterns,
+            final Collection<MavenCoordinates> ignoredDependencies,
+            final boolean useDefaultResourceIgnoreList,
+            final boolean useDefaultClassIgnoreList,
+            final Set<File> bootClasspath,
+            final File[] projectFolders) throws MojoExecutionException, InvalidVersionSpecificationException {
         checkNotNull(project, "project is null");
         checkNotNull(fileToArtifactMap, "fileToArtifactMap is null");
         checkNotNull(ignoredResourcePatterns, "ignoredResourcePatterns is null");
@@ -125,7 +123,8 @@ public class ClasspathDescriptor
         checkNotNull(ignoredDependencies, "ignoredDependencies is null");
         checkNotNull(projectFolders, "projectFolders is null");
 
-        final ClasspathDescriptor classpathDescriptor = new ClasspathDescriptor(useDefaultResourceIgnoreList, ignoredResourcePatterns, useDefaultClassIgnoreList, ignoredClassPatterns);
+        final ClasspathDescriptor classpathDescriptor = new ClasspathDescriptor(useDefaultResourceIgnoreList, ignoredResourcePatterns,
+                useDefaultClassIgnoreList, ignoredClassPatterns);
 
         File file = null;
 
@@ -135,13 +134,11 @@ public class ClasspathDescriptor
                 if (file.exists()) {
                     LOG.debug("Adding '%s' as a boot classpath element", file);
                     classpathDescriptor.addClasspathElement(file);
-                }
-                else {
+                } else {
                     LOG.debug("Ignoring '%s', does not exist.", file);
                 }
             }
-        }
-        catch (final IOException ex) {
+        } catch (final IOException ex) {
             throw new MojoExecutionException(format("Error trying to access file '%s' from boot classpath", file), ex);
         }
 
@@ -162,8 +159,7 @@ public class ClasspathDescriptor
                     if (!matchArtifactPredicate.apply(artifact)) {
                         classpathDescriptor.addClasspathElement(file);
                     }
-                }
-                else {
+                } else {
                     // e.g. when running the goal explicitly on a cleaned multi-module project, referenced
                     // projects will try to use the output folders of a referenced project but these do not
                     // exist. Obviously, in this case the plugin might return incorrect results (unfortunately
@@ -172,8 +168,7 @@ public class ClasspathDescriptor
                     LOG.debug("Classpath element '%s' does not exist.", file.getAbsolutePath());
                 }
             }
-        }
-        catch (final IOException ex) {
+        } catch (final IOException ex) {
             throw new MojoExecutionException(format("Error trying to access file '%s' for artifact '%s'", file, artifact), ex);
         }
 
@@ -183,14 +178,12 @@ public class ClasspathDescriptor
                 file = projectFile;
                 if (projectFile.exists()) {
                     classpathDescriptor.addClasspathElement(file);
-                }
-                else {
+                } else {
                     // See above. This may happen in the project has been cleaned before running the goal directly.
                     LOG.debug("Project folder '%s' does not exist.", file.getAbsolutePath());
                 }
             }
-        }
-        catch (final IOException ex) {
+        } catch (final IOException ex) {
             throw new MojoExecutionException(format("Error trying to access project folder '%s'", file), ex);
         }
 
@@ -198,11 +191,10 @@ public class ClasspathDescriptor
     }
 
     private ClasspathDescriptor(final boolean useDefaultResourceIgnoreList,
-        final Collection<String> ignoredResourcePatterns,
-        final boolean useDefaultClassIgnoreList,
-        final Collection<String> ignoredClassPatterns)
-            throws MojoExecutionException
-    {
+            final Collection<String> ignoredResourcePatterns,
+            final boolean useDefaultClassIgnoreList,
+            final Collection<String> ignoredClassPatterns)
+            throws MojoExecutionException {
         final ImmutableList.Builder<Pattern> ignoredResourcePatternsBuilder = ImmutableList.builder();
 
         // build resource predicate...
@@ -220,8 +212,7 @@ public class ClasspathDescriptor
                 MatchPatternPredicate ignoredResourcesPredicate = new MatchPatternPredicate(ignoredResourcePatterns);
                 resourcesPredicate = Predicates.or(resourcesPredicate, ignoredResourcesPredicate);
                 ignoredResourcePatternsBuilder.addAll(ignoredResourcesPredicate.getPatterns());
-            }
-            catch (final PatternSyntaxException pse) {
+            } catch (final PatternSyntaxException pse) {
                 throw new MojoExecutionException("Error compiling resourceIgnore pattern: " + pse.getMessage());
             }
         }
@@ -246,8 +237,7 @@ public class ClasspathDescriptor
                 MatchPatternPredicate ignoredPackagePredicate = new MatchPatternPredicate(ignoredClassPatterns);
                 classPredicate = Predicates.or(classPredicate, ignoredPackagePredicate);
                 ignoredClassPatternsBuilder.addAll(ignoredPackagePredicate.getPatterns());
-            }
-            catch (final PatternSyntaxException pse) {
+            } catch (final PatternSyntaxException pse) {
                 throw new MojoExecutionException("Error compiling classIgnore pattern: " + pse.getMessage());
             }
         }
@@ -256,8 +246,7 @@ public class ClasspathDescriptor
         this.ignoredClassPatterns = ignoredClassPatternsBuilder.build();
     }
 
-    public ImmutableMap<String, Collection<File>> getClasspathElementLocations(final ConflictType type)
-    {
+    public ImmutableMap<String, Collection<File>> getClasspathElementLocations(final ConflictType type) {
         checkNotNull(type, "type is null");
         switch (type) {
             case CLASS:
@@ -269,24 +258,20 @@ public class ClasspathDescriptor
         }
     }
 
-    public ImmutableList<Pattern> getIgnoredResourcePatterns()
-    {
+    public ImmutableList<Pattern> getIgnoredResourcePatterns() {
         return ignoredResourcePatterns;
     }
 
-    public ImmutableList<Pattern> getIgnoredClassPatterns()
-    {
+    public ImmutableList<Pattern> getIgnoredClassPatterns() {
         return ignoredClassPatterns;
     }
 
-    public ImmutableList<Pattern> getIgnoredDirectoryPatterns()
-    {
+    public ImmutableList<Pattern> getIgnoredDirectoryPatterns() {
         return DEFAULT_IGNORED_LOCAL_DIRECTORIES.getPatterns();
     }
 
 
-    private void addClasspathElement(final File element) throws IOException
-    {
+    private void addClasspathElement(final File element) throws IOException {
         checkState(element.exists(), "Path '%s' does not exist!", element.getAbsolutePath());
 
         ClasspathCacheElement cached = CACHED_BY_FILE.get(element);
@@ -295,15 +280,13 @@ public class ClasspathDescriptor
             final ClasspathCacheElement.Builder cacheBuilder = ClasspathCacheElement.builder(element);
             if (element.isDirectory()) {
                 addDirectory(cacheBuilder, element, new PackageNameHolder());
-            }
-            else {
+            } else {
                 addArchive(cacheBuilder, element);
             }
             final ClasspathCacheElement newCached = cacheBuilder.build();
             final ClasspathCacheElement oldCached = CACHED_BY_FILE.putIfAbsent(element, newCached);
             cached = MoreObjects.firstNonNull(oldCached, newCached);
-        }
-        else {
+        } else {
             LOG.debug("Cache hit for '%s'", element.getAbsolutePath());
         }
 
@@ -312,8 +295,7 @@ public class ClasspathDescriptor
 
     }
 
-    private void addDirectory(final ClasspathCacheElement.Builder cacheBuilder, final File workDir, final PackageNameHolder packageName)
-    {
+    private void addDirectory(final ClasspathCacheElement.Builder cacheBuilder, final File workDir, final PackageNameHolder packageName) {
         final File[] files = workDir.listFiles();
 
         if (files != null) {
@@ -321,31 +303,26 @@ public class ClasspathDescriptor
                 if (file.isDirectory()) {
                     if (DEFAULT_IGNORED_LOCAL_DIRECTORIES.apply(file.getName())) {
                         LOG.debug("Ignoring local directory '%s'", file.getAbsolutePath());
-                    }
-                    else {
+                    } else {
                         addDirectory(cacheBuilder, file, packageName.getChildPackage(file.getName()));
                     }
 
-                }
-                else if (file.isFile()) {
+                } else if (file.isFile()) {
                     if ("class".equals(Files.getFileExtension(file.getName()))) {
                         final String className = packageName.getQualifiedName(Files.getNameWithoutExtension(file.getName()));
                         cacheBuilder.addClass(className);
-                    }
-                    else {
+                    } else {
                         final String resourcePath = packageName.getQualifiedPath(file.getName());
                         cacheBuilder.addResource(resourcePath);
                     }
-                }
-                else {
+                } else {
                     LOG.warn("Ignoring unknown file type for '%s'", file.getAbsolutePath());
                 }
             }
         }
     }
 
-    private void addArchive(final ClasspathCacheElement.Builder cacheBuilder, final File element) throws IOException
-    {
+    private void addArchive(final ClasspathCacheElement.Builder cacheBuilder, final File element) throws IOException {
         final Closer closer = Closer.create();
 
         try {
@@ -363,15 +340,13 @@ public class ClasspathDescriptor
                         final PackageNameHolder packageName = new PackageNameHolder(nameElements.subList(0, nameElements.size() - 1));
                         final String className = packageName.getQualifiedName(Files.getNameWithoutExtension(name));
                         cacheBuilder.addClass(className);
-                    }
-                    else {
+                    } else {
                         final String resourcePath = name.replace('\\', File.separatorChar);
                         cacheBuilder.addResource(resourcePath);
                     }
                 }
             }
-        }
-        finally {
+        } finally {
             closer.close();
         }
     }
@@ -403,8 +378,8 @@ public class ClasspathDescriptor
 
         String className = Files.getNameWithoutExtension(classFileName);
         if (!(SourceVersion.isIdentifier(className)
-              || "module-info".equals(className)
-              || "package-info".equals(className))) {
+                || "module-info".equals(className)
+                || "package-info".equals(className))) {
             LOG.debug("Ignoring %s, %s is not a valid class identifier", fullClassPath, className);
             return Optional.empty();
         }

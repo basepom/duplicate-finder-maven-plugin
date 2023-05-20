@@ -13,37 +13,32 @@
  */
 package org.basepom.mojo.duplicatefinder.artifact;
 
-import static com.google.common.base.Strings.nullToEmpty;
-
 import java.io.File;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.project.MavenProject;
 
-public final class ArtifactHelper
-{
-    private ArtifactHelper()
-    {
+import static com.google.common.base.Strings.nullToEmpty;
+
+public final class ArtifactHelper {
+
+    private ArtifactHelper() {
         throw new AssertionError("do not instantiate");
     }
 
-    public static File getOutputDirectory(final MavenProject project)
-    {
+    public static File getOutputDirectory(final MavenProject project) {
         return new File(project.getBuild().getOutputDirectory());
     }
 
-    public static File getTestOutputDirectory(final MavenProject project)
-    {
+    public static File getTestOutputDirectory(final MavenProject project) {
         return new File(project.getBuild().getTestOutputDirectory());
     }
 
-    public static boolean isJarArtifact(final Artifact artifact)
-    {
+    public static boolean isJarArtifact(final Artifact artifact) {
         return nullToEmpty(artifact.getType()).isEmpty() || "jar".equals(artifact.getType()) || "test-jar".equals(artifact.getType());
     }
 
-    public static boolean isTestArtifact(final Artifact artifact)
-    {
+    public static boolean isTestArtifact(final Artifact artifact) {
         return "test-jar".equals(artifact.getType()) || "tests".equals(artifact.getClassifier());
     }
 }

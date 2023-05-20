@@ -13,8 +13,6 @@
  */
 package org.basepom.mojo.duplicatefinder;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import java.util.Collection;
 import java.util.EnumMap;
 import java.util.EnumSet;
@@ -30,9 +28,11 @@ import com.google.common.collect.MultimapBuilder.SetMultimapBuilder;
 import com.google.common.collect.Multimaps;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
-public class ResultCollector
-{
+public class ResultCollector {
+
     private final EnumSet<ConflictState> printState;
     private final EnumSet<ConflictState> failState;
 
@@ -44,8 +44,7 @@ public class ResultCollector
 
     private ConflictState conflictState = ConflictState.NO_CONFLICT;
 
-    ResultCollector(final EnumSet<ConflictState> printState, final EnumSet<ConflictState> failState)
-    {
+    ResultCollector(final EnumSet<ConflictState> printState, final EnumSet<ConflictState> failState) {
         this.printState = printState;
         this.failState = failState;
 
@@ -54,23 +53,20 @@ public class ResultCollector
         }
     }
 
-    public ConflictState getConflictState()
-    {
+    public ConflictState getConflictState() {
         return conflictState;
     }
 
-    public boolean isFailed()
-    {
+    public boolean isFailed() {
         return failState.contains(conflictState);
     }
 
-    public boolean hasConflictsFor(ConflictType type, ConflictState state)
-    {
+    public boolean hasConflictsFor(ConflictType type, ConflictState state) {
         return seenResults.get(type).contains(state);
     }
 
-    public void addConflict(ConflictType type, String name, SortedSet<ClasspathElement> conflictingClasspathElements, boolean excepted, final ConflictState state)
-    {
+    public void addConflict(ConflictType type, String name, SortedSet<ClasspathElement> conflictingClasspathElements, boolean excepted,
+            final ConflictState state) {
         if (!excepted) {
             this.conflictState = ConflictState.max(this.conflictState, state);
 
@@ -83,30 +79,27 @@ public class ResultCollector
         results.put(conflictResult.getConflictName(), conflictResult);
     }
 
-    public Map<String, Collection<ConflictResult>> getResults(final ConflictType type, final ConflictState state)
-    {
+    public Map<String, Collection<ConflictResult>> getResults(final ConflictType type, final ConflictState state) {
         Multimap<String, ConflictResult> result = Multimaps.filterValues(results, conflictResult -> {
             checkNotNull(conflictResult, "conflictResult is null");
             return conflictResult.getConflictState() == state
-                   && conflictResult.getType() == type
-                   && !conflictResult.isExcepted();
+                    && conflictResult.getType() == type
+                    && !conflictResult.isExcepted();
         });
 
         return ImmutableMap.copyOf(result.asMap());
     }
 
-    Map<String, Collection<ConflictResult>> getAllResults()
-    {
+    Map<String, Collection<ConflictResult>> getAllResults() {
         return ImmutableMap.copyOf(results.asMap());
     }
 
-    private static String buildConflictName(final SortedSet<ClasspathElement> conflictArtifactNames)
-    {
+    private static String buildConflictName(final SortedSet<ClasspathElement> conflictArtifactNames) {
         return Joiner.on(", ").join(Collections2.transform(conflictArtifactNames, ClasspathElement.getNameFunction()));
     }
 
-    public class ConflictResult
-    {
+    public class ConflictResult {
+
         private final ConflictType type;
         private final String name;
         private final SortedSet<ClasspathElement> classpathElements;
@@ -115,11 +108,10 @@ public class ResultCollector
         private final String conflictName;
 
         ConflictResult(final ConflictType type,
-            final String name,
-            final SortedSet<ClasspathElement> classpathElements,
-            final boolean excepted,
-            final ConflictState conflictState)
-        {
+                final String name,
+                final SortedSet<ClasspathElement> classpathElements,
+                final boolean excepted,
+                final ConflictState conflictState) {
             this.type = type;
             this.name = name;
             this.classpathElements = classpathElements;
@@ -128,43 +120,35 @@ public class ResultCollector
             this.conflictName = ResultCollector.buildConflictName(classpathElements);
         }
 
-        public String getName()
-        {
+        public String getName() {
             return name;
         }
 
-        public ConflictType getType()
-        {
+        public ConflictType getType() {
             return type;
         }
 
-        public SortedSet<ClasspathElement> getClasspathElements()
-        {
+        public SortedSet<ClasspathElement> getClasspathElements() {
             return classpathElements;
         }
 
-        public boolean isExcepted()
-        {
+        public boolean isExcepted() {
             return excepted;
         }
 
-        public boolean isPrinted()
-        {
+        public boolean isPrinted() {
             return !excepted && printState.contains(conflictState);
         }
 
-        public boolean isFailed()
-        {
+        public boolean isFailed() {
             return !excepted && failState.contains(conflictState);
         }
 
-        public ConflictState getConflictState()
-        {
+        public ConflictState getConflictState() {
             return conflictState;
         }
 
-        private String getConflictName()
-        {
+        private String getConflictName() {
             return conflictName;
         }
     }

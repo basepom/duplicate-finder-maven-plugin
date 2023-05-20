@@ -16,7 +16,7 @@ import static org.basepom.mojo.duplicatefinder.groovy.ITools.*
 def result = loadTestXml(basedir)
 
 overallState(CONFLICT_DIFF, 1, NOT_FAILED, result) // This is "1" because both conflictResults are in the same conflict.
-checkConflictResult("conflict-same-content",      TYPE_RESOURCE, CONFLICT_EQUAL, NOT_EXCEPTED, NOT_PRINTED, NOT_FAILED, findConflictResult(result, 2, FIRST_JAR, SECOND_JAR))
-checkConflictResult("conflict-different-content", TYPE_RESOURCE, CONFLICT_DIFF,  NOT_EXCEPTED, PRINTED,     NOT_FAILED, findConflictResult(result, 2, FIRST_JAR, SECOND_JAR))
+checkConflictResult("conflict-same-content", TYPE_RESOURCE, CONFLICT_EQUAL, NOT_EXCEPTED, NOT_PRINTED, NOT_FAILED, findConflictResult(result, 2, FIRST_JAR, SECOND_JAR))
+checkConflictResult("conflict-different-content", TYPE_RESOURCE, CONFLICT_DIFF, NOT_EXCEPTED, PRINTED, NOT_FAILED, findConflictResult(result, 2, FIRST_JAR, SECOND_JAR))
 
 return true

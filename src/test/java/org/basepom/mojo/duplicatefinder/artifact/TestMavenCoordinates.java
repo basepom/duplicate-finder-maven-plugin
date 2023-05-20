@@ -13,24 +13,22 @@
  */
 package org.basepom.mojo.duplicatefinder.artifact;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.artifact.handler.DefaultArtifactHandler;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.model.Dependency;
-import org.basepom.mojo.duplicatefinder.artifact.MavenCoordinates;
 import org.junit.Test;
 
-public class TestMavenCoordinates
-{
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+public class TestMavenCoordinates {
+
     @Test
-    public void testCreateFromDependencyBasic() throws java.lang.Exception
-    {
+    public void testCreateFromDependencyBasic() throws java.lang.Exception {
         final Dependency dependency = new Dependency();
         dependency.setGroupId("test.group");
         dependency.setArtifactId("test-artifact");
@@ -49,8 +47,7 @@ public class TestMavenCoordinates
     }
 
     @Test
-    public void testCreateFromDependencyWithClassifier() throws java.lang.Exception
-    {
+    public void testCreateFromDependencyWithClassifier() throws java.lang.Exception {
         final Dependency dependency = new Dependency();
         dependency.setGroupId("test.group");
         dependency.setArtifactId("test-artifact");
@@ -71,8 +68,7 @@ public class TestMavenCoordinates
     }
 
     @Test
-    public void testCreateFromDependencyWithVersionRange() throws java.lang.Exception
-    {
+    public void testCreateFromDependencyWithVersionRange() throws java.lang.Exception {
         final Dependency dependency = new Dependency();
         dependency.setGroupId("test.group");
         dependency.setArtifactId("test-artifact");
@@ -92,8 +88,7 @@ public class TestMavenCoordinates
     }
 
     @Test
-    public void testCreateFromArtifactBasic() throws java.lang.Exception
-    {
+    public void testCreateFromArtifactBasic() throws java.lang.Exception {
         final Artifact artifact = new DefaultArtifact("test.group", "test-artifact", "1.0", "test", "jar", null, new DefaultArtifactHandler());
 
         final MavenCoordinates coordinates = new MavenCoordinates(artifact);
@@ -109,8 +104,7 @@ public class TestMavenCoordinates
     }
 
     @Test
-    public void testCreateFromArtifactWithClassifier() throws java.lang.Exception
-    {
+    public void testCreateFromArtifactWithClassifier() throws java.lang.Exception {
         final Artifact artifact = new DefaultArtifact("test.group", "test-artifact", "1.0", "test", "jar", "jdk17", new DefaultArtifactHandler());
 
         final MavenCoordinates coordinates = new MavenCoordinates(artifact);
@@ -127,8 +121,7 @@ public class TestMavenCoordinates
     }
 
     @Test
-    public void testCreateFromArtifactWithVersionRange() throws java.lang.Exception
-    {
+    public void testCreateFromArtifactWithVersionRange() throws java.lang.Exception {
         final VersionRange versionRange = VersionRange.createFromVersionSpec("[1.0, 2.0)");
         final Artifact artifact = new DefaultArtifact("test.group", "test-artifact", versionRange, "test", "jar", "jdk17", new DefaultArtifactHandler());
 
@@ -142,8 +135,7 @@ public class TestMavenCoordinates
     }
 
     @Test
-    public void testCreateFromArtifactWithVersionRangeRestricted() throws java.lang.Exception
-    {
+    public void testCreateFromArtifactWithVersionRangeRestricted() throws java.lang.Exception {
         final VersionRange versionRange = VersionRange.createFromVersionSpec("[1.0, 2.0)").restrict(VersionRange.createFromVersion("1.2"));
         final Artifact artifact = new DefaultArtifact("test.group", "test-artifact", versionRange, "test", "jar", "jdk17", new DefaultArtifactHandler());
 
@@ -159,9 +151,9 @@ public class TestMavenCoordinates
     }
 
     @Test
-    public void testTestJar() throws java.lang.Exception
-    {
-        MavenCoordinates coordinates = new MavenCoordinates(new DefaultArtifact("test.group", "test-artifact", "1.0", "test", "test-jar", null, new DefaultArtifactHandler()));
+    public void testTestJar() throws java.lang.Exception {
+        MavenCoordinates coordinates = new MavenCoordinates(
+                new DefaultArtifact("test.group", "test-artifact", "1.0", "test", "test-jar", null, new DefaultArtifactHandler()));
         assertEquals("jar", coordinates.getType());
         assertTrue(coordinates.getClassifier().isPresent());
         assertEquals("tests", coordinates.getClassifier().get());
@@ -172,15 +164,15 @@ public class TestMavenCoordinates
         assertEquals("tests", coordinates.getClassifier().get());
 
         // Existing classifier gets preserved
-        coordinates = new MavenCoordinates(new DefaultArtifact("test.group", "test-artifact", "1.0", "test", "test-jar", "special", new DefaultArtifactHandler()));
+        coordinates = new MavenCoordinates(
+                new DefaultArtifact("test.group", "test-artifact", "1.0", "test", "test-jar", "special", new DefaultArtifactHandler()));
         assertEquals("jar", coordinates.getType());
         assertTrue(coordinates.getClassifier().isPresent());
         assertEquals("special", coordinates.getClassifier().get());
     }
 
     @Test
-    public void testBasicMismatches() throws java.lang.Exception
-    {
+    public void testBasicMismatches() throws java.lang.Exception {
         final Dependency dependency = new Dependency();
         dependency.setGroupId("test.group");
         dependency.setArtifactId("test-artifact");
@@ -188,31 +180,39 @@ public class TestMavenCoordinates
         final MavenCoordinates dependencyCoordinates = new MavenCoordinates(dependency);
 
         // group mismatch
-        assertFalse(dependencyCoordinates.matches(new MavenCoordinates(new DefaultArtifact("test.group2", "test-artifact", "1.0", "test", "jar", null, new DefaultArtifactHandler()))));
+        assertFalse(dependencyCoordinates.matches(
+                new MavenCoordinates(new DefaultArtifact("test.group2", "test-artifact", "1.0", "test", "jar", null, new DefaultArtifactHandler()))));
         // artifact id mismatch
-        assertFalse(dependencyCoordinates.matches(new MavenCoordinates(new DefaultArtifact("test.group", "test-artifact2", "1.0", "test", "jar", null, new DefaultArtifactHandler()))));
+        assertFalse(dependencyCoordinates.matches(
+                new MavenCoordinates(new DefaultArtifact("test.group", "test-artifact2", "1.0", "test", "jar", null, new DefaultArtifactHandler()))));
         // type mismatch
-        assertFalse(dependencyCoordinates.matches(new MavenCoordinates(new DefaultArtifact("test.group", "test-artifact", "1.0", "test", "war", null, new DefaultArtifactHandler()))));
+        assertFalse(dependencyCoordinates.matches(
+                new MavenCoordinates(new DefaultArtifact("test.group", "test-artifact", "1.0", "test", "war", null, new DefaultArtifactHandler()))));
 
         // no classifier matches any classifier
-        assertTrue(dependencyCoordinates.matches(new MavenCoordinates(new DefaultArtifact("test.group", "test-artifact", "1.0", "test", "jar", null, new DefaultArtifactHandler()))));
-        assertTrue(dependencyCoordinates.matches(new MavenCoordinates(new DefaultArtifact("test.group", "test-artifact", "1.0", "test", "jar", "foo", new DefaultArtifactHandler()))));
-        assertTrue(dependencyCoordinates.matches(new MavenCoordinates(new DefaultArtifact("test.group", "test-artifact", "1.0", "test", "jar", "bar", new DefaultArtifactHandler()))));
+        assertTrue(dependencyCoordinates.matches(
+                new MavenCoordinates(new DefaultArtifact("test.group", "test-artifact", "1.0", "test", "jar", null, new DefaultArtifactHandler()))));
+        assertTrue(dependencyCoordinates.matches(
+                new MavenCoordinates(new DefaultArtifact("test.group", "test-artifact", "1.0", "test", "jar", "foo", new DefaultArtifactHandler()))));
+        assertTrue(dependencyCoordinates.matches(
+                new MavenCoordinates(new DefaultArtifact("test.group", "test-artifact", "1.0", "test", "jar", "bar", new DefaultArtifactHandler()))));
 
         dependency.setClassifier("baz");
         final MavenCoordinates dependencyCoordinatesWithClassifier = new MavenCoordinates(dependency);
 
         // classifier matches same classifier
-        assertTrue(dependencyCoordinatesWithClassifier.matches(new MavenCoordinates(new DefaultArtifact("test.group", "test-artifact", "1.0", "test", "jar", "baz", new DefaultArtifactHandler()))));
+        assertTrue(dependencyCoordinatesWithClassifier.matches(
+                new MavenCoordinates(new DefaultArtifact("test.group", "test-artifact", "1.0", "test", "jar", "baz", new DefaultArtifactHandler()))));
 
         // classifier does not match empty classifier or other classifier
-        assertFalse(dependencyCoordinatesWithClassifier.matches(new MavenCoordinates(new DefaultArtifact("test.group", "test-artifact", "1.0", "test", "jar", null, new DefaultArtifactHandler()))));
-        assertFalse(dependencyCoordinatesWithClassifier.matches(new MavenCoordinates(new DefaultArtifact("test.group", "test-artifact", "1.0", "test", "jar", "bar", new DefaultArtifactHandler()))));
+        assertFalse(dependencyCoordinatesWithClassifier.matches(
+                new MavenCoordinates(new DefaultArtifact("test.group", "test-artifact", "1.0", "test", "jar", null, new DefaultArtifactHandler()))));
+        assertFalse(dependencyCoordinatesWithClassifier.matches(
+                new MavenCoordinates(new DefaultArtifact("test.group", "test-artifact", "1.0", "test", "jar", "bar", new DefaultArtifactHandler()))));
     }
 
     @Test
-    public void testVersionMatches() throws java.lang.Exception
-    {
+    public void testVersionMatches() throws java.lang.Exception {
         final Dependency dependency = new Dependency();
         dependency.setGroupId("test.group");
         dependency.setArtifactId("test-artifact");
@@ -220,30 +220,37 @@ public class TestMavenCoordinates
 
         // match any version
         assertTrue(dependencyCoordinatesNoVersionNoVersionRange
-            .matches(new MavenCoordinates(new DefaultArtifact("test.group", "test-artifact", "1.0", "test", "jar", null, new DefaultArtifactHandler()))));
+                .matches(new MavenCoordinates(new DefaultArtifact("test.group", "test-artifact", "1.0", "test", "jar", null, new DefaultArtifactHandler()))));
         assertTrue(dependencyCoordinatesNoVersionNoVersionRange
-            .matches(new MavenCoordinates(new DefaultArtifact("test.group", "test-artifact", "2.0", "test", "jar", null, new DefaultArtifactHandler()))));
+                .matches(new MavenCoordinates(new DefaultArtifact("test.group", "test-artifact", "2.0", "test", "jar", null, new DefaultArtifactHandler()))));
 
         dependency.setVersion("1.0");
         final MavenCoordinates dependencyCoordinatesVersion = new MavenCoordinates(dependency);
 
         // don't match anything without version
         assertFalse(dependencyCoordinatesVersion
-            .matches(new MavenCoordinates(new DefaultArtifact("test.group", "test-artifact", VersionRange.createFromVersionSpec("[1.0, 2.0)"), "test", "jar", null, new DefaultArtifactHandler()))));
+                .matches(new MavenCoordinates(
+                        new DefaultArtifact("test.group", "test-artifact", VersionRange.createFromVersionSpec("[1.0, 2.0)"), "test", "jar", null,
+                                new DefaultArtifactHandler()))));
 
         // But exact versions match (or don't)
-        assertFalse(dependencyCoordinatesVersion.matches(new MavenCoordinates(new DefaultArtifact("test.group", "test-artifact", "1.1", "test", "jar", null, new DefaultArtifactHandler()))));
-        assertTrue(dependencyCoordinatesVersion.matches(new MavenCoordinates(new DefaultArtifact("test.group", "test-artifact", "1.0", "test", "jar", null, new DefaultArtifactHandler()))));
+        assertFalse(dependencyCoordinatesVersion.matches(
+                new MavenCoordinates(new DefaultArtifact("test.group", "test-artifact", "1.1", "test", "jar", null, new DefaultArtifactHandler()))));
+        assertTrue(dependencyCoordinatesVersion.matches(
+                new MavenCoordinates(new DefaultArtifact("test.group", "test-artifact", "1.0", "test", "jar", null, new DefaultArtifactHandler()))));
 
         dependency.setVersion("[2.0, 3.0)");
         final MavenCoordinates dependencyCoordinatesVersionRange = new MavenCoordinates(dependency);
 
         // Don't match outside version range
-        assertFalse(dependencyCoordinatesVersionRange.matches(new MavenCoordinates(new DefaultArtifact("test.group", "test-artifact", "1.0", "test", "jar", null, new DefaultArtifactHandler()))));
-        assertFalse(dependencyCoordinatesVersionRange.matches(new MavenCoordinates(new DefaultArtifact("test.group", "test-artifact", "3.0", "test", "jar", null, new DefaultArtifactHandler()))));
+        assertFalse(dependencyCoordinatesVersionRange.matches(
+                new MavenCoordinates(new DefaultArtifact("test.group", "test-artifact", "1.0", "test", "jar", null, new DefaultArtifactHandler()))));
+        assertFalse(dependencyCoordinatesVersionRange.matches(
+                new MavenCoordinates(new DefaultArtifact("test.group", "test-artifact", "3.0", "test", "jar", null, new DefaultArtifactHandler()))));
 
         // match inside
-        assertTrue(dependencyCoordinatesVersionRange.matches(new MavenCoordinates(new DefaultArtifact("test.group", "test-artifact", "2.2", "test", "jar", null, new DefaultArtifactHandler()))));
+        assertTrue(dependencyCoordinatesVersionRange.matches(
+                new MavenCoordinates(new DefaultArtifact("test.group", "test-artifact", "2.2", "test", "jar", null, new DefaultArtifactHandler()))));
 
     }
 

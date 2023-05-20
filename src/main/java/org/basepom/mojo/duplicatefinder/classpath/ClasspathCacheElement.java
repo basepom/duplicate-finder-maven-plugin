@@ -21,61 +21,53 @@ import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 
-class ClasspathCacheElement
-{
+class ClasspathCacheElement {
+
     private final File element;
     private final ImmutableSet<String> classes;
     private final ImmutableSet<String> resources;
 
-    public static ClasspathCacheElement.Builder builder(final File element)
-    {
+    public static ClasspathCacheElement.Builder builder(final File element) {
         return new Builder(element);
     }
 
-    private ClasspathCacheElement(final File element, final ImmutableSet<String> classes, final ImmutableSet<String> resources)
-    {
+    private ClasspathCacheElement(final File element, final ImmutableSet<String> classes, final ImmutableSet<String> resources) {
         this.element = element;
         this.classes = classes;
         this.resources = resources;
     }
 
-    void putClasses(final Multimap<String, File> classMap, final Predicate<String> excludePredicate)
-    {
+    void putClasses(final Multimap<String, File> classMap, final Predicate<String> excludePredicate) {
         for (final String className : Collections2.filter(classes, Predicates.not(excludePredicate))) {
             classMap.put(className, element);
         }
     }
 
-    void putResources(final Multimap<String, File> resourceMap, final Predicate<String> excludePredicate)
-    {
+    void putResources(final Multimap<String, File> resourceMap, final Predicate<String> excludePredicate) {
         for (final String resource : Collections2.filter(resources, Predicates.not(excludePredicate))) {
             resourceMap.put(resource, element);
         }
     }
 
-    static class Builder
-    {
+    static class Builder {
+
         private final File element;
         private final ImmutableSet.Builder<String> classBuilder = ImmutableSet.builder();
         private final ImmutableSet.Builder<String> resourcesBuilder = ImmutableSet.builder();
 
-        private Builder(final File element)
-        {
+        private Builder(final File element) {
             this.element = element;
         }
 
-        void addClass(final String className)
-        {
+        void addClass(final String className) {
             classBuilder.add(className);
         }
 
-        void addResource(final String resource)
-        {
+        void addResource(final String resource) {
             resourcesBuilder.add(resource);
         }
 
-        ClasspathCacheElement build()
-        {
+        ClasspathCacheElement build() {
             return new ClasspathCacheElement(element, classBuilder.build(), resourcesBuilder.build());
         }
     }

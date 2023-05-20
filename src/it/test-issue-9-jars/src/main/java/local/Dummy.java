@@ -13,9 +13,9 @@
  */
 package local;
 
-public class Dummy
-{
-    public static final void main(String ... args) throws Exception {
+public class Dummy {
+
+    public static final void main(String... args) throws Exception {
         System.out.println("Hello, dummy World!");
     }
 }

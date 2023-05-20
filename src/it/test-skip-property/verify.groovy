@@ -11,8 +11,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import static org.basepom.mojo.duplicatefinder.groovy.ITools.*
-
 def resultFile = new File(basedir, "target/duplicate-finder-result.xml").getCanonicalFile()
 
 assert !resultFile.exists()

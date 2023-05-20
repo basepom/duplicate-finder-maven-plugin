@@ -13,24 +13,22 @@
  */
 package org.basepom.mojo.duplicatefinder.classpath;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import java.util.Collection;
 import java.util.regex.Pattern;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
-
 import org.basepom.mojo.duplicatefinder.PluginLog;
 
-class MatchPatternPredicate implements Predicate<String>
-{
+import static com.google.common.base.Preconditions.checkNotNull;
+
+class MatchPatternPredicate implements Predicate<String> {
+
     private static final PluginLog LOG = new PluginLog(MatchPatternPredicate.class);
 
     private final ImmutableList<Pattern> patterns;
 
-    MatchPatternPredicate(final Collection<String> patternStrings)
-    {
+    MatchPatternPredicate(final Collection<String> patternStrings) {
         checkNotNull(patternStrings, "patternStrings is null");
 
         final ImmutableList.Builder<Pattern> builder = ImmutableList.builder();
@@ -41,14 +39,12 @@ class MatchPatternPredicate implements Predicate<String>
         this.patterns = builder.build();
     }
 
-    public ImmutableList<Pattern> getPatterns()
-    {
+    public ImmutableList<Pattern> getPatterns() {
         return patterns;
     }
 
     @Override
-    public boolean apply(final String input)
-    {
+    public boolean apply(final String input) {
         if (input != null) {
             for (final Pattern pattern : patterns) {
                 if (pattern.matcher(input).matches()) {
