@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
 ~   Licensed under the Apache License, Version 2.0 (the "License");
 ~   you may not use this file except in compliance with the License.
@@ -17,19 +18,20 @@
     <parent>
         <groupId>org.basepom</groupId>
         <artifactId>basepom-oss</artifactId>
-        <version>33</version>
+        <version>53</version>
     </parent>
 
     <groupId>org.basepom.maven</groupId>
     <artifactId>duplicate-finder-maven-plugin</artifactId>
+    <version>2.0.0-SNAPSHOT</version>
     <packaging>maven-plugin</packaging>
 
-    <version>1.5.2-SNAPSHOT</version>
     <name>duplicate-finder-maven-plugin Maven Mojo</name>
 
     <description>
         The Maven duplicate-finder plugin provides goals to check the various maven scoped classpaths (compile, runtime, test) for duplicate classes and resources.
     </description>
+    <inceptionYear>2014</inceptionYear>
 
     <url>https://github.com/basepom/duplicate-finder-maven-plugin</url>
 
@@ -41,34 +43,10 @@
         </license>
     </licenses>
 
-    <scm>
-        <connection>scm:git:git://github.com/basepom/duplicate-finder-maven-plugin.git</connection>
-        <developerConnection>scm:git:git://github.com/basepom/duplicate-finder-maven-plugin.git</developerConnection>
-        <url>https://github.com/basepom/duplicate-finder-maven-plugin</url>
-        <tag>HEAD</tag>
-    </scm>
-
-    <repositories>
-        <repository>
-            <id>snapshots</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-            <releases>
-                <enabled>false</enabled>
-                <updatePolicy>never</updatePolicy>
-                <checksumPolicy>warn</checksumPolicy>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>interval:180</updatePolicy>
-                <checksumPolicy>fail</checksumPolicy>
-            </snapshots>
-        </repository>
-    </repositories>
-
-    <issueManagement>
-        <system>Github</system>
-        <url>https://github.com/basepom/duplicate-finder-maven-plugin/issues</url>
-    </issueManagement>
+    <organization>
+        <name>The basepom project</name>
+        <url>https://github.com/basepom</url>
+    </organization>
 
     <developers>
         <developer>
@@ -90,98 +68,93 @@
         </contributor>
     </contributors>
 
+    <scm>
+        <connection>scm:git:git://github.com/basepom/duplicate-finder-maven-plugin.git</connection>
+        <developerConnection>scm:git:git://github.com/basepom/duplicate-finder-maven-plugin.git</developerConnection>
+        <url>https://github.com/basepom/duplicate-finder-maven-plugin</url>
+        <tag>HEAD</tag>
+    </scm>
+
+    <issueManagement>
+        <system>Github</system>
+        <url>https://github.com/basepom/duplicate-finder-maven-plugin/issues</url>
+    </issueManagement>
+
     <properties>
-        <project.build.systemJdk>11</project.build.systemJdk>
-        <project.build.targetJdk>8</project.build.targetJdk>
+        <!-- maven 3.9.x insanity -->
+        <maven.plugin.validation>BRIEF</maven.plugin.validation>
+
+        <project.build.targetJdk>11</project.build.targetJdk>
+        <project.moduleName>org.basepom.mojo.duplicatefinder</project.moduleName>
+
+        <!-- <maven.compiler.source>1.8</maven.compiler.source> -->
+        <!-- <maven.compiler.target>1.8</maven.compiler.target> -->
+
+        <basepom.nexus-staging.staging-url>https://oss.sonatype.org/</basepom.nexus-staging.staging-url>
+        <basepom.release.profiles>basepom.oss-release,plugin-release</basepom.release.profiles>
+        <basepom.release.tag-name-format>duplicate-finder-maven-plugin-@{project.version}</basepom.release.tag-name-format>
+
+        <basepom.site.skip>false</basepom.site.skip>
+        <basepom.site.scm.id>github</basepom.site.scm.id>
+        <basepom.site.scm.site-path>${project.artifactId}/development</basepom.site.scm.site-path>
+        <basepom.site.scm.skip-deploy>false</basepom.site.scm.skip-deploy>
+        <basepom.site.scm.url>scm:git:https://github.com/basepom/basepom.github.io.git</basepom.site.scm.url>
+
+        <!-- site requires full javadoc generation -->
+        <basepom.javadoc.skip>false</basepom.javadoc.skip>
+
         <!-- Activate an IT profile to run integration tests -->
         <basepom.it.skip>true</basepom.it.skip>
-        <basepom.it.parallel>8</basepom.it.parallel>
+        <basepom.it.fork-count>8</basepom.it.fork-count>
 
-        <dep.maven-api.version>3.0</dep.maven-api.version>
-        <dep.plexus.version>2.0.0</dep.plexus.version>
-        <dep.groovy.version>3.0.5</dep.groovy.version>
-        <dep.slf4j.version>1.7.28</dep.slf4j.version>
-        <dep.guava.version>28.1-jre</dep.guava.version>
+        <dep.groovy.version>4.0.12</dep.groovy.version>
+        <dep.slf4j.version>1.7.36</dep.slf4j.version>
+        <dep.guava.version>31.1-jre</dep.guava.version>
 
-        <dep.plugin.plugin.version>3.6.0</dep.plugin.plugin.version>
-        <dep.plugin.gmavenplus.plugin>1.10.0</dep.plugin.gmavenplus.plugin>
+        <dep.plugin.gmavenplus.plugin>2.1.0</dep.plugin.gmavenplus.plugin>
+
+        <!-- Maven API version. Keep on 3.8.x for now -->
+        <dep.maven-api.version>3.8.7</dep.maven-api.version>
+
+        <!-- other maven stuff -->
+        <dep.plexus.version>2.1.1</dep.plexus.version>
+        <dep.maven-shared-utils.version>3.4.2</dep.maven-shared-utils.version>
+
+        <!-- plugin tooling -->
+        <dep.plugin.plugin.version>3.9.0</dep.plugin.plugin.version>
+
     </properties>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.codehaus.plexus</groupId>
+                <artifactId>plexus-component-annotations</artifactId>
+                <version>${dep.plexus.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.maven.shared</groupId>
+                <artifactId>maven-shared-utils</artifactId>
+                <version>${dep.maven-shared-utils.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${dep.slf4j.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-simple</artifactId>
+                <version>${dep.slf4j.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
-        <dependency>
-            <groupId>org.apache.maven</groupId>
-            <artifactId>maven-plugin-api</artifactId>
-            <version>${dep.maven-api.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.sonatype.sisu</groupId>
-                    <artifactId>sisu-inject-plexus</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.maven.plugin-tools</groupId>
-            <artifactId>maven-plugin-annotations</artifactId>
-            <version>${dep.plugin.plugin.version}</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.maven</groupId>
-            <artifactId>maven-model</artifactId>
-            <version>${dep.maven-api.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.maven</groupId>
-            <artifactId>maven-artifact</artifactId>
-            <version>${dep.maven-api.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.maven</groupId>
-            <artifactId>maven-core</artifactId>
-            <version>${dep.maven-api.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.apache.maven.reporting</groupId>
-                    <artifactId>maven-reporting-api</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.maven.wagon</groupId>
-                    <artifactId>wagon-file</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.maven.wagon</groupId>
-                    <artifactId>wagon-http-lightweight</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.maven.wagon</groupId>
-                    <artifactId>wagon-ssh</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.maven.wagon</groupId>
-                    <artifactId>wagon-ssh-external</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>commons-cli</groupId>
-                    <artifactId>commons-cli</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>classworlds</groupId>
-                    <artifactId>classworlds</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.codehaus.plexus</groupId>
-                    <artifactId>plexus-interactivity-api</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.sonatype.sisu</groupId>
-                    <artifactId>sisu-inject-plexus</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
+        <!-- deps -->
 
         <dependency>
             <groupId>com.google.guava</groupId>
@@ -194,6 +167,7 @@
             <artifactId>jcip-annotations</artifactId>
             <version>1.0</version>
         </dependency>
+
         <dependency>
             <groupId>com.google.code.findbugs</groupId>
             <artifactId>jsr305</artifactId>
@@ -201,28 +175,9 @@
         </dependency>
 
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>${dep.slf4j.version}</version>
-        </dependency>
-
-        <dependency>
             <groupId>org.codehaus.woodstox</groupId>
             <artifactId>stax2-api</artifactId>
             <version>3.1.4</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.codehaus.woodstox</groupId>
-            <artifactId>woodstox-core-asl</artifactId>
-            <version>4.4.1</version>
-            <scope>runtime</scope>
-            <exclusions>
-                <exclusion>
-                    <artifactId>stax-api</artifactId>
-                    <groupId>javax.xml.stream</groupId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <dependency>
@@ -237,6 +192,72 @@
             </exclusions>
         </dependency>
 
+        <!-- Maven provided dependencies -->
+        <dependency>
+            <groupId>org.apache.maven</groupId>
+            <artifactId>maven-plugin-api</artifactId>
+            <version>${dep.maven-api.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.maven.plugin-tools</groupId>
+            <artifactId>maven-plugin-annotations</artifactId>
+            <version>${dep.plugin.plugin.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.maven</groupId>
+            <artifactId>maven-model</artifactId>
+            <version>${dep.maven-api.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.maven</groupId>
+            <artifactId>maven-artifact</artifactId>
+            <version>${dep.maven-api.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.maven</groupId>
+            <artifactId>maven-core</artifactId>
+            <version>${dep.maven-api.version}</version>
+            <exclusions>
+                <!-- weird no_aop classifier prevents dep convergence -->
+                <exclusion>
+                    <groupId>com.google.inject</groupId>
+                    <artifactId>guice</artifactId>
+                </exclusion>
+            </exclusions>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- runtime dependencies -->
+
+        <dependency>
+            <groupId>org.codehaus.woodstox</groupId>
+            <artifactId>woodstox-core-asl</artifactId>
+            <version>4.4.1</version>
+            <scope>runtime</scope>
+            <exclusions>
+                <exclusion>
+                    <artifactId>stax-api</artifactId>
+                    <groupId>javax.xml.stream</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!-- Test code -->
+
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -245,15 +266,22 @@
         </dependency>
 
         <dependency>
-            <groupId>org.codehaus.groovy</groupId>
+            <groupId>org.apache.groovy</groupId>
             <artifactId>groovy</artifactId>
             <version>${dep.groovy.version}</version>
             <scope>test</scope>
         </dependency>
+
         <dependency>
-            <groupId>org.codehaus.groovy</groupId>
+            <groupId>org.apache.groovy</groupId>
             <artifactId>groovy-xml</artifactId>
             <version>${dep.groovy.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -267,6 +295,7 @@
                     <version>${dep.plugin.plugin.version}</version>
                     <configuration>
                         <skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
+                        <helpPackageName>org.basepom.mojo.duplicatefinder</helpPackageName>
                     </configuration>
                 </plugin>
 
@@ -274,6 +303,18 @@
                     <groupId>org.codehaus.plexus</groupId>
                     <artifactId>plexus-component-metadata</artifactId>
                     <version>${dep.plexus.version}</version>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <configuration>
+                        <archive>
+                            <manifestEntries combine.children="append">
+                                <Automatic-Module-Name>${project.moduleName}</Automatic-Module-Name>
+                            </manifestEntries>
+                        </archive>
+                    </configuration>
                 </plugin>
 
                 <plugin>
@@ -285,19 +326,6 @@
         </pluginManagement>
 
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-enforcer-plugin</artifactId>
-                <configuration>
-                    <rules combine.children="append">
-                        <requireProperty>
-                            <property>project.build.targetJdk</property>
-                            <regex>^8$</regex>
-                            <regexMessage>Project must be built with JDK8 target. Do not specify an integration profile while building.</regexMessage>
-                        </requireProperty>
-                    </rules>
-                </configuration>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-plugin-plugin</artifactId>
@@ -331,6 +359,16 @@
             </plugin>
 
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-pmd-plugin</artifactId>
+                <configuration>
+                    <excludeRoots combine.children="append">
+                        <excludeRoot>target/generated-sources/plugin</excludeRoot>
+                    </excludeRoots>
+                </configuration>
+            </plugin>
+
+            <plugin>
                 <groupId>org.codehaus.gmavenplus</groupId>
                 <artifactId>gmavenplus-plugin</artifactId>
                 <executions>
@@ -347,23 +385,14 @@
                 <groupId>com.mycila</groupId>
                 <artifactId>license-maven-plugin</artifactId>
                 <configuration>
-                    <mapping>
-                        <groovy>SLASHSTAR_STYLE</groovy>
-                    </mapping>
-                    <excludes combine.children="append">
-                        <exclude>**/conflict-different-content</exclude>
-                        <exclude>**/conflict-same-content</exclude>
-                    </excludes>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-pmd-plugin</artifactId>
-                <configuration>
-                    <excludeRoots combine.children="append">
-                        <excludeRoot>target/generated-sources/plugin</excludeRoot>
-                    </excludeRoots>
+                    <licenseSets>
+                        <licenseSet>
+                            <excludes combine.children="append">
+                                <exclude>**/conflict-different-content</exclude>
+                                <exclude>**/conflict-same-content</exclude>
+                            </excludes>
+                        </licenseSet>
+                    </licenseSets>
                 </configuration>
             </plugin>
 
@@ -373,9 +402,6 @@
                 <configuration>
                     <!-- Allows access to the groovy utility class in the test source tree. -->
                     <addTestClassPath>true</addTestClassPath>
-                    <filterProperties>
-                        <project.it.enforce>${project.it.enforce}</project.it.enforce>
-                    </filterProperties>
                 </configuration>
 
                 <!-- dependency for verify.groovy scripts -->
@@ -386,63 +412,58 @@
                         <version>${dep.guava.version}</version>
                     </dependency>
                     <dependency>
-                        <groupId>org.codehaus.groovy</groupId>
+                        <groupId>org.apache.groovy</groupId>
                         <artifactId>groovy</artifactId>
                         <version>${dep.groovy.version}</version>
                     </dependency>
                     <dependency>
-                        <groupId>org.codehaus.groovy</groupId>
+                        <groupId>org.apache.groovy</groupId>
                         <artifactId>groovy-xml</artifactId>
                         <version>${dep.groovy.version}</version>
                     </dependency>
                 </dependencies>
             </plugin>
-
-            <!-- Use Jacoco with the invoker plugin
-                 for integration test coverage.
-            -->
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>default-it</id>
-                        <configuration>
-                            <destFile>${project.build.directory}/jacoco-it.exec</destFile>
-                            <propertyName>invoker.mavenOpts</propertyName>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
     </build>
 
-    <!-- do not activate IT profiles during a regular build, it would end up building a
-         plugin that would not run on a lower version of Java
-    -->
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration combine.children="append">
+                    <author>false</author>
+                    <detectJavaApiLink>true</detectJavaApiLink>
+                    <linksource>true</linksource>
+                    <nodeprecated>false</nodeprecated>
+                    <nohelp>true</nohelp>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-plugin-report-plugin</artifactId>
+                <version>${dep.plugin.plugin.version}</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-report-plugin</artifactId>
+                <version>${dep.plugin.surefire.version}</version>
+                <reportSets>
+                    <reportSet>
+                        <reports>
+                            <report>failsafe-report-only</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
+            </plugin>
+        </plugins>
+    </reporting>
+
     <profiles>
         <profile>
-            <id>it-jdk14</id>
+            <id>plugin-release</id>
             <properties>
-                <project.build.targetJdk>14</project.build.targetJdk>
-                <project.it.enforce>[14,15)</project.it.enforce>
-                <basepom.it.skip>false</basepom.it.skip>
-            </properties>
-        </profile>
-        <profile>
-            <id>it-jdk11</id>
-            <properties>
-                <project.build.targetJdk>11</project.build.targetJdk>
-                <project.it.enforce>[11,12)</project.it.enforce>
-                <basepom.it.skip>false</basepom.it.skip>
-            </properties>
-        </profile>
-        <profile>
-            <id>it-jdk8</id>
-            <properties>
-                <project.build.targetJdk>8</project.build.targetJdk>
-                <project.it.enforce>[1.8,9)</project.it.enforce>
-                <basepom.it.skip>false</basepom.it.skip>
+                <basepom.site.scm.site-path>${project.artifactId}/release-${project.version}</basepom.site.scm.site-path>
             </properties>
         </profile>
     </profiles>
