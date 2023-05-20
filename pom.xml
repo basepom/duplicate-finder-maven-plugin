@@ -465,6 +465,38 @@
             <properties>
                 <basepom.site.scm.site-path>${project.artifactId}/release-${project.version}</basepom.site.scm.site-path>
             </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-enforcer-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>enforce-java17</id>
+                                <goals>
+                                    <goal>enforce</goal>
+                                </goals>
+                                <configuration>
+                                    <rules>
+                                        <requireJavaVersion>
+                                            <version>[17,)</version>
+                                        </requireJavaVersion>
+                                    </rules>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <!-- Profile to skip time-consuming steps. -->
+            <id>fast</id>
+            <properties>
+                <basepom.check.skip-all>true</basepom.check.skip-all>
+                <skipITs>true</skipITs>
+                <skipTests>true</skipTests>
+            </properties>
         </profile>
     </profiles>
 </project>
