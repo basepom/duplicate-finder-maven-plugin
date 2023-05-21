@@ -33,6 +33,16 @@
     <menu name="Overview">
       <item name="Introduction" href="index.html"/>
       <item name="Goals" href="plugin-info.html"/>
+      <item name="Simple configuration" href="simple_options.html" />
+      <item name="Classpath Exceptions" href="classpath_exceptions.html" />
+      <item name="Ignoring Dependencies and Resources" href="ignoring_dependencies_and_resources.html" />
+      <item name="Result File Options" href="result_file_options.html" />
+      <item name="Developer Information">
+          <item name="Development Guidelines" href="development_guidelines.html" />
+          <item name="Writing Integration Tests" href="writing_integration_test.html" />
+          <item name="Result File Format" href="result_file_format.html" />
+          <item name="Default ignored elements" href="default_ignored_elements.html" />
+      </item>
       <item name="License" href="https://www.apache.org/licenses/LICENSE-2.0" />
     </menu>
     <menu ref="reports" />

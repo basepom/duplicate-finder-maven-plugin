@@ -1,5 +1,5 @@
 duplicate-finder maven plugin
-(C) 2010-2014 by the authors
+(C) 2010-2023 by the authors
 
 This product is based on the Maven Duplicate Finder Plugin
 (C) 2010 Ning, Inc.

@@ -35,3 +35,23 @@ Up-to-date documentation is available from the [duplicate finder plugin Wiki](ht
 ## Release Notes
 
 See the [Changelog](CHANGES.md).
+
+## Authors
+
+* Thomas Dudziak (@tomdz)
+* Henning Schmiedehausen (@hgschmie)
+
+## Contributors
+
+* Andrew Gaul (@andrewgaul)
+* Davy De Waele (@ddewaele)
+* Conny Kreyßel (@kreyssel)
+* Matt Stephenson (@mattstep)
+* Mickaël Tricot (@mickaeltr)
+* Steven Schlansker (@stevenschlansker)
+* Tim Williamson (@twilliamson)
+* @camshoff
+* @jakub-bochenski
+* Michael Bellomo (@mbellomo)
+* Frank Jakop (fjakop)
+* Brian Clozel (@bclozel)
