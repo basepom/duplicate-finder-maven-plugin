@@ -47,8 +47,9 @@ import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
 import org.basepom.mojo.duplicatefinder.ConflictType;
-import org.basepom.mojo.duplicatefinder.PluginLog;
 import org.basepom.mojo.duplicatefinder.artifact.MavenCoordinates;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static java.lang.String.format;
 
@@ -58,7 +59,7 @@ import static com.google.common.base.Preconditions.checkState;
 @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
 public class ClasspathDescriptor {
 
-    private static final PluginLog LOG = new PluginLog(ClasspathDescriptor.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ClasspathDescriptor.class);
 
     private static final MatchPatternPredicate DEFAULT_IGNORED_RESOURCES_PREDICATE = new MatchPatternPredicate(Arrays.asList(
             // Standard jar folders
@@ -148,7 +149,7 @@ public class ClasspathDescriptor {
                     // exist. Obviously, in this case the plugin might return incorrect results (unfortunately
                     // false negatives, but there is not much it can do here (besides fail the build here with a
                     // cryptic error message. Maybe add a flag?).
-                    LOG.debug("Classpath element '%s' does not exist.", file.getAbsolutePath());
+                    LOG.debug(format("Classpath element '%s' does not exist.", file.getAbsolutePath()));
                 }
             }
         } catch (final IOException ex) {
@@ -163,7 +164,7 @@ public class ClasspathDescriptor {
                     classpathDescriptor.addClasspathElement(file);
                 } else {
                     // See above. This may happen in the project has been cleaned before running the goal directly.
-                    LOG.debug("Project folder '%s' does not exist.", file.getAbsolutePath());
+                    LOG.debug(format("Project folder '%s' does not exist.", file.getAbsolutePath()));
                 }
             }
         } catch (final IOException ex) {
@@ -270,7 +271,7 @@ public class ClasspathDescriptor {
             final ClasspathCacheElement oldCached = CACHED_BY_FILE.putIfAbsent(element, newCached);
             cached = MoreObjects.firstNonNull(oldCached, newCached);
         } else {
-            LOG.debug("Cache hit for '%s'", element.getAbsolutePath());
+            LOG.debug(format("Cache hit for '%s'", element.getAbsolutePath()));
         }
 
         cached.putResources(resourcesWithElements, resourcesPredicate);
@@ -285,7 +286,7 @@ public class ClasspathDescriptor {
             for (final File file : files) {
                 if (file.isDirectory()) {
                     if (DEFAULT_IGNORED_LOCAL_DIRECTORIES.apply(file.getName())) {
-                        LOG.debug("Ignoring local directory '%s'", file.getAbsolutePath());
+                        LOG.debug(format("Ignoring local directory '%s'", file.getAbsolutePath()));
                     } else {
                         addDirectory(cacheBuilder, file, packageName.getChildPackage(file.getName()));
                     }
@@ -299,7 +300,7 @@ public class ClasspathDescriptor {
                         cacheBuilder.addResource(resourcePath);
                     }
                 } else {
-                    LOG.warn("Ignoring unknown file type for '%s'", file.getAbsolutePath());
+                    LOG.warn(format("Ignoring unknown file type for '%s'", file.getAbsolutePath()));
                 }
             }
         }
@@ -340,18 +341,18 @@ public class ClasspathDescriptor {
         // ZIP/Jars always use "/" as separators
         final List<String> nameElements = ImmutableList.copyOf(Splitter.on("/").splitToList(fullClassPath));
         if (nameElements.isEmpty()) {
-            LOG.warn("ZIP entry '%s' split into empty list!", fullClassPath);
+            LOG.warn(format("ZIP entry '%s' split into empty list!", fullClassPath));
             return Optional.empty();
         }
         String classFileName = nameElements.get(nameElements.size() - 1);
 
         if (!"class".equals(Files.getFileExtension(classFileName))) {
-            LOG.debug("Ignoring %s, %s is not a class file", fullClassPath, classFileName);
+            LOG.debug(format("Ignoring %s, %s is not a class file", fullClassPath, classFileName));
             return Optional.empty();
         }
         for (int i = 0; i < nameElements.size() - 1; i++) {
             if (!SourceVersion.isIdentifier(nameElements.get(i))) {
-                LOG.debug("Ignoring %s, %s is not a valid package element", fullClassPath, nameElements.get(i));
+                LOG.debug(format("Ignoring %s, %s is not a valid package element", fullClassPath, nameElements.get(i)));
                 return Optional.empty();
             }
         }
@@ -360,7 +361,7 @@ public class ClasspathDescriptor {
         if (!(SourceVersion.isIdentifier(className)
                 || "module-info".equals(className)
                 || "package-info".equals(className))) {
-            LOG.debug("Ignoring %s, %s is not a valid class identifier", fullClassPath, className);
+            LOG.debug(format("Ignoring %s, %s is not a valid class identifier", fullClassPath, className));
             return Optional.empty();
         }
 

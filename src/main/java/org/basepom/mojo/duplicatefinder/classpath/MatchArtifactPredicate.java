@@ -20,14 +20,17 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.versioning.OverConstrainedVersionException;
-import org.basepom.mojo.duplicatefinder.PluginLog;
 import org.basepom.mojo.duplicatefinder.artifact.MavenCoordinates;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import static java.lang.String.format;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 public class MatchArtifactPredicate implements Predicate<Artifact> {
 
-    private static final PluginLog LOG = new PluginLog(MatchArtifactPredicate.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MatchArtifactPredicate.class);
 
     private final List<MavenCoordinates> mavenCoordinates;
 
@@ -41,11 +44,11 @@ public class MatchArtifactPredicate implements Predicate<Artifact> {
             for (final MavenCoordinates mavenCoordinate : mavenCoordinates) {
                 try {
                     if (mavenCoordinate.matches(artifact)) {
-                        LOG.debug("Ignoring artifact '%s' (matches %s)", artifact, mavenCoordinate);
+                        LOG.debug(format("Ignoring artifact '%s' (matches %s)", artifact, mavenCoordinate));
                         return true;
                     }
                 } catch (final OverConstrainedVersionException e) {
-                    LOG.warn("Caught '%s' while comparing '%s' to '%s'", e.getMessage(), mavenCoordinate, artifact);
+                    LOG.warn(format("Caught '%s' while comparing '%s' to '%s'", e.getMessage(), mavenCoordinate, artifact));
                 }
             }
         }

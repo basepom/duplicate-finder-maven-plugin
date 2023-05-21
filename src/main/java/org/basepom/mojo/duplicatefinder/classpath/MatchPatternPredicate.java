@@ -18,13 +18,16 @@ import java.util.regex.Pattern;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
-import org.basepom.mojo.duplicatefinder.PluginLog;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import static java.lang.String.format;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 class MatchPatternPredicate implements Predicate<String> {
 
-    private static final PluginLog LOG = new PluginLog(MatchPatternPredicate.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MatchPatternPredicate.class);
 
     private final ImmutableList<Pattern> patterns;
 
@@ -48,7 +51,7 @@ class MatchPatternPredicate implements Predicate<String> {
         if (input != null) {
             for (final Pattern pattern : patterns) {
                 if (pattern.matcher(input).matches()) {
-                    LOG.debug("Ignoring '%s' (matches %s)", input, pattern.pattern());
+                    LOG.debug(format("Ignoring '%s' (matches %s)", input, pattern.pattern()));
                     return true;
                 }
             }

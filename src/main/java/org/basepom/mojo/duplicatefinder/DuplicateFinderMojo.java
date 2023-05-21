@@ -61,6 +61,8 @@ import org.codehaus.stax2.XMLOutputFactory2;
 import org.codehaus.staxmate.SMOutputFactory;
 import org.codehaus.staxmate.out.SMOutputDocument;
 import org.codehaus.staxmate.out.SMOutputElement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static java.lang.String.format;
 
@@ -84,7 +86,7 @@ import static org.basepom.mojo.duplicatefinder.artifact.ArtifactHelper.getTestOu
 @Mojo(name = "check", requiresProject = true, threadSafe = true, defaultPhase = LifecyclePhase.VERIFY, requiresDependencyResolution = ResolutionScope.TEST)
 public final class DuplicateFinderMojo extends AbstractMojo {
 
-    private static final PluginLog LOG = new PluginLog(DuplicateFinderMojo.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DuplicateFinderMojo.class);
 
     private static final int SAVE_FILE_VERSION = 1;
 
@@ -198,8 +200,10 @@ public final class DuplicateFinderMojo extends AbstractMojo {
      * Quiets the plugin (report only errors).
      *
      * @since 1.1.0
+     * @deprecated
      */
     @Parameter(defaultValue = "false", property = "duplicate-finder.quiet")
+    @Deprecated
     public boolean quiet = false;
 
     /**
@@ -279,9 +283,9 @@ public final class DuplicateFinderMojo extends AbstractMojo {
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         if (skip) {
-            LOG.report(quiet, "Skipping duplicate-finder execution!");
+            LOG.info("Skipping duplicate-finder execution!");
         } else if (!includePomProjects && "pom".equals(project.getArtifact().getType())) {
-            LOG.report(quiet, "Ignoring POM project!");
+            LOG.info("Ignoring POM project!");
         } else {
             if (printEqualFiles) {
                 printState.add(CONFLICT_CONTENT_EQUAL);
@@ -298,8 +302,15 @@ public final class DuplicateFinderMojo extends AbstractMojo {
                 failState.add(CONFLICT_CONTENT_DIFFERENT);
             }
 
-            if (includeBootClasspath || bootClasspathProperty != null) {
-                LOG.warn("<includeBootClasspath> and <bootClasspathProperty> are no longer supported and will be ignored!");
+            if (includeBootClasspath) {
+                LOG.warn("<includeBootClasspath> is no longer supported and will be ignored!");
+            }
+            if (bootClasspathProperty != null) {
+                LOG.warn("<bootClasspathProperty> is no longer supported and will be ignored!");
+            }
+
+            if (quiet) {
+                LOG.warn("<quiet> is no longer supported and will be ignored!");
             }
 
             try {
@@ -314,7 +325,7 @@ public final class DuplicateFinderMojo extends AbstractMojo {
                 final ImmutableMap.Builder<String, Entry<ResultCollector, ClasspathDescriptor>> classpathResultBuilder = ImmutableMap.builder();
 
                 if (checkCompileClasspath) {
-                    LOG.report(quiet, "Checking compile classpath");
+                    LOG.info("Checking compile classpath");
                     final ResultCollector resultCollector = new ResultCollector(printState, failState);
                     final ClasspathDescriptor classpathDescriptor = checkClasspath(resultCollector, artifactFileResolver, COMPILE_SCOPE,
                             getOutputDirectory(project));
@@ -322,7 +333,7 @@ public final class DuplicateFinderMojo extends AbstractMojo {
                 }
 
                 if (checkRuntimeClasspath) {
-                    LOG.report(quiet, "Checking runtime classpath");
+                    LOG.info("Checking runtime classpath");
                     final ResultCollector resultCollector = new ResultCollector(printState, failState);
                     final ClasspathDescriptor classpathDescriptor = checkClasspath(resultCollector, artifactFileResolver, RUNTIME_SCOPE,
                             getOutputDirectory(project));
@@ -330,7 +341,7 @@ public final class DuplicateFinderMojo extends AbstractMojo {
                 }
 
                 if (checkTestClasspath) {
-                    LOG.report(quiet, "Checking test classpath");
+                    LOG.info("Checking test classpath");
                     final ResultCollector resultCollector = new ResultCollector(printState, failState);
                     final ClasspathDescriptor classpathDescriptor = checkClasspath(resultCollector,
                             artifactFileResolver,
@@ -361,9 +372,9 @@ public final class DuplicateFinderMojo extends AbstractMojo {
                                     final String artifactNames = entry.getKey();
                                     final Collection<ConflictResult> conflictResults = entry.getValue();
 
-                                    LOG.warn("Found duplicate %s %s in [%s]:", state.getHint(), type.getType(), artifactNames);
+                                    LOG.warn(format("Found duplicate %s %s in [%s]:", state.getHint(), type.getType(), artifactNames));
                                     for (final ConflictResult conflictResult : conflictResults) {
-                                        LOG.warn("  %s", conflictResult.getName());
+                                        LOG.warn(format("  %s", conflictResult.getName()));
                                     }
                                 }
                             }
@@ -373,7 +384,7 @@ public final class DuplicateFinderMojo extends AbstractMojo {
                     failed |= resultCollector.isFailed();
 
                     if (resultCollector.isFailed()) {
-                        LOG.warn("Found duplicate classes/resources in %s classpath.", classpathName);
+                        LOG.warn(format("Found duplicate classes/resources in %s classpath.", classpathName));
                     }
                 }
 
@@ -491,11 +502,11 @@ public final class DuplicateFinderMojo extends AbstractMojo {
                     firstSHA256 = newSHA256;
                     firstFile = element;
                 } else if (!newSHA256.equals(firstSHA256)) {
-                    LOG.debug("Found different SHA256 hashes for elements %s in file %s and %s", resourcePath, firstFile, element);
+                    LOG.debug(format("Found different SHA256 hashes for elements %s in file %s and %s", resourcePath, firstFile, element));
                     return ConflictState.CONFLICT_CONTENT_DIFFERENT;
                 }
             } catch (final IOException ex) {
-                LOG.warn(ex, "Could not read content from file %s!", element);
+                LOG.warn(format("Could not read content from file %s!", element), ex);
             }
         }
 
@@ -602,7 +613,6 @@ public final class DuplicateFinderMojo extends AbstractMojo {
         SMOutputElement prefs = XMLWriterUtils.addElement(rootElement, "configuration", null);
         // Simple configuration options
         XMLWriterUtils.addAttribute(prefs, "skip", skip);
-        XMLWriterUtils.addAttribute(prefs, "quiet", quiet);
         XMLWriterUtils.addAttribute(prefs, "checkCompileClasspath", checkCompileClasspath);
         XMLWriterUtils.addAttribute(prefs, "checkRuntimeClasspath", checkRuntimeClasspath);
         XMLWriterUtils.addAttribute(prefs, "checkTestClasspath", checkTestClasspath);

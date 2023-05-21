@@ -38,7 +38,10 @@ import org.apache.maven.project.MavenProject;
 import org.basepom.mojo.duplicatefinder.ClasspathElement;
 import org.basepom.mojo.duplicatefinder.ClasspathElement.ClasspathArtifact;
 import org.basepom.mojo.duplicatefinder.ClasspathElement.ClasspathLocalFolder;
-import org.basepom.mojo.duplicatefinder.PluginLog;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import static java.lang.String.format;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -55,7 +58,7 @@ import static org.basepom.mojo.duplicatefinder.artifact.ArtifactHelper.isTestArt
 @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
 public class ArtifactFileResolver {
 
-    private static final PluginLog LOG = new PluginLog(ArtifactFileResolver.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ArtifactFileResolver.class);
 
     // A BiMultimap would come in really handy here...
     private final Multimap<File, Artifact> localFileArtifactCache;
@@ -102,7 +105,7 @@ public class ArtifactFileResolver {
             // In that case, the dependency will show up as a referenced project but not in the artifacts list from the project.
             // Fix up straight from the referenced project.
             if (repoArtifacts.isEmpty()) {
-                LOG.debug("Found project reference to %s but no repo reference, probably used in a plugin dependency.", referencedProject.getArtifact());
+                LOG.debug(format("Found project reference to %s but no repo reference, probably used in a plugin dependency.", referencedProject.getArtifact()));
             }
 
             for (final Artifact artifact : repoArtifacts) {
