@@ -251,7 +251,7 @@ public final class DuplicateFinderMojo extends AbstractMojo {
      * @since 1.1.1
      * @deprecated
      */
-    @Parameter(defaultValue = "sun.boot.class.path", property = "duplicate-finder.bootClasspathProperty")
+    @Parameter(property = "duplicate-finder.bootClasspathProperty")
     @Deprecated
     public String bootClasspathProperty = null;
 
