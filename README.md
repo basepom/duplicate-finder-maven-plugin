@@ -30,7 +30,7 @@ The plugin has two goals:
 
 ## Documentation
 
-Up-to-date documentation is available from the [duplicate finder plugin Wiki](https://github.com/basepom/duplicate-finder-maven-plugin/wiki). A snapshot from the last release of the plugin is available in the `docs` folder in this repository.
+Up-to-date documentation is available from the [documentation site](https://basepom.github.io/duplicate-finder-maven-plugin/development/).
 
 ## Release Notes
 

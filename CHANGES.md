@@ -2,6 +2,19 @@
 
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) specification.
 
+### 2.0.0 - 2023-05-21
+
+### changed
+
+* minimum Java version is now Java 11
+* fix dependencies to silence Apache Maven 3.9.x warnings
+
+### removed
+
+* `quiet` option no longer does anything
+* `includeBootClasspath` and `bootClasspathProperty` were only supported up to Java 8 and the plugin now supports only Java 11 and up, so they are deprecated and no longer do anything.
+
+
 ### 1.5.1 - 2021-01-06
 
 This version is identical to 1.5.0 except that it now uses the native maven 3.x logging.

@@ -33,7 +33,7 @@
     </description>
     <inceptionYear>2014</inceptionYear>
 
-    <url>https://github.com/basepom/duplicate-finder-maven-plugin</url>
+    <url>https://basepom.github.io/duplicate-finder-maven-plugin</url>
 
     <licenses>
         <license>
