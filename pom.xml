@@ -490,8 +490,9 @@
             <id>fast</id>
             <properties>
                 <basepom.check.skip-all>true</basepom.check.skip-all>
-                <skipITs>true</skipITs>
-                <skipTests>true</skipTests>
+                <basepom.check.skip-javadoc>false</basepom.check.skip-javadoc>
+                <basepom.test.skip>true</basepom.test.skip>
+                <basepom.it.skip>true</basepom.it.skip>
             </properties>
         </profile>
     </profiles>
