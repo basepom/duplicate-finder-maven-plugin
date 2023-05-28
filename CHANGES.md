@@ -2,6 +2,13 @@
 
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) specification.
 
+### 2.0.1 - 2023-05-28
+
+* remove old wiki-copy from docs folder
+* minor updates to integration test code
+* deprecation messages for deprecated parameters
+
+
 ### 2.0.0 - 2023-05-21
 
 ### changed
