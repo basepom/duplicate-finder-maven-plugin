@@ -200,7 +200,7 @@ public final class DuplicateFinderMojo extends AbstractMojo {
      * Quiets the plugin (report only errors).
      *
      * @since 1.1.0
-     * @deprecated
+     * @deprecated Maven logging controls the log level now.
      */
     @Parameter(defaultValue = "false", property = "duplicate-finder.quiet")
     @Deprecated
@@ -243,7 +243,7 @@ public final class DuplicateFinderMojo extends AbstractMojo {
      * internal classes (e.g. the classes in rt.jar).
      *
      * @since 1.1.1
-     * @deprecated
+     * @deprecated Inspecting the boot classpath is no longer supported in Java 9+
      */
     @Parameter(defaultValue = "false", property = "duplicate-finder.includeBootClasspath")
     @Deprecated
@@ -253,7 +253,7 @@ public final class DuplicateFinderMojo extends AbstractMojo {
      * System property that contains the boot class path.
      *
      * @since 1.1.1
-     * @deprecated
+     * @deprecated Inspecting the boot classpath is no longer supported in Java 9+
      */
     @Parameter(property = "duplicate-finder.bootClasspathProperty")
     @Deprecated

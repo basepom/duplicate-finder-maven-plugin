@@ -66,8 +66,6 @@
                         <checkRuntimeClasspath>false</checkRuntimeClasspath>
                         <checkTestClasspath>true</checkTestClasspath>
                         <useResultFile>true</useResultFile>
-                        <!-- for backwards compat. reasons. This should be 'true' at some point -->
-                        <includeBootClasspath>false</includeBootClasspath>
                     </configuration>
                 </plugin>
             </plugins>
