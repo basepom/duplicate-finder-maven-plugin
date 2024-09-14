@@ -44,4 +44,4 @@ jobs:
         env:
           MAVEN_ARGS: "-Dbasepom.it.fork-count=1 -B -fae"
         run: |
-          make tests
+          make run-tests
