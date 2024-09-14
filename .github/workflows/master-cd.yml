@@ -1,3 +1,4 @@
+---
 name: CD (Snapshot deployment)
 
 on:
@@ -11,12 +12,14 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-
-      - name: setup build jdk
-        uses: actions/setup-java@v4
         with:
-          distribution: temurin
+          fetch-tags: true
+          fetch-depth: 0
+
+      - uses: actions/setup-java@v4
+        with:
           java-version: 21
+          distribution: temurin
           cache: maven
           server-id: sonatype-nexus-snapshots
           server-username: NEXUS_REPO_USER
@@ -27,30 +30,34 @@ jobs:
           NEXUS_REPO_USER: ${{ secrets.NEXUS_REPO_USER }}
           NEXUS_REPO_PASSWORD: ${{ secrets.NEXUS_REPO_PASSWORD }}
           MAVEN_ARGS: "-B -fae"
-        run: make deploy
+        run: |
+          make deploy
 
   site:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
-
-      - name: Set git information
-        run: |
-          git config --global user.name github-actions
-          git config --global user.email github-actions@github.com
-
-      - name: setup build jdk
-        uses: actions/setup-java@v4
         with:
-          distribution: temurin
+          fetch-tags: true
+          fetch-depth: 0
+
+      - name: configure git user
+        run: |
+          git config --global user.name github-cd-action
+          git config --global user.email github-cd-action@basepom.org
+
+      - uses: actions/setup-java@v4
+        with:
           java-version: 21
+          distribution: temurin
           cache: maven
           server-id: github
           server-password: SITE_DEPLOY
 
-      - name: deploy documentation
+      - name: publish docs
         env:
           SITE_DEPLOY: ${{ secrets.SITE_DEPLOY_TOKEN  }}
-          MAVEN_ARGS: "-Dbasepom.it.skip=false -Dbasepom.it.fork-count=1 -B -fae"
-        run: make deploy-site
+          MAVEN_ARGS: "-B -fae"
+        run: |
+          make deploy-site

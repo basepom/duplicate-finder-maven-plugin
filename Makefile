@@ -19,11 +19,15 @@ export MAVEN_OPTS MAVEN_ARGS
 
 default:: help
 
+Makefile:: ;
+
 clean::
 	${MAVEN} clean
 
 install::
 	${MAVEN} clean install
+
+tests: install-fast run-tests
 
 install-fast:: MAVEN_ARGS += -Pfast
 install-fast:: install
@@ -38,8 +42,9 @@ run-tests::
 deploy::
 	${MAVEN} clean deploy
 
-deploy-site::
-	${MAVEN} clean install site-deploy
+deploy-site:: MAVEN_ARGS += -Dbasepom.it.skip=false
+deploy-site:: install
+	${MAVEN} site-deploy
 
 release::
 	${MAVEN} clean release:clean release:prepare release:perform
@@ -49,11 +54,12 @@ release-site:: deploy-site
 
 help::
 	@echo " * clean           - clean local build tree"
-	@echo " * install         - installs build result in the local maven repository"
-	@echo " * install-fast    - like install, but do not run tests and checkers"
-	@echo " * install-notests - like install, but do not run tests"
-	@echo " * deploy          - installs build result in the snapshot OSS repository"
-	@echo " * test            - run unit tests"
+	@echo " * install         - build, run static analysis and unit tests, then install in the local repository"
+	@echo " * install-fast    - same as 'install', but skip unit tests and static analysis"
+	@echo " * install-notests - same as 'install', but skip unit tests"
+	@echo " * tests           - build code and run unit and integration tests"
+	@echo " * run-tests       - run all unit and integration tests except really slow tests"
+	@echo " * deploy          - builds and deploys the current version to the Sonatype OSS repository"
 	@echo " * deploy-site     - builds and deploys the documentation site"
 	@echo " * release         - release a new version to maven central"
-	@echo " * release-site    - run from release directory to deploy new doc site"
+	@echo " * release-site    - run from release directory to deploy the documentation site for a release"
