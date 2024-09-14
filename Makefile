@@ -12,42 +12,48 @@
 
 SHELL = /bin/sh
 .SUFFIXES:
-.PHONY: help clean install install-fast tests deploy deploy-site release
 
 MAVEN = ./mvnw
 
-export MAVEN_OPTS MAVEN_CONFIG
+export MAVEN_OPTS MAVEN_ARGS
 
-default: help
+default:: help
 
-clean:
+clean::
 	${MAVEN} clean
 
-install:
+install::
 	${MAVEN} clean install
 
-install-fast: MAVEN_CONFIG += -Pfast
-install-fast: install
+install-fast:: MAVEN_ARGS += -Pfast
+install-fast:: install
 
-tests: MAVEN_CONFIG += -Dbasepom.it.skip=false
-tests:
+install-notests:: MAVEN_ARGS += -DskipTests
+install-notests:: install
+
+run-tests:: MAVEN_ARGS += -Dbasepom.it.skip=false
+tests::
 	${MAVEN} surefire:test invoker:install invoker:integration-test invoker:verify
 
-deploy:
+deploy::
 	${MAVEN} clean deploy
 
-# run install b/c https://issues.apache.org/jira/browse/MJAVADOC-701
-deploy-site:
+deploy-site::
 	${MAVEN} clean install site-deploy
 
-release:
+release::
 	${MAVEN} clean release:clean release:prepare release:perform
 
-help:
-	@echo " * clean        - clean local build tree"
-	@echo " * install      - installs build result in the local maven repository"
-	@echo " * install-fast - same as 'install', but skip test execution and code analysis (Checkstyle/PMD/Spotbugs)"
-	@echo " * deploy       - installs build result in the snapshot OSS repository"
-	@echo " * tests        - run unit and integration tests"
-	@echo " * deploy-site  - builds and deploys the documentation site"
-	@echo " * release      - release a new version to maven central"
+release-site:: MAVEN_ARGS += -Pplugin-release
+release-site:: deploy-site
+
+help::
+	@echo " * clean           - clean local build tree"
+	@echo " * install         - installs build result in the local maven repository"
+	@echo " * install-fast    - like install, but do not run tests and checkers"
+	@echo " * install-notests - like install, but do not run tests"
+	@echo " * deploy          - installs build result in the snapshot OSS repository"
+	@echo " * test            - run unit tests"
+	@echo " * deploy-site     - builds and deploys the documentation site"
+	@echo " * release         - release a new version to maven central"
+	@echo " * release-site    - run from release directory to deploy new doc site"

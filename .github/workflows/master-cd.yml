@@ -3,54 +3,54 @@ name: CD (Snapshot deployment)
 on:
   push:
     branches:
-    - main
+      - main
 
 jobs:
   cd:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-    - name: setup build jdk
-      uses: actions/setup-java@v3
-      with:
-        distribution: temurin
-        java-version: 17
-        cache: maven
-        server-id: sonatype-nexus-snapshots
-        server-username: NEXUS_REPO_USER
-        server-password: NEXUS_REPO_PASSWORD
+      - name: setup build jdk
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+          server-id: sonatype-nexus-snapshots
+          server-username: NEXUS_REPO_USER
+          server-password: NEXUS_REPO_PASSWORD
 
-    - name: deploy code
-      env:
-        NEXUS_REPO_USER: ${{ secrets.NEXUS_REPO_USER }}
-        NEXUS_REPO_PASSWORD: ${{ secrets.NEXUS_REPO_PASSWORD }}
-        MAVEN_CONFIG: "-B -fae"
-      run: make deploy
+      - name: deploy code
+        env:
+          NEXUS_REPO_USER: ${{ secrets.NEXUS_REPO_USER }}
+          NEXUS_REPO_PASSWORD: ${{ secrets.NEXUS_REPO_PASSWORD }}
+          MAVEN_ARGS: "-B -fae"
+        run: make deploy
 
   site:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-    - name: Set git information
-      run: |
-        git config --global user.name github-actions
-        git config --global user.email github-actions@github.com
+      - name: Set git information
+        run: |
+          git config --global user.name github-actions
+          git config --global user.email github-actions@github.com
 
-    - name: setup build jdk
-      uses: actions/setup-java@v3
-      with:
-        distribution: temurin
-        java-version: 17
-        cache: maven
-        server-id: github
-        server-password: SITE_DEPLOY
+      - name: setup build jdk
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+          server-id: github
+          server-password: SITE_DEPLOY
 
-    - name: deploy documentation
-      env:
-        SITE_DEPLOY: ${{ secrets.SITE_DEPLOY_TOKEN  }}
-        MAVEN_CONFIG: "-Dbasepom.it.skip=false -Dbasepom.it.fork-count=1 -B -fae"
-      run: make deploy-site
+      - name: deploy documentation
+        env:
+          SITE_DEPLOY: ${{ secrets.SITE_DEPLOY_TOKEN  }}
+          MAVEN_ARGS: "-Dbasepom.it.skip=false -Dbasepom.it.fork-count=1 -B -fae"
+        run: make deploy-site

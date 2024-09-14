@@ -3,45 +3,45 @@ name: CI build
 on:
   push:
     branches:
-    - main
+      - main
   pull_request:
     branches:
-    - main
+      - main
 
 jobs:
   ci:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        test-java-version: [ 11, 17, 20 ]
+        test-java-version: [ 11, 17, 21 ]
 
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-    - uses: actions/setup-java@v3
-      id: setup_build_jdk
-      name: Setup Build JDK
-      with:
-        java-version: 17
-        distribution: temurin
-        cache: maven
+      - uses: actions/setup-java@v4
+        id: setup_build_jdk
+        name: Setup Build JDK
+        with:
+          java-version: 21
+          distribution: temurin
+          cache: maven
 
-    - name: Build
-      env:
-        MAVEN_CONFIG: "-Pfast -Dbasepom.check.skip-enforcer=false -B -fae"
-      run: |
-        make install
+      - name: Build
+        env:
+          MAVEN_ARGS: "-Pfast -Dbasepom.check.skip-enforcer=false -B -fae"
+        run: |
+          make install
 
-    - uses: actions/setup-java@v3
-      id: setup_test_jdk
-      name: Setup Test JDK
-      with:
-        java-version: ${{ matrix.test-java-version }}
-        distribution: temurin
-        cache: maven
+      - uses: actions/setup-java@v4
+        id: setup_test_jdk
+        name: Setup Test JDK
+        with:
+          java-version: ${{ matrix.test-java-version }}
+          distribution: temurin
+          cache: maven
 
-    - name: Run unit tests
-      env:
-        MAVEN_CONFIG: "-Dbasepom.it.fork-count=1 -B -fae"
-      run: |
-        make tests
+      - name: Run unit tests
+        env:
+          MAVEN_ARGS: "-Dbasepom.it.fork-count=1 -B -fae"
+        run: |
+          make tests
