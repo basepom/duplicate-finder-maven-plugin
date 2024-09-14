@@ -16,9 +16,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.basepom</groupId>
-        <artifactId>basepom-oss</artifactId>
-        <version>53</version>
+        <groupId>org.kitei</groupId>
+        <artifactId>kitei-root</artifactId>
+        <version>17</version>
     </parent>
 
     <groupId>org.basepom.maven</groupId>
@@ -81,14 +81,11 @@
     </issueManagement>
 
     <properties>
-        <!-- maven 3.9.x insanity -->
-        <maven.plugin.validation>BRIEF</maven.plugin.validation>
-
         <project.build.targetJdk>11</project.build.targetJdk>
         <project.moduleName>org.basepom.mojo.duplicatefinder</project.moduleName>
 
-        <basepom.nexus-staging.staging-url>https://oss.sonatype.org/</basepom.nexus-staging.staging-url>
-        <basepom.release.profiles>basepom.oss-release,plugin-release</basepom.release.profiles>
+        <basepom.javadoc.legacy-mode>true</basepom.javadoc.legacy-mode>
+        <basepom.release.profiles>basepom.deploy-release,plugin-release</basepom.release.profiles>
         <basepom.release.tag-name-format>duplicate-finder-maven-plugin-@{project.version}</basepom.release.tag-name-format>
 
         <basepom.site.skip>false</basepom.site.skip>
@@ -103,21 +100,23 @@
         <basepom.it.skip>true</basepom.it.skip>
         <basepom.it.fork-count>8</basepom.it.fork-count>
 
-        <dep.groovy.version>4.0.12</dep.groovy.version>
+        <dep.groovy.version>4.0.23</dep.groovy.version>
         <dep.slf4j.version>1.7.36</dep.slf4j.version>
-        <dep.guava.version>31.1-jre</dep.guava.version>
+        <dep.guava.version>33.3.0-jre</dep.guava.version>
+        <dep.staxmate.version>2.4.1</dep.staxmate.version>
+        <dep.stax2-api.version>4.2.2</dep.stax2-api.version>
 
-        <dep.plugin.gmavenplus.plugin>2.1.0</dep.plugin.gmavenplus.plugin>
+        <dep.plugin.gmavenplus.plugin>3.0.2</dep.plugin.gmavenplus.plugin>
 
         <!-- Maven API version. Keep on 3.8.x for now -->
-        <dep.maven-api.version>3.8.7</dep.maven-api.version>
+        <dep.maven-api.version>3.8.8</dep.maven-api.version>
 
         <!-- other maven stuff -->
-        <dep.plexus.version>2.1.1</dep.plexus.version>
+        <dep.plexus.version>2.2.0</dep.plexus.version>
         <dep.maven-shared-utils.version>3.4.2</dep.maven-shared-utils.version>
 
         <!-- plugin tooling -->
-        <dep.plugin.plugin.version>3.9.0</dep.plugin.plugin.version>
+        <dep.plugin.plugin.version>3.15.0</dep.plugin.plugin.version>
 
     </properties>
 
@@ -173,13 +172,13 @@
         <dependency>
             <groupId>org.codehaus.woodstox</groupId>
             <artifactId>stax2-api</artifactId>
-            <version>3.1.4</version>
+            <version>${dep.stax2-api.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.fasterxml.staxmate</groupId>
             <artifactId>staxmate</artifactId>
-            <version>2.2.1</version>
+            <version>${dep.staxmate.version}</version>
             <exclusions>
                 <exclusion>
                     <artifactId>stax-api</artifactId>
