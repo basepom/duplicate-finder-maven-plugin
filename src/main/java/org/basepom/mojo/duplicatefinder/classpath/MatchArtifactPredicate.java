@@ -11,7 +11,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.basepom.mojo.duplicatefinder.classpath;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.String.format;
+
+import org.basepom.mojo.duplicatefinder.artifact.MavenCoordinates;
 
 import java.util.Collection;
 import java.util.List;
@@ -20,13 +26,8 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.versioning.OverConstrainedVersionException;
-import org.basepom.mojo.duplicatefinder.artifact.MavenCoordinates;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static java.lang.String.format;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 public class MatchArtifactPredicate implements Predicate<Artifact> {
 

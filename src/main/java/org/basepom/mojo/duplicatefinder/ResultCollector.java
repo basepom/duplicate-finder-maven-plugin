@@ -11,7 +11,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.basepom.mojo.duplicatefinder;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Collection;
 import java.util.EnumMap;
@@ -27,8 +30,6 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder.SetMultimapBuilder;
 import com.google.common.collect.Multimaps;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
 public class ResultCollector {

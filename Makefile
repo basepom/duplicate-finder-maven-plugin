@@ -32,7 +32,7 @@ install-notests:: MAVEN_ARGS += -DskipTests
 install-notests:: install
 
 run-tests:: MAVEN_ARGS += -Dbasepom.it.skip=false
-tests::
+run-tests::
 	${MAVEN} surefire:test invoker:install invoker:integration-test invoker:verify
 
 deploy::

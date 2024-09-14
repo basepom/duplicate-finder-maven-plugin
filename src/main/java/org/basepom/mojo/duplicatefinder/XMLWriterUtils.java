@@ -11,21 +11,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.basepom.mojo.duplicatefinder;
+
+import org.basepom.mojo.duplicatefinder.ResultCollector.ConflictResult;
+import org.basepom.mojo.duplicatefinder.artifact.MavenCoordinates;
+import org.basepom.mojo.duplicatefinder.classpath.ClasspathDescriptor;
 
 import java.io.File;
 import java.util.Collection;
 import java.util.Map;
 import java.util.regex.Pattern;
-
 import javax.xml.stream.XMLStreamException;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.versioning.OverConstrainedVersionException;
 import org.apache.maven.project.MavenProject;
-import org.basepom.mojo.duplicatefinder.ResultCollector.ConflictResult;
-import org.basepom.mojo.duplicatefinder.artifact.MavenCoordinates;
-import org.basepom.mojo.duplicatefinder.classpath.ClasspathDescriptor;
 import org.codehaus.staxmate.out.SMOutputElement;
 
 public final class XMLWriterUtils {

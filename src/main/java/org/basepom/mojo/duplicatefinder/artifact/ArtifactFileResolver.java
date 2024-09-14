@@ -11,7 +11,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.basepom.mojo.duplicatefinder.artifact;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+import static java.lang.String.format;
+import static org.basepom.mojo.duplicatefinder.artifact.ArtifactHelper.getOutputDirectory;
+import static org.basepom.mojo.duplicatefinder.artifact.ArtifactHelper.getTestOutputDirectory;
+import static org.basepom.mojo.duplicatefinder.artifact.ArtifactHelper.isTestArtifact;
+
+import org.basepom.mojo.duplicatefinder.ClasspathElement;
+import org.basepom.mojo.duplicatefinder.ClasspathElement.ClasspathArtifact;
+import org.basepom.mojo.duplicatefinder.ClasspathElement.ClasspathLocalFolder;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,25 +47,13 @@ import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.project.MavenProject;
-import org.basepom.mojo.duplicatefinder.ClasspathElement;
-import org.basepom.mojo.duplicatefinder.ClasspathElement.ClasspathArtifact;
-import org.basepom.mojo.duplicatefinder.ClasspathElement.ClasspathLocalFolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static java.lang.String.format;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-import static org.basepom.mojo.duplicatefinder.artifact.ArtifactHelper.getOutputDirectory;
-import static org.basepom.mojo.duplicatefinder.artifact.ArtifactHelper.getTestOutputDirectory;
-import static org.basepom.mojo.duplicatefinder.artifact.ArtifactHelper.isTestArtifact;
 
 /**
  * Resolves artifact references from the project into local and repository files and folders.
  * <p>
- * Only manages the dependencies because the main project can have multiple (two) folders
- * for the project. This is not supported by this resolver.
+ * Only manages the dependencies because the main project can have multiple (two) folders for the project. This is not supported by this resolver.
  */
 @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
 public class ArtifactFileResolver {
@@ -105,7 +105,8 @@ public class ArtifactFileResolver {
             // In that case, the dependency will show up as a referenced project but not in the artifacts list from the project.
             // Fix up straight from the referenced project.
             if (repoArtifacts.isEmpty()) {
-                LOG.debug(format("Found project reference to %s but no repo reference, probably used in a plugin dependency.", referencedProject.getArtifact()));
+                LOG.debug(
+                        format("Found project reference to %s but no repo reference, probably used in a plugin dependency.", referencedProject.getArtifact()));
             }
 
             for (final Artifact artifact : repoArtifacts) {

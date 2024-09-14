@@ -11,13 +11,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.basepom.mojo.duplicatefinder.artifact;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.Objects;
+import java.util.Optional;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.MoreObjects;
-import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
@@ -26,8 +29,6 @@ import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException
 import org.apache.maven.artifact.versioning.OverConstrainedVersionException;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.model.Dependency;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 public class MavenCoordinates {
 

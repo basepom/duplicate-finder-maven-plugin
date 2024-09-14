@@ -307,8 +307,8 @@ public final class ClasspathDescriptor {
     private void addArchive(final ClasspathCacheElement.Builder cacheBuilder, final File element) throws IOException {
 
         try (
-                final InputStream input = element.toURI().toURL().openStream();
-                final ZipInputStream zipInput = new ZipInputStream(input)) {
+                InputStream input = element.toURI().toURL().openStream();
+                ZipInputStream zipInput = new ZipInputStream(input)) {
 
             ZipEntry entry;
 

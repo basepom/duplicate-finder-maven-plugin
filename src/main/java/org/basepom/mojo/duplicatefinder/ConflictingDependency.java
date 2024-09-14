@@ -199,9 +199,9 @@ public class ConflictingDependency {
 
         final String resourceAsRelative = resource.startsWith("/") || resource.startsWith("\\") ? resource.substring(1) : resource;
 
-        if (resources.contains(resourceAsRelative) ||
-                resources.contains("/" + resourceAsRelative) ||
-                resources.contains("\\" + resourceAsRelative)) {
+        if (resources.contains(resourceAsRelative)
+                || resources.contains("/" + resourceAsRelative)
+                || resources.contains("\\" + resourceAsRelative)) {
 
             return true;
         }

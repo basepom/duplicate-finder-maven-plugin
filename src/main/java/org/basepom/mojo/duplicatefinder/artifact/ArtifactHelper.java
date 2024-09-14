@@ -11,14 +11,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.basepom.mojo.duplicatefinder.artifact;
+
+import static com.google.common.base.Strings.nullToEmpty;
 
 import java.io.File;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.project.MavenProject;
-
-import static com.google.common.base.Strings.nullToEmpty;
 
 public final class ArtifactHelper {
 

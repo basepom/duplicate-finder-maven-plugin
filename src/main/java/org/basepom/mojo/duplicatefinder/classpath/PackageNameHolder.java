@@ -11,19 +11,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.basepom.mojo.duplicatefinder.classpath;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.List;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-
 /**
- * Manages the package in which resources and classes reside. Keeps track of the current package when
- * traversing local folders for classes and resources.
+ * Manages the package in which resources and classes reside. Keeps track of the current package when traversing local folders for classes and resources.
  */
 class PackageNameHolder {
 

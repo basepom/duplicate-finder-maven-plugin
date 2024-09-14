@@ -11,7 +11,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.basepom.mojo.duplicatefinder;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Strings.nullToEmpty;
+import static org.basepom.mojo.duplicatefinder.artifact.ArtifactHelper.isJarArtifact;
+import static org.basepom.mojo.duplicatefinder.artifact.ArtifactHelper.isTestArtifact;
 
 import java.io.File;
 import java.util.Objects;
@@ -22,15 +29,9 @@ import com.google.common.collect.Ordering;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.maven.artifact.Artifact;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.base.Strings.nullToEmpty;
-import static org.basepom.mojo.duplicatefinder.artifact.ArtifactHelper.isJarArtifact;
-import static org.basepom.mojo.duplicatefinder.artifact.ArtifactHelper.isTestArtifact;
-
 /**
- * Describes any of the possible elements on the classpath. These can be elements from the boot classpath, artifacts and local
- * folder from the current project. For each of the possible types exists a subclass which holds additional information.
+ * Describes any of the possible elements on the classpath. These can be elements from the boot classpath, artifacts and local folder from the current project.
+ * For each of the possible types exists a subclass which holds additional information.
  */
 public abstract class ClasspathElement implements Comparable<ClasspathElement> {
 
