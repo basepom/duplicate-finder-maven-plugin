@@ -11,7 +11,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.basepom.mojo.duplicatefinder;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import org.basepom.mojo.duplicatefinder.artifact.MavenCoordinates;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,16 +32,14 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.OverConstrainedVersionException;
 import org.apache.maven.model.Dependency;
-import org.basepom.mojo.duplicatefinder.artifact.MavenCoordinates;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Captures the &lt;exceptions&gt; section from the plugin configuration.
  */
 public class ConflictingDependency {
+
     private static final Logger LOG = LoggerFactory.getLogger(ConflictingDependency.class);
 
     private final Set<MavenCoordinates> conflictingDependencies = new LinkedHashSet<>();
@@ -48,14 +51,14 @@ public class ConflictingDependency {
     private boolean currentProjectIncluded = false;
 
     // Called by maven
-    public void setConflictingDependencies(final Dependency[] conflictingDependencies) throws InvalidVersionSpecificationException {
+    public void setConflictingDependencies(final Dependency... conflictingDependencies) throws InvalidVersionSpecificationException {
         for (Dependency conflictingDependency : conflictingDependencies) {
             this.conflictingDependencies.add(new MavenCoordinates(conflictingDependency));
         }
     }
 
     // Called by maven
-    public void setResourcePatterns(final String[] resourcePatterns) {
+    public void setResourcePatterns(final String... resourcePatterns) {
         this.matchingResources = new Pattern[resourcePatterns.length];
         for (int i = 0; i < resourcePatterns.length; i++) {
             this.matchingResources[i] = Pattern.compile(resourcePatterns[i], Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
@@ -67,7 +70,7 @@ public class ConflictingDependency {
     }
 
     // Called by maven
-    public void setClasses(final String[] classes) {
+    public void setClasses(final String... classes) {
         this.classes.addAll(Arrays.asList(classes));
     }
 
@@ -76,7 +79,7 @@ public class ConflictingDependency {
     }
 
     // Called by maven
-    public void setPackages(final String[] packages) {
+    public void setPackages(final String... packages) {
         this.packages.addAll(Arrays.asList(packages));
     }
 
@@ -85,7 +88,7 @@ public class ConflictingDependency {
     }
 
     // Called by maven
-    public void setResources(final String[] resources) {
+    public void setResources(final String... resources) {
         this.resources.addAll(Arrays.asList(resources));
     }
 
@@ -122,6 +125,7 @@ public class ConflictingDependency {
         return ImmutableList.copyOf(conflictingDependencies);
     }
 
+    @SuppressWarnings("PMD.MethodReturnsInternalArray")
     Pattern[] getResourcePatterns() {
         return matchingResources;
     }

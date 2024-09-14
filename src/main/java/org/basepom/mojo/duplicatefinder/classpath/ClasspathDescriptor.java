@@ -11,7 +11,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.basepom.mojo.duplicatefinder.classpath;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+import static java.lang.String.format;
+
+import org.basepom.mojo.duplicatefinder.ConflictType;
+import org.basepom.mojo.duplicatefinder.artifact.MavenCoordinates;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,7 +36,6 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-
 import javax.lang.model.SourceVersion;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -43,21 +50,13 @@ import com.google.common.collect.MultimapBuilder;
 import com.google.common.io.Files;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
-import org.basepom.mojo.duplicatefinder.ConflictType;
-import org.basepom.mojo.duplicatefinder.artifact.MavenCoordinates;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static java.lang.String.format;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-
 @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
-public class ClasspathDescriptor {
+public final class ClasspathDescriptor {
 
     private static final Logger LOG = LoggerFactory.getLogger(ClasspathDescriptor.class);
 
@@ -92,8 +91,7 @@ public class ClasspathDescriptor {
             "^.bzr$"));
 
     /**
-     * This is a global, static cache which can be reused through multiple runs of the plugin in the same VM,
-     * e.g. for a multi-module build.
+     * This is a global, static cache which can be reused through multiple runs of the plugin in the same VM, e.g. for a multi-module build.
      */
     private static final ConcurrentMap<File, ClasspathCacheElement> CACHED_BY_FILE = new ConcurrentHashMap<>();
 
@@ -113,7 +111,7 @@ public class ClasspathDescriptor {
             final Collection<MavenCoordinates> ignoredDependencies,
             final boolean useDefaultResourceIgnoreList,
             final boolean useDefaultClassIgnoreList,
-            final File[] projectFolders) throws MojoExecutionException, InvalidVersionSpecificationException {
+            final File... projectFolders) throws MojoExecutionException {
         checkNotNull(project, "project is null");
         checkNotNull(fileToArtifactMap, "fileToArtifactMap is null");
         checkNotNull(ignoredResourcePatterns, "ignoredResourcePatterns is null");
@@ -309,8 +307,8 @@ public class ClasspathDescriptor {
     private void addArchive(final ClasspathCacheElement.Builder cacheBuilder, final File element) throws IOException {
 
         try (
-            final InputStream input = element.toURI().toURL().openStream();
-            final ZipInputStream zipInput = new ZipInputStream(input)) {
+                final InputStream input = element.toURI().toURL().openStream();
+                final ZipInputStream zipInput = new ZipInputStream(input)) {
 
             ZipEntry entry;
 

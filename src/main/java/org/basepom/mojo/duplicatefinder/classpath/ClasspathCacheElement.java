@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 
-class ClasspathCacheElement {
+final class ClasspathCacheElement {
 
     private final File element;
     private final ImmutableSet<String> classes;
@@ -48,7 +48,7 @@ class ClasspathCacheElement {
         }
     }
 
-    static class Builder {
+    static final class Builder {
 
         private final File element;
         private final ImmutableSet.Builder<String> classBuilder = ImmutableSet.builder();

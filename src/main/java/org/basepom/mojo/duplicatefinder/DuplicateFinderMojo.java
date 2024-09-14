@@ -11,13 +11,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.basepom.mojo.duplicatefinder;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+import static java.lang.String.format;
+import static org.apache.maven.artifact.Artifact.SCOPE_COMPILE;
+import static org.apache.maven.artifact.Artifact.SCOPE_PROVIDED;
+import static org.apache.maven.artifact.Artifact.SCOPE_RUNTIME;
+import static org.apache.maven.artifact.Artifact.SCOPE_SYSTEM;
+import static org.basepom.mojo.duplicatefinder.ConflictState.CONFLICT_CONTENT_DIFFERENT;
+import static org.basepom.mojo.duplicatefinder.ConflictState.CONFLICT_CONTENT_EQUAL;
+import static org.basepom.mojo.duplicatefinder.ConflictType.CLASS;
+import static org.basepom.mojo.duplicatefinder.ConflictType.RESOURCE;
+import static org.basepom.mojo.duplicatefinder.artifact.ArtifactHelper.getOutputDirectory;
+import static org.basepom.mojo.duplicatefinder.artifact.ArtifactHelper.getTestOutputDirectory;
+
+import org.basepom.mojo.duplicatefinder.ResultCollector.ConflictResult;
+import org.basepom.mojo.duplicatefinder.artifact.ArtifactFileResolver;
+import org.basepom.mojo.duplicatefinder.artifact.MavenCoordinates;
+import org.basepom.mojo.duplicatefinder.classpath.ClasspathDescriptor;
 
 import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Arrays;
 import java.util.Collection;
@@ -28,7 +49,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-
 import javax.xml.stream.XMLStreamException;
 
 import com.google.common.base.Strings;
@@ -53,32 +73,12 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
-import org.basepom.mojo.duplicatefinder.ResultCollector.ConflictResult;
-import org.basepom.mojo.duplicatefinder.artifact.ArtifactFileResolver;
-import org.basepom.mojo.duplicatefinder.artifact.MavenCoordinates;
-import org.basepom.mojo.duplicatefinder.classpath.ClasspathDescriptor;
 import org.codehaus.stax2.XMLOutputFactory2;
 import org.codehaus.staxmate.SMOutputFactory;
 import org.codehaus.staxmate.out.SMOutputDocument;
 import org.codehaus.staxmate.out.SMOutputElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static java.lang.String.format;
-
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-import static org.apache.maven.artifact.Artifact.SCOPE_COMPILE;
-import static org.apache.maven.artifact.Artifact.SCOPE_PROVIDED;
-import static org.apache.maven.artifact.Artifact.SCOPE_RUNTIME;
-import static org.apache.maven.artifact.Artifact.SCOPE_SYSTEM;
-import static org.basepom.mojo.duplicatefinder.ConflictState.CONFLICT_CONTENT_DIFFERENT;
-import static org.basepom.mojo.duplicatefinder.ConflictState.CONFLICT_CONTENT_EQUAL;
-import static org.basepom.mojo.duplicatefinder.ConflictType.CLASS;
-import static org.basepom.mojo.duplicatefinder.ConflictType.RESOURCE;
-import static org.basepom.mojo.duplicatefinder.artifact.ArtifactHelper.getOutputDirectory;
-import static org.basepom.mojo.duplicatefinder.artifact.ArtifactHelper.getTestOutputDirectory;
 
 /**
  * Finds duplicate classes/resources on the classpath.
@@ -170,7 +170,7 @@ public final class DuplicateFinderMojo extends AbstractMojo {
      * Dependencies that should not be checked at all.
      */
     @Parameter(alias = "ignoredDependencies")
-    public MavenCoordinates[] ignoredDependencies = new MavenCoordinates[0];
+    MavenCoordinates[] ignoredDependencies = new MavenCoordinates[0];
 
     /**
      * Check resources and classes on the compile class path.
@@ -239,8 +239,7 @@ public final class DuplicateFinderMojo extends AbstractMojo {
     public int resultFileMinClasspathCount = 2;
 
     /**
-     * Include the boot class path in duplicate detection. This will find duplicates with the JDK
-     * internal classes (e.g. the classes in rt.jar).
+     * Include the boot class path in duplicate detection. This will find duplicates with the JDK internal classes (e.g. the classes in rt.jar).
      *
      * @since 1.1.1
      * @deprecated Inspecting the boot classpath is no longer supported in Java 9+
@@ -271,7 +270,7 @@ public final class DuplicateFinderMojo extends AbstractMojo {
     private final EnumSet<ConflictState> failState = EnumSet.noneOf(ConflictState.class);
 
     // called by maven
-    public void setIgnoredDependencies(final Dependency[] dependencies) throws InvalidVersionSpecificationException {
+    public void setIgnoredDependencies(final Dependency... dependencies) throws InvalidVersionSpecificationException {
         checkArgument(dependencies != null);
 
         this.ignoredDependencies = new MavenCoordinates[dependencies.length];
@@ -418,8 +417,8 @@ public final class DuplicateFinderMojo extends AbstractMojo {
     }
 
     /**
-     * Checks the maven classpath for a given set of scopes whether it contains duplicates. In addition to the
-     * artifacts on the classpath, one or more additional project folders are added.
+     * Checks the maven classpath for a given set of scopes whether it contains duplicates. In addition to the artifacts on the classpath, one or more
+     * additional project folders are added.
      */
     private ClasspathDescriptor checkClasspath(final ResultCollector resultCollector,
             final ArtifactFileResolver artifactFileResolver,
@@ -528,7 +527,7 @@ public final class DuplicateFinderMojo extends AbstractMojo {
 
             if (file.isDirectory()) {
                 final File resourceFile = new File(file, resourcePath);
-                in = closer.register(new BufferedInputStream(new FileInputStream(resourceFile)));
+                in = closer.register(new BufferedInputStream(Files.newInputStream(resourceFile.toPath())));
             } else {
                 final ZipFile zip = new ZipFile(file);
 
