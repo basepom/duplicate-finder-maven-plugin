@@ -29,12 +29,8 @@ These options control aspects of the plugin execution.
 
 ### `skip`
 
-Skips the plugin execution completely. If the `quiet` flag is `false`,
-the message `Skipping duplicate-finder execution!` is output at INFO
-level.
-
-If the `quiet` flag is set to `true`, the message is only visible at
-DEBUG level if maven was run with the `-X` option.
+Skips the plugin execution completely. The message
+`Skipping duplicate-finder execution!` is output at INFO level.
 
 Maven command line property: `duplicate-finder.skip` (**Plugin version 1.1.1+**)
 
