@@ -309,7 +309,7 @@ public final class DuplicateFinderMojo extends AbstractMojo {
             }
 
             if (quiet) {
-                LOG.warn("<quiet> is no longer supported and will be ignored!");
+                LOG.warn("<quiet> is no longer supported and ignored!");
             }
 
             try {
